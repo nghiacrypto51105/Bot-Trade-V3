@@ -797,7 +797,12 @@ def api_run_backtest():
         })
     return {"status": "success", "results": results}
 
-@app.get("/", response_class=HTMLResponse)
+@app.api_route("/health", methods=["GET", "HEAD"])
+@app.api_route("/ping", methods=["GET", "HEAD"])
+def api_health():
+    return JSONResponse({"status": "ok", "service": "bot-trade-v3", "alive": state.is_alive})
+
+@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
 def serve_dashboard():
     html_path = os.path.join(os.path.dirname(__file__), "templates", "index.html")
     if os.path.exists(html_path):
