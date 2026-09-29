@@ -18,8 +18,11 @@ class DailyPnLTracker:
         self.filepath = filepath
         self._ensure_dir()
         self.data: Dict[str, Any] = self._load()
-        if not self.data:
-            self._init_september_historical_data()
+
+    def reset_all_pnl(self):
+        """Xóa toàn bộ dữ liệu PnL về 0 để người dùng bắt đầu từ con số 0"""
+        self.data = {}
+        self._save()
 
     def _ensure_dir(self):
         d = os.path.dirname(self.filepath)
