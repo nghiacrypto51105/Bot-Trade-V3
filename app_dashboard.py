@@ -1076,11 +1076,18 @@ def api_control(req: ControlRequest):
         state.death_reason = None
     return {"status": "success", "action": req.action}
 
+class ResetAccountRequest(BaseModel):
+    balance: Optional[float] = 1000.0
+
 @app.post("/api/reset_account")
-def api_reset_account():
-    state.balance = 1000.0
-    state.equity = 1000.0
-    state.peak_equity = 1000.0
+def api_reset_account(req: Optional[ResetAccountRequest] = None):
+    initial = 1000.0
+    if req and req.balance and req.balance > 0:
+        initial = float(req.balance)
+    state.initial_balance = initial
+    state.balance = initial
+    state.equity = initial
+    state.peak_equity = initial
     state.max_drawdown = 0.0
     state.current_drawdown = 0.0
     state.is_alive = True
@@ -1091,10 +1098,13 @@ def api_reset_account():
     state.quant_agent.daily_losses_count = 0
     state.quant_agent.day_locked = False
     state.last_trade_candle_time = 0
-    return {"status": "success", "message": "Đã đặt lại tài khoản Demo về $1,000"}
+    return {"status": "success", "message": f"Đã đặt lại tài khoản Demo về ${initial:,.2f}"}
 
 class TestTradeRequest(BaseModel):
-    side: str  # "LONG" hoặc "SHORT"
+    side: str                          # "LONG" hoặc "SHORT"
+    leverage: Optional[float] = 16.0   # Đòn bẩy tùy chọn (1x - 50x)
+    margin_pct: Optional[float] = None # Ký quỹ % (0.05 - 1.0)
+    margin_usdt: Optional[float] = None# Ký quỹ USDT cố định
 
 @app.post("/api/test_trade")
 def api_test_trade(req: TestTradeRequest):
@@ -1119,8 +1129,15 @@ def api_test_trade(req: TestTradeRequest):
     if side not in ["LONG", "SHORT"]:
         return JSONResponse({"status": "error", "message": "Hướng lệnh không hợp lệ (phải là LONG hoặc SHORT)"})
         
-    margin = state.balance * state.margin_pct
-    size = (margin * state.leverage) / close_p
+    lev = float(req.leverage) if (req.leverage and 1.0 <= req.leverage <= 50.0) else state.leverage
+    if req.margin_usdt and 1.0 <= req.margin_usdt <= state.balance:
+        margin = float(req.margin_usdt)
+    elif req.margin_pct and 0.05 <= req.margin_pct <= 1.0:
+        margin = state.balance * float(req.margin_pct)
+    else:
+        margin = state.balance * state.margin_pct
+        
+    size = (margin * lev) / close_p
     fee = close_p * size * state.fee_rate
     state.balance -= fee
     
@@ -1140,6 +1157,7 @@ def api_test_trade(req: TestTradeRequest):
         "entry_price": close_p,
         "size": size,
         "margin": margin,
+        "leverage": lev,
         "sl": sl,
         "stop_loss": sl,
         "tp1": tp1,
