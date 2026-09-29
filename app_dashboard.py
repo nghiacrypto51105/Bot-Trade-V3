@@ -1093,6 +1093,136 @@ def api_reset_account():
     state.last_trade_candle_time = 0
     return {"status": "success", "message": "Đã đặt lại tài khoản Demo về $1,000"}
 
+class TestTradeRequest(BaseModel):
+    side: str  # "LONG" hoặc "SHORT"
+
+@app.post("/api/test_trade")
+def api_test_trade(req: TestTradeRequest):
+    if state.mode == "LIVE TRADING":
+        return JSONResponse({
+            "status": "error",
+            "message": "Tính năng mở lệnh thử nghiệm chỉ dùng trong chế độ DEMO để đảm bảo an toàn tuyệt đối cho tài khoản tiền thật!"
+        })
+    if state.active_position is not None:
+        return JSONResponse({
+            "status": "error",
+            "message": "Đang có vị thế đang chạy! Vui lòng đóng lệnh hiện tại trước khi mở lệnh thử nghiệm mới."
+        })
+    
+    close_p = state.latest_price
+    if close_p <= 0 and state.candles:
+        close_p = state.candles[-1]["close"]
+    if close_p <= 0:
+        close_p = 2650.0  # Fallback nếu chưa có giá từ sàn
+        
+    side = req.side.upper().strip()
+    if side not in ["LONG", "SHORT"]:
+        return JSONResponse({"status": "error", "message": "Hướng lệnh không hợp lệ (phải là LONG hoặc SHORT)"})
+        
+    margin = state.balance * state.margin_pct
+    size = (margin * state.leverage) / close_p
+    fee = close_p * size * state.fee_rate
+    state.balance -= fee
+    
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    if side == "LONG":
+        sl = round(close_p * (1.0 - state.quant_agent.sl_pct), 2)
+        tp1 = round(close_p * (1.0 + state.quant_agent.tp1_pct), 2)
+        tp2 = round(close_p * (1.0 + state.quant_agent.tp2_pct), 2)
+    else:
+        sl = round(close_p * (1.0 + state.quant_agent.sl_pct), 2)
+        tp1 = round(close_p * (1.0 - state.quant_agent.tp1_pct), 2)
+        tp2 = round(close_p * (1.0 - state.quant_agent.tp2_pct), 2)
+        
+    state.active_position = {
+        "side": side,
+        "entry_price": close_p,
+        "size": size,
+        "margin": margin,
+        "sl": sl,
+        "stop_loss": sl,
+        "tp1": tp1,
+        "tp2": tp2,
+        "tp1_hit": False,
+        "open_time": now_str,
+        "unrealized_pnl": 0.0,
+        "pnl_pct": 0.0,
+        "is_test": True
+    }
+    
+    state.trades.insert(0, {
+        "time": now_str,
+        "action": f"VÀO LỆNH THỬ NGHIỆM ({side}) [DEMO]",
+        "price": close_p,
+        "size": f"{size:.3f} oz",
+        "pnl": f"-${fee:.2f} (Phí)",
+        "balance": f"${state.balance:.2f}",
+        "type": "OPEN"
+    })
+    state.trades = state.trades[:100]
+    logger.info(f"[TEST TRADE OPENED] {side} @ {close_p:.2f} | TP1: {tp1} | TP2: {tp2} | SL: {sl}")
+    
+    return JSONResponse({
+        "status": "success",
+        "message": f"Đã mở thành công lệnh THỬ NGHIỆM {side} tại giá ${close_p:,.2f}! Quan sát lệnh đang chạy ngay tại khung Vị Thế.",
+        "position": state.active_position
+    })
+
+@app.post("/api/close_position")
+def api_close_position():
+    if not state.active_position:
+        return JSONResponse({
+            "status": "error",
+            "message": "Hiện không có vị thế nào đang chạy để đóng."
+        })
+        
+    pos = state.active_position
+    cur_p = state.latest_price
+    if cur_p <= 0 and state.candles:
+        cur_p = state.candles[-1]["close"]
+        
+    side = pos["side"]
+    entry = pos["entry_price"]
+    size = pos["size"]
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    if state.mode == "LIVE TRADING" and state.bingx_client:
+        order_side = "SELL" if side == "LONG" else "BUY"
+        state.bingx_client.place_market_order("NCCOGOLD2USD-USDT", order_side, side, size)
+        sync_live_balance()
+        
+    if side == "LONG":
+        pnl = (cur_p - entry) * size
+    else:
+        pnl = (entry - cur_p) * size
+        
+    fee = cur_p * size * state.fee_rate
+    net = pnl - fee
+    state.balance += net
+    
+    trade_type = "WIN" if net >= 0 else "LOSS"
+    act_name = "ĐÓNG LỆNH THỦ CÔNG" + (" [BINGX LIVE]" if state.mode == "LIVE TRADING" else " [THỬ NGHIỆM]")
+    
+    state.trades.insert(0, {
+        "time": now_str,
+        "action": act_name,
+        "price": cur_p,
+        "size": f"{size:.3f} oz",
+        "pnl": f"{net:+.2f} USDT",
+        "balance": f"${state.balance:.2f}",
+        "type": trade_type
+    })
+    state.trades = state.trades[:100]
+    state.active_position = None
+    logger.info(f"[MANUAL CLOSE] {side} closed @ {cur_p} | Net: {net:+.2f} USDT")
+    
+    return JSONResponse({
+        "status": "success",
+        "message": f"Đã đóng vị thế thị trường thành công tại giá ${cur_p:,.2f}! PnL ròng: {net:+.2f} USDT.",
+        "balance": state.balance
+    })
+
 class SetModeRequest(BaseModel):
     mode: str                          # "LIVE" hoặc "DEMO"
     api_key: Optional[str] = None
