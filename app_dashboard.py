@@ -73,22 +73,29 @@ class BingXAPIClient:
             if r.status_code == 200:
                 data = r.json()
                 if data.get("code") == 0:
-                    d = data.get("data", {})
-                    b = d.get("balance", d)
-                    if isinstance(b, dict):
-                        bal = float(b.get("balance", b.get("availableMargin", 0.0)))
-                        eq = float(b.get("equity", bal))
-                        return True, bal, eq, "Thành công"
-                    elif isinstance(b, list):
-                        for item in b:
-                            if item.get("asset") == "USDT":
+                    d = data.get("data", [])
+                    if isinstance(d, list):
+                        for item in d:
+                            if isinstance(item, dict) and item.get("asset") == "USDT":
                                 bal = float(item.get("balance", item.get("availableMargin", 0.0)))
                                 eq = float(item.get("equity", bal))
                                 return True, bal, eq, "Thành công"
-                        if b:
-                            bal = float(b[0].get("balance", 0.0))
-                            eq = float(b[0].get("equity", bal))
+                        if d and isinstance(d[0], dict):
+                            bal = float(d[0].get("balance", 0.0))
+                            eq = float(d[0].get("equity", bal))
                             return True, bal, eq, "Thành công"
+                    elif isinstance(d, dict):
+                        b = d.get("balance", d)
+                        if isinstance(b, dict):
+                            bal = float(b.get("balance", b.get("availableMargin", 0.0)))
+                            eq = float(b.get("equity", bal))
+                            return True, bal, eq, "Thành công"
+                        elif isinstance(b, list):
+                            for item in b:
+                                if isinstance(item, dict) and item.get("asset") == "USDT":
+                                    bal = float(item.get("balance", item.get("availableMargin", 0.0)))
+                                    eq = float(item.get("equity", bal))
+                                    return True, bal, eq, "Thành công"
                 else:
                     return False, 0.0, 0.0, data.get("msg", "Lỗi API BingX")
 
@@ -99,12 +106,19 @@ class BingXAPIClient:
             if r2.status_code == 200:
                 data2 = r2.json()
                 if data2.get("code") == 0:
-                    d = data2.get("data", {})
-                    b = d.get("balance", d)
-                    if isinstance(b, dict):
-                        bal = float(b.get("balance", b.get("availableMargin", 0.0)))
-                        eq = float(b.get("equity", bal))
-                        return True, bal, eq, "Thành công"
+                    d2 = data2.get("data", {})
+                    if isinstance(d2, dict):
+                        b2 = d2.get("balance", d2)
+                        if isinstance(b2, dict):
+                            bal = float(b2.get("balance", b2.get("availableMargin", 0.0)))
+                            eq = float(b2.get("equity", bal))
+                            return True, bal, eq, "Thành công"
+                    elif isinstance(d2, list):
+                        for item in d2:
+                            if isinstance(item, dict) and item.get("asset") == "USDT":
+                                bal = float(item.get("balance", item.get("availableMargin", 0.0)))
+                                eq = float(item.get("equity", bal))
+                                return True, bal, eq, "Thành công"
                 return False, 0.0, 0.0, data2.get("msg", f"HTTP Error {r2.status_code}")
 
             return False, 0.0, 0.0, f"HTTP Error {r.status_code}"
@@ -243,6 +257,19 @@ _init_k, _init_s = load_bingx_keys()
 if _init_k and _init_s:
     state.bingx_client = BingXAPIClient(_init_k, _init_s)
     logger.info("[INIT] Đã tìm thấy BingX API Keys trong .env.")
+    try:
+        ok, bal, eq, msg = state.bingx_client.get_account_balance()
+        if ok:
+            state.mode = "LIVE TRADING"
+            state.initial_balance = bal
+            state.balance = bal
+            state.equity = eq
+            state.peak_equity = eq
+            state.real_balance_synced = True
+            state.bingx_client.set_leverage(symbol="NCCOGOLD2USD-USDT", leverage=16)
+            logger.info(f"[INIT LIVE] Đã kích hoạt LIVE TRADING! Số dư BingX: ${bal:,.2f} USDT | Đòn bẩy 16x")
+    except Exception as e:
+        logger.warning(f"[INIT LIVE ERROR] Không thể tự động đồng bộ Live: {e}")
 
 def sync_live_balance() -> Tuple[bool, float, float, str]:
     """Đồng bộ số dư thực tế từ sàn BingX"""
