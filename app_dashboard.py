@@ -210,6 +210,9 @@ class BingXAPIClient:
             logger.error(f"[BINGX ORDER EXCEPTION] {e}")
             return False, {"error": str(e)}
 
+DEFAULT_BINGX_API_KEY = "npUSTPD0PKerLK8jZj3tFdSGxMozv6F8HqlEbuFrQDdWhYHsH84xZ5t6Isj4MLTi18jj3C2hvOX5fKqL4POEg"
+DEFAULT_BINGX_SECRET_KEY = "RUPkdl0HBF4m6e7Thk6VyunJdfc4swyn8Glso7fMwDScSC6KfVJCT3MnBO520Hmevc6DWbWo6VrQ37a7QXw"
+
 def load_bingx_keys() -> Tuple[str, str]:
     api_key = os.getenv("BINGX_API_KEY", "")
     api_secret = os.getenv("BINGX_API_SECRET", "")
@@ -225,6 +228,10 @@ def load_bingx_keys() -> Tuple[str, str]:
                         api_secret = line.split("=", 1)[1].strip()
         except Exception:
             pass
+    if not api_key:
+        api_key = DEFAULT_BINGX_API_KEY
+    if not api_secret:
+        api_secret = DEFAULT_BINGX_SECRET_KEY
     return api_key, api_secret
 
 class TradingEngineState:

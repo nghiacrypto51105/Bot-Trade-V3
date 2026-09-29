@@ -2061,14 +2061,9 @@
     async function selectTradingMode(targetMode) {
       if (targetMode === 'LIVE') {
         try {
-          const resp = await fetch('/api/account_info');
-          const info = await resp.json();
-          if (!info.has_keys) {
-            showToast('Chưa có API Key BingX! Vui lòng nhập API Key để kết nối sàn và bắt đầu trade thật.', 'info');
-            openApiModal();
-            return;
-          }
-          showToast('Đang kết nối BingX & đồng bộ số dư tài khoản...', 'info');
+          activeTradingMode = 'LIVE';
+          switchTab('chart');
+          showToast('Đang kích hoạt Live Trading & đồng bộ số dư BingX...', 'info');
           const r = await fetch('/api/set_mode', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -2077,26 +2072,23 @@
           const res = await r.json();
           if (res.status === 'success') {
             showToast(res.message, 'success');
-            activeTradingMode = 'LIVE';
-            switchTab('chart');
           } else {
-            alert(res.message);
-            openApiModal();
+            showToast(res.message || 'Không thể đồng bộ BingX Live', 'error');
           }
         } catch (err) {
           showToast('Lỗi kết nối: ' + err, 'error');
         }
       } else { // DEMO
         try {
+          activeTradingMode = 'DEMO';
+          switchTab('chart');
           const r = await fetch('/api/set_mode', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({mode: 'DEMO'})
           });
           const res = await r.json();
-          showToast(res.message, 'info');
-          activeTradingMode = 'DEMO';
-          switchTab('chart');
+          showToast(res.message || 'Đã chuyển sang Paper Trading', 'info');
         } catch (err) {
           showToast('Lỗi: ' + err, 'error');
         }
