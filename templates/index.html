@@ -969,7 +969,50 @@
 
     <!-- SMART DYNAMIC POSITION BANNER -->
     <div id="dynamic-position-container">
-      <div class="active-pos-card" id="active-pos-card">
+      <!-- PENDING LIMIT ORDER CARD (TTL 15 MINS) -->
+      <div class="active-pos-card" id="pending-limit-card" style="display: none; border-color: rgba(14,203,129,0.4); background: #08111a; margin-bottom: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span id="pending-limit-badge" style="padding: 2px 8px; border-radius: 4px; font-weight: 800; font-size: 10.5px; background: rgba(14,203,129,0.15); color: #0ecb81; border: 1px solid rgba(14,203,129,0.3); display: flex; align-items: center; gap: 5px;">
+              <i class="fas fa-clock"></i> ⏳ LỆNH CHỜ LIMIT LONG (MAKER 0.02%)
+            </span>
+            <span style="font-size: 11px; color: var(--text-muted);">
+              Khối lượng: <b id="pending-limit-size" style="color:#fff;">0.000 oz</b> | Ký quỹ: <b id="pending-limit-margin" style="color:#fff;">$0.00</b> | Chiến lược: <b id="pending-limit-strategy" style="color:#0ecb81;">SMA 20 PULLBACK</b>
+            </span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div>
+              <span style="font-size: 10px; color: var(--text-muted);">HẾT HẠN HỦY LỆNH SAU: </span>
+              <span id="pending-limit-timer" style="font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 800; color: #f0ad4e;">15:00</span>
+            </div>
+            <button onclick="cancelPendingLimitOrder()" class="btn btn-danger" style="padding: 4px 10px; font-weight: 700; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 4px; background: rgba(246,70,93,0.2); border: 1px solid #f6465d; color: #f6465d;">
+              <i class="fas fa-ban"></i> HỦY LỆNH CHỜ
+            </button>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 6px; background: rgba(0,0,0,0.4); border-radius: 4px; padding: 6px 8px; border: 1px solid rgba(255,255,255,0.06);">
+          <div>
+            <span style="font-size: 9.5px; color: var(--text-muted); display:block;">Giá Limit chờ khớp</span>
+            <span id="pending-limit-price" style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 12px; color: #0ecb81;">$0.00</span>
+          </div>
+          <div>
+            <span style="font-size: 9.5px; color: var(--text-muted); display:block;">Giá thị trường hiện tại</span>
+            <span id="pending-limit-cur-price" style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 12px; color: #fff;">$0.00</span>
+          </div>
+          <div>
+            <span style="font-size: 9.5px; color: var(--text-muted); display:block;">Khoảng cách khớp</span>
+            <span id="pending-limit-dist" style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 12px; color: #f0ad4e;">$0.00</span>
+          </div>
+          <div>
+            <span style="font-size: 9.5px; color: var(--text-muted); display:block;">Phí sàn tiết kiệm</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 11px; color: #0ecb81;">0.02% (Tiết kiệm 60%)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIVE POSITION CARD -->
+      <div class="active-pos-card" id="active-pos-card" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
           <div style="display: flex; align-items: center; gap: 8px;">
             <span id="active-pos-badge" style="padding: 2px 8px; border-radius: 4px; font-weight: 800; font-size: 10.5px; background: rgba(14,203,129,0.2); color: #0ecb81; border: 1px solid #0ecb81;">
@@ -1960,7 +2003,7 @@
 
       // 3. Dynamic Position Banner Update
       activePosition = d.active_position;
-      renderDynamicPosition(activePosition, p, isLive);
+      renderDynamicPosition(activePosition, d.pending_limit_order, p, isLive);
 
       // 4. Trades Table
       renderTradesTable(d.trades || []);
@@ -1972,67 +2015,147 @@
       }
     }
 
-    // SMART DYNAMIC POSITION BANNER
-    function renderDynamicPosition(pos, curPrice, isLive) {
+    // SMART DYNAMIC POSITION BANNER & PENDING LIMIT
+    function renderDynamicPosition(pos, pendingOrder, curPrice, isLive) {
       const container = document.getElementById('dynamic-position-container');
       if (!container) return;
 
-      if (!pos) {
+      const posCard = document.getElementById('active-pos-card');
+      const limitCard = document.getElementById('pending-limit-card');
+
+      if (!pos && !pendingOrder) {
         container.style.display = 'none';
+        if (posCard) posCard.style.display = 'none';
+        if (limitCard) limitCard.style.display = 'none';
         return;
       }
 
       container.style.display = 'block';
-      const card = document.getElementById('active-pos-card');
-      const badge = document.getElementById('active-pos-badge');
-      const sizeEl = document.getElementById('active-pos-size');
-      const marginEl = document.getElementById('active-pos-margin');
-      const pnlEl = document.getElementById('active-pos-pnl');
-      const entryEl = document.getElementById('active-pos-entry');
-      const slEl = document.getElementById('active-pos-sl');
-      const tp1El = document.getElementById('active-pos-tp1');
-      const tp2El = document.getElementById('active-pos-tp2');
-      const lockEl = document.getElementById('active-pos-lock');
 
-      const isLong = pos.side === 'LONG';
-      if (card) {
+      // 1. RENDER PENDING LIMIT ORDER
+      if (pendingOrder && limitCard) {
+        limitCard.style.display = 'block';
+        const isLong = pendingOrder.side === 'LONG';
+        const badge = document.getElementById('pending-limit-badge');
+        const sizeEl = document.getElementById('pending-limit-size');
+        const marginEl = document.getElementById('pending-limit-margin');
+        const stratEl = document.getElementById('pending-limit-strategy');
+        const timerEl = document.getElementById('pending-limit-timer');
+        const priceEl = document.getElementById('pending-limit-price');
+        const curPriceEl = document.getElementById('pending-limit-cur-price');
+        const distEl = document.getElementById('pending-limit-dist');
+
+        if (badge) {
+          badge.innerHTML = isLong
+            ? '<i class="fas fa-clock"></i> ⏳ LỆNH CHỜ LIMIT BUY (LONG MAKER)'
+            : '<i class="fas fa-clock"></i> ⏳ LỆNH CHỜ LIMIT SELL (SHORT MAKER)';
+          badge.style.color = isLong ? 'var(--color-green)' : 'var(--color-red)';
+          badge.style.borderColor = isLong ? 'rgba(14,203,129,0.3)' : 'rgba(246,70,93,0.3)';
+          badge.style.background = isLong ? 'rgba(14,203,129,0.15)' : 'rgba(246,70,93,0.15)';
+        }
+
+        if (sizeEl) sizeEl.innerText = (pendingOrder.size || 0).toFixed(3) + ' oz';
+        if (marginEl) marginEl.innerText = '$' + (pendingOrder.margin || 0).toFixed(2);
+        if (stratEl) stratEl.innerText = pendingOrder.strategy || 'DUAL A+';
+        if (priceEl) priceEl.innerText = '$' + (pendingOrder.limit_price || 0).toFixed(2);
+        if (curPriceEl) curPriceEl.innerText = '$' + (curPrice || 0).toFixed(2);
+        
+        if (distEl) {
+          const dist = Math.abs((curPrice || 0) - (pendingOrder.limit_price || 0));
+          distEl.innerText = '$' + dist.toFixed(2);
+        }
+
+        if (timerEl) {
+          const now = Math.floor(Date.now() / 1000);
+          const placed = Math.floor(pendingOrder.placed_time || now);
+          const ttl = pendingOrder.ttl_seconds || 900;
+          const elapsed = Math.max(0, now - placed);
+          const remaining = Math.max(0, ttl - elapsed);
+          const remMin = Math.floor(remaining / 60);
+          const remSec = remaining % 60;
+          timerEl.innerText = (remMin < 10 ? '0' : '') + remMin + ':' + (remSec < 10 ? '0' : '') + remSec;
+          if (remaining <= 60) {
+            timerEl.style.color = 'var(--color-red)';
+          } else {
+            timerEl.style.color = '#f0ad4e';
+          }
+        }
+      } else if (limitCard) {
+        limitCard.style.display = 'none';
+      }
+
+      // 2. RENDER ACTIVE POSITION
+      if (pos && posCard) {
+        posCard.style.display = 'block';
+        const badge = document.getElementById('active-pos-badge');
+        const sizeEl = document.getElementById('active-pos-size');
+        const marginEl = document.getElementById('active-pos-margin');
+        const pnlEl = document.getElementById('active-pos-pnl');
+        const entryEl = document.getElementById('active-pos-entry');
+        const slEl = document.getElementById('active-pos-sl');
+        const tp1El = document.getElementById('active-pos-tp1');
+        const tp2El = document.getElementById('active-pos-tp2');
+        const lockEl = document.getElementById('active-pos-lock');
+
+        const isLong = pos.side === 'LONG';
         if (isLong) {
-          card.className = 'active-pos-card';
+          posCard.className = 'active-pos-card';
         } else {
-          card.className = 'active-pos-card short';
+          posCard.className = 'active-pos-card short';
         }
+
+        if (badge) {
+          const modePrefix = isLive ? '🔴 LIVE: ' : '🧪 THỬ: ';
+          badge.innerText = modePrefix + pos.side + ' ' + (pos.leverage || 16) + 'x';
+          badge.style.color = isLong ? 'var(--color-green)' : 'var(--color-red)';
+          badge.style.borderColor = isLong ? 'var(--color-green)' : 'var(--color-red)';
+        }
+
+        if (sizeEl) sizeEl.innerText = (pos.size || 0).toFixed(3) + ' oz';
+        if (marginEl) marginEl.innerText = '$' + (pos.margin || 0).toFixed(2);
+
+        const unPnl = pos.unrealized_pnl || 0;
+        const pnlPct = pos.pnl_pct || 0;
+        const isWin = unPnl >= 0;
+        if (pnlEl) {
+          pnlEl.innerText = (isWin ? '+$' : '-$') + Math.abs(unPnl).toFixed(2) + ' (' + (isWin ? '+' : '') + pnlPct.toFixed(2) + '%)';
+          pnlEl.style.color = isWin ? 'var(--color-green)' : 'var(--color-red)';
+        }
+
+        if (entryEl) entryEl.innerText = '$' + (pos.entry_price || 0).toFixed(2);
+        if (slEl) slEl.innerText = '$' + (pos.stop_loss || pos.sl || 0).toFixed(2);
+        if (tp1El) tp1El.innerHTML = '$' + (pos.tp1 || 0).toFixed(2) + (pos.tp1_hit ? ' <span style="color:#0ecb81; font-size:9.5px;">(✓ ĐÃ CHỐT 50%)</span>' : '');
+        if (tp2El) tp2El.innerText = '$' + (pos.tp2 || 0).toFixed(2);
+        
+        if (lockEl) {
+          if (pos.tp1_hit) {
+            lockEl.innerHTML = '<span style="color:#0ecb81;"><i class="fas fa-check"></i> ĐÃ DỜI SL VÀO +0.14% LÃI</span>';
+          } else {
+            lockEl.innerText = 'CHƯA KÍCH HOẠT (Chờ TP1)';
+            lockEl.style.color = 'var(--text-muted)';
+          }
+        }
+      } else if (posCard) {
+        posCard.style.display = 'none';
       }
+    }
 
-      if (badge) {
-        const modePrefix = isLive ? '🔴 LIVE: ' : '🧪 THỬ: ';
-        badge.innerText = modePrefix + pos.side + ' ' + (pos.leverage || 16) + 'x';
-        badge.style.color = isLong ? 'var(--color-green)' : 'var(--color-red)';
-        badge.style.borderColor = isLong ? 'var(--color-green)' : 'var(--color-red)';
-      }
-
-      if (sizeEl) sizeEl.innerText = (pos.size || 0).toFixed(3) + ' oz';
-      if (marginEl) marginEl.innerText = '$' + (pos.margin || 0).toFixed(2);
-
-      const unPnl = pos.unrealized_pnl || 0;
-      const pnlPct = pos.pnl_pct || 0;
-      const isWin = unPnl >= 0;
-      if (pnlEl) {
-        pnlEl.innerText = (isWin ? '+$' : '-$') + Math.abs(unPnl).toFixed(2) + ' (' + (isWin ? '+' : '') + pnlPct.toFixed(2) + '%)';
-        pnlEl.style.color = isWin ? 'var(--color-green)' : 'var(--color-red)';
-      }
-
-      if (entryEl) entryEl.innerText = '$' + (pos.entry_price || 0).toFixed(2);
-      if (slEl) slEl.innerText = '$' + (pos.stop_loss || pos.sl || 0).toFixed(2);
-      if (tp1El) tp1El.innerHTML = '$' + (pos.tp1 || 0).toFixed(2) + (pos.tp1_hit ? ' <span style="color:#0ecb81; font-size:9.5px;">(✓ ĐÃ CHỐT 50%)</span>' : '');
-      if (tp2El) tp2El.innerText = '$' + (pos.tp2 || 0).toFixed(2);
-      
-      if (lockEl) {
-        if (pos.tp1_hit) {
-          lockEl.innerHTML = '<span style="color:#0ecb81;"><i class="fas fa-check"></i> ĐÃ DỜI SL VÀO +0.14% LÃI</span>';
+    async function cancelPendingLimitOrder() {
+      if (!confirm('Bạn có chắc chắn muốn hủy lệnh chờ Limit Maker này không?')) return;
+      try {
+        const resp = await fetch('/api/cancel_pending_limit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        const res = await resp.json();
+        if (res.status === 'success') {
+          showToast(res.message || 'Đã hủy lệnh chờ thành công', 'success');
         } else {
-          lockEl.innerText = 'CHƯA KÍCH HOẠT (Chờ TP1)';
-          lockEl.style.color = 'var(--text-muted)';
+          showToast(res.message || 'Lỗi khi hủy lệnh', 'error');
         }
+      } catch (err) {
+        showToast('Lỗi kết nối: ' + err.message, 'error');
       }
     }
 

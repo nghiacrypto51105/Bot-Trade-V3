@@ -210,6 +210,89 @@ class BingXAPIClient:
             logger.error(f"[BINGX ORDER EXCEPTION] {e}")
             return False, {"error": str(e)}
 
+    def place_limit_order(self, symbol: str, side: str, position_side: str, quantity: float, price: float) -> Tuple[bool, dict]:
+        """
+        Đặt lệnh Limit Maker chờ khớp trên sàn BingX (Phí chỉ 0.02% - Tiết kiệm 60%).
+        side: 'BUY' hoặc 'SELL'
+        positionSide: 'LONG' hoặc 'SHORT'
+        quantity: Khối lượng oz
+        price: Mức giá Limit chờ khớp
+        """
+        if not self.api_key or not self.api_secret:
+            return False, {"error": "Chưa có API Key"}
+        try:
+            qty_str = f"{max(0.0005, quantity):.4f}"
+            price_str = f"{price:.2f}"
+            params = {
+                "symbol": symbol,
+                "side": side,
+                "positionSide": position_side,
+                "type": "LIMIT",
+                "price": price_str,
+                "quantity": qty_str,
+                "timeInForce": "GTC"
+            }
+            q = self._sign(params)
+            url = f"{self.base_url}/openApi/swap/v2/trade/order?{q}"
+            headers = {"X-BX-APIKEY": self.api_key}
+            r = requests.post(url, headers=headers, timeout=6)
+            res = r.json()
+            if res.get("code") == 0:
+                logger.info(f"[BINGX LIMIT ORDER PLACED] {side} {position_side} {qty_str} @ ${price_str} | ID: {res.get('data', {}).get('orderId')}")
+                return True, res.get("data", {})
+            logger.error(f"[BINGX LIMIT ORDER FAILED] {res}")
+            return False, res
+        except Exception as e:
+            logger.error(f"[BINGX LIMIT ORDER EXCEPTION] {e}")
+            return False, {"error": str(e)}
+
+    def cancel_order(self, symbol: str, order_id: str) -> Tuple[bool, dict]:
+        """
+        Hủy lệnh chờ Limit trên sàn BingX (Ví dụ khi hết hạn 15 phút hoặc gãy trend).
+        """
+        if not self.api_key or not self.api_secret:
+            return False, {"error": "Chưa có API Key"}
+        try:
+            params = {
+                "symbol": symbol,
+                "orderId": str(order_id)
+            }
+            q = self._sign(params)
+            url = f"{self.base_url}/openApi/swap/v2/trade/order?{q}"
+            headers = {"X-BX-APIKEY": self.api_key}
+            r = requests.delete(url, headers=headers, timeout=6)
+            res = r.json()
+            if res.get("code") == 0:
+                logger.info(f"[BINGX CANCEL ORDER SUCCESS] Order ID: {order_id}")
+                return True, res.get("data", {})
+            logger.warning(f"[BINGX CANCEL ORDER FAILED] {res}")
+            return False, res
+        except Exception as e:
+            logger.error(f"[BINGX CANCEL EXCEPTION] {e}")
+            return False, {"error": str(e)}
+
+    def get_order_status(self, symbol: str, order_id: str) -> Tuple[bool, dict]:
+        """
+        Lấy trạng thái thực tế của lệnh trên BingX (NEW, FILLED, CANCELED).
+        """
+        if not self.api_key or not self.api_secret:
+            return False, {"error": "Chưa có API Key"}
+        try:
+            params = {
+                "symbol": symbol,
+                "orderId": str(order_id)
+            }
+            q = self._sign(params)
+            url = f"{self.base_url}/openApi/swap/v2/trade/order?{q}"
+            headers = {"X-BX-APIKEY": self.api_key}
+            r = requests.get(url, headers=headers, timeout=6)
+            res = r.json()
+            if res.get("code") == 0:
+                return True, res.get("data", {})
+            return False, res
+        except Exception as e:
+            return False, {"error": str(e)}
+
 DEFAULT_BINGX_API_KEY = "npUSTPD0PKerLK8jZj3tFdSGxMozv6F8HqlEbuFrQDdWhYHsH84xZ5t6Isj4MLTi18jj3C2hvOX5fKqL4POEg"
 DEFAULT_BINGX_SECRET_KEY = "RUPkdl0HBF4m6e7Thk6VyunJdfc4swyn8Glso7fMwDScSC6KfVJCT3MnBO520Hmevc6DWbWo6VrQ37a7QXw"
 
@@ -287,6 +370,8 @@ class TradingEngineState:
         self.fee_rate_maker = 0.0002  # Phí Maker BingX (Chốt lời Limit TP1/TP2): 0.02%
         
         self.active_position = None
+        self.pending_limit_order: Optional[Dict[str, Any]] = None
+        self.order_ttl_seconds: int = 900  # 15 phút TTL tự động hủy lệnh lỗi thời
         self.trades: List[Dict[str, Any]] = []
         
         self.latest_price = 0.0
@@ -731,6 +816,116 @@ def check_and_manage_live_position():
             state.active_position = None
             logger.info(f"[LIVE EXIT SHORT] Hit SL @ {cur_p} ({act_text})")
 
+def check_and_manage_pending_limit_order():
+    """
+    Giám sát vòng đời Lệnh chờ Limit Maker:
+    1. Kiểm tra hết hạn TTL (15 phút / 1 nến M15) -> Tự động HỦY LỆNH trên BingX.
+    2. Kiểm tra gãy xu hướng EMA 300 (Invalidation) -> HỦY LỆNH khẩn cấp.
+    3. Kiểm tra khớp lệnh (Filled) -> Chuyển thành Active Position + Cài TP1/TP2/SL tự động.
+    """
+    if not state.pending_limit_order:
+        return
+
+    cur_p = state.latest_price
+    if cur_p <= 0:
+        return
+
+    order = state.pending_limit_order
+    placed_t = order.get("placed_time", time.time())
+    ttl = order.get("ttl_seconds", 900)
+    side = order.get("side")
+    limit_p = order.get("limit_price", 0.0)
+    order_id = order.get("order_id")
+    size = order.get("size", 0.001)
+    margin = order.get("margin", 5.0)
+    strategy = order.get("strategy", "SMA 20 PULLBACK")
+    ema_val = state.indicators.get("ema_1h", cur_p)
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # 1. KIỂM TRA HẾT HẠN TTL HOẶC GÃY TREND EMA 300
+    is_expired = (time.time() - placed_t) > ttl
+    is_invalidated = (side == "LONG" and cur_p < ema_val) or (side == "SHORT" and cur_p > ema_val)
+
+    if is_expired or is_invalidated:
+        cancel_reason = "HẾT HẠN TTL 15 PHÚT (LỖI THỜI)" if is_expired else "GÃY XU HƯỚNG EMA 300"
+        if state.mode == "LIVE TRADING" and state.bingx_client and order_id:
+            try:
+                state.bingx_client.cancel_order("NCCOGOLD2USD-USDT", str(order_id))
+            except Exception as e:
+                logger.warning(f"[CANCEL ORDER ERROR] {e}")
+
+        logger.info(f"[CANCEL PENDING LIMIT] Đã hủy lệnh chờ {side} @ ${limit_p:,.2f} | Lý do: {cancel_reason}")
+        state.trades.insert(0, {
+            "time": now_str,
+            "action": f"HỦY LỆNH CHỜ {side} [{cancel_reason}]",
+            "price": limit_p,
+            "size": f"{size:.3f} oz",
+            "pnl": "ĐÃ HỦY (0 PHÍ)",
+            "balance": f"${state.balance:.2f}",
+            "type": "CLOSE"
+        })
+        state.trades = state.trades[:100]
+        state.pending_limit_order = None
+        return
+
+    # 2. KIỂM TRA KHỚP LỆNH (FILLED)
+    is_filled = False
+    if state.mode == "LIVE TRADING" and state.bingx_client and order_id:
+        ok, res = state.bingx_client.get_order_status("NCCOGOLD2USD-USDT", str(order_id))
+        if ok and str(res.get("status")) in ["FILLED", "2"]:
+            is_filled = True
+        elif side == "LONG" and cur_p <= limit_p:
+            is_filled = True
+        elif side == "SHORT" and cur_p >= limit_p:
+            is_filled = True
+    else:
+        if side == "LONG" and cur_p <= limit_p:
+            is_filled = True
+        elif side == "SHORT" and cur_p >= limit_p:
+            is_filled = True
+
+    if is_filled:
+        fee = limit_p * size * state.fee_rate_maker
+        state.balance -= fee
+        
+        sl = round(limit_p * (1.0 - state.quant_agent.sl_pct if side == "LONG" else 1.0 + state.quant_agent.sl_pct), 2)
+        tp1 = round(limit_p * (1.0 + state.quant_agent.tp1_pct if side == "LONG" else 1.0 - state.quant_agent.tp1_pct), 2)
+        tp2 = round(limit_p * (1.0 + state.quant_agent.tp2_pct if side == "LONG" else 1.0 - state.quant_agent.tp2_pct), 2)
+        
+        state.active_position = {
+            "side": side,
+            "entry_price": limit_p,
+            "size": size,
+            "margin": margin,
+            "sl": sl,
+            "stop_loss": sl,
+            "tp1": tp1,
+            "tp2": tp2,
+            "tp1_hit": False,
+            "open_time": now_str,
+            "strategy": strategy,
+            "order_type": "LIMIT_MAKER",
+            "unrealized_pnl": 0.0,
+            "pnl_pct": 0.0
+        }
+        state.pending_limit_order = None
+        state.quant_agent.daily_trades_count += 1
+        if state.quant_agent.daily_trades_count >= state.quant_agent.max_daily_trades:
+            state.quant_agent.day_locked = True
+        save_bot_limits(state.quant_agent.daily_trades_count, state.quant_agent.daily_losses_count, state.quant_agent.day_locked)
+            
+        state.trades.insert(0, {
+            "time": now_str,
+            "action": f"KHỚP LỆNH LIMIT {side} [{strategy}] (MAKER 0.02%)" + (" [BINGX LIVE]" if state.mode == "LIVE TRADING" else ""),
+            "price": limit_p,
+            "size": f"{size:.3f} oz",
+            "pnl": f"-${fee:.2f} (Phí Maker)",
+            "balance": f"${state.balance:.2f}",
+            "type": "OPEN"
+        })
+        state.trades = state.trades[:100]
+        logger.info(f"[LIMIT MAKER FILLED] {side} @ {limit_p:,.2f} | TP1: {tp1} | TP2: {tp2} | SL: {sl}")
+
 def check_live_entry_signal():
     # 1. Luôn tính toán cập nhật các chỉ báo kỹ thuật theo giá tick mới nhất
     if len(state.candles) >= 30:
@@ -744,8 +939,8 @@ def check_live_entry_signal():
             "rsi": round(rsi, 1)
         }
 
-    # 2. Kiểm tra các bộ lọc sinh mệnh và kỷ luật trước khi vào lệnh
-    if state.active_position is not None:
+    # 2. Kiểm tra các bộ lọc sinh mệnh và kỷ luật: KHÓA NHỒI LỆNH (Tuyệt đối không nhồi khi đã có lệnh active hoặc limit chờ)
+    if state.active_position is not None or state.pending_limit_order is not None:
         return
     if state.quant_agent.day_locked or state.quant_agent.daily_trades_count >= state.quant_agent.max_daily_trades:
         return
@@ -772,24 +967,28 @@ def check_live_entry_signal():
     rsi = state.indicators["rsi"]
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # 1. ĐIỀU KIỆN LONG (Dual A+ Sniper):
-    # Nhánh 1: Bắt đáy chiết khấu sâu (Deep Dip): Giá <= BB Dưới & RSI <= 45
-    # Nhánh 2: Bắt nhịp hồi tiếp diễn sóng tăng (SMA 20 Pullback): Giá <= SMA 20 (+0.1%) & RSI <= 52 (Đã hạ nhiệt)
-    is_long_deep_dip = (close_p <= lower_bb and rsi <= state.quant_agent.rsi_low)
-    is_long_sma_pullback = (close_p <= sma_bb * 1.001 and rsi <= 52.0 and close_p > lower_bb)
+    # 1. TÍN HIỆU LONG (Dual A+ Limit Maker):
+    # Nhánh 1: Bắt đáy chiết khấu sâu (Deep Dip): Giá gần BB Dưới & RSI <= 48 -> Đặt Limit tại BB Dưới
+    # Nhánh 2: Bắt nhịp hồi tiếp diễn sóng tăng (SMA 20 Pullback): Giá gần SMA 20 & RSI <= 54 -> Đặt Limit tại SMA 20
+    is_long_setup_sma = (close_p > ema_1h and close_p <= sma_bb * 1.006 and rsi <= 54.0)
+    is_long_setup_deep = (close_p > ema_1h and close_p <= lower_bb * 1.004 and rsi <= 48.0)
 
-    if close_p > ema_1h and (is_long_deep_dip or is_long_sma_pullback):
-        strategy_tag = "DEEP DIP" if is_long_deep_dip else "SMA 20 PULLBACK"
+    if (not state.active_position) and (not state.pending_limit_order) and (is_long_setup_sma or is_long_setup_deep):
+        strategy_tag = "DEEP DIP" if is_long_setup_deep else "SMA 20 PULLBACK"
+        limit_p = round(lower_bb if is_long_setup_deep else sma_bb, 2)
+        if limit_p > close_p:
+            limit_p = round(close_p, 2)
+
         size, margin, est_risk = compute_smart_order_sizing(
             balance=state.balance,
-            close_p=close_p,
+            close_p=limit_p,
             leverage=state.leverage,
             sl_pct=state.quant_agent.sl_pct,
             risk_pct=state.risk_per_trade_pct,
             max_margin_pct=state.max_margin_pct
         )
 
-        # Nếu đang ở chế độ LIVE TRADING: gửi lệnh thật lên sàn BingX
+        order_id = None
         if state.mode == "LIVE TRADING":
             if not state.bingx_client:
                 logger.error("[LIVE ERROR] Chưa có BingX Client để mở lệnh Live!")
@@ -797,69 +996,49 @@ def check_live_entry_signal():
             if state.balance < 2.0:
                 logger.warning(f"[LIVE INSUFFICIENT BALANCE] Số dư ${state.balance:.2f} < 2 USDT tối thiểu!")
                 return
-            ok, res = state.bingx_client.place_market_order("NCCOGOLD2USD-USDT", "BUY", "LONG", size)
+            ok, res = state.bingx_client.place_limit_order("NCCOGOLD2USD-USDT", "BUY", "LONG", size, limit_p)
             if not ok:
-                logger.error(f"[LIVE ORDER FAILED] Không thể khớp lệnh LONG BingX: {res}")
+                logger.error(f"[LIVE LIMIT ORDER FAILED] Không thể đặt lệnh BUY LIMIT BingX: {res}")
                 return
+            order_id = res.get("orderId")
 
-        fee = close_p * size * state.fee_rate
-        state.balance -= fee
-        
-        sl = round(close_p * (1.0 - state.quant_agent.sl_pct), 2)
-        tp1 = round(close_p * (1.0 + state.quant_agent.tp1_pct), 2)
-        tp2 = round(close_p * (1.0 + state.quant_agent.tp2_pct), 2)
-        
-        state.active_position = {
+        state.pending_limit_order = {
+            "order_id": order_id,
             "side": "LONG",
-            "entry_price": close_p,
+            "limit_price": limit_p,
             "size": size,
             "margin": margin,
-            "sl": sl,
-            "stop_loss": sl,
-            "tp1": tp1,
-            "tp2": tp2,
-            "tp1_hit": False,
-            "open_time": now_str,
             "strategy": strategy_tag,
-            "unrealized_pnl": 0.0,
-            "pnl_pct": 0.0
+            "placed_time": time.time(),
+            "placed_time_str": now_str,
+            "candle_time": cur_time,
+            "ttl_seconds": 900
         }
         state.last_trade_candle_time = cur_time
-        state.quant_agent.daily_trades_count += 1
-        if state.quant_agent.daily_trades_count >= state.quant_agent.max_daily_trades:
-            state.quant_agent.day_locked = True
-        save_bot_limits(state.quant_agent.daily_trades_count, state.quant_agent.daily_losses_count, state.quant_agent.day_locked)
-            
-        state.trades.insert(0, {
-            "time": now_str,
-            "action": f"VÀO LỆNH LONG [{strategy_tag}]" + (" [BINGX LIVE]" if state.mode == "LIVE TRADING" else ""),
-            "price": close_p,
-            "size": f"{size:.3f} oz",
-            "pnl": f"-${fee:.2f} (Phí)",
-            "balance": f"${state.balance:.2f}",
-            "type": "OPEN"
-        })
-        state.trades = state.trades[:100]
-        logger.info(f"[LIVE OPEN LONG ({strategy_tag})] @ {close_p:.2f} | TP1: {tp1} | TP2: {tp2} | SL: {sl}")
+        logger.info(f"[PLACED BUY LIMIT ({strategy_tag})] @ {limit_p:,.2f} | Size: {size:.3f} oz | TTL: 15 mins")
 
-    # 2. ĐIỀU KIỆN SHORT (Dual A+ Sniper):
-    # Nhánh 1: Bắt đỉnh sóng hồi sâu (Deep Peak): Giá >= BB Trên & RSI >= 55
-    # Nhánh 2: Bắt nhịp hồi tiếp diễn sóng giảm (SMA 20 Pullback): Giá >= SMA 20 & RSI >= 48
-    is_short_deep_peak = (close_p >= upper_bb and rsi >= state.quant_agent.rsi_high)
-    is_short_sma_pullback = (close_p >= sma_bb * 0.999 and rsi >= 48.0 and close_p < upper_bb)
+    # 2. TÍN HIỆU SHORT (Dual A+ Limit Maker):
+    # Nhánh 1: Bắt đỉnh sóng hồi sâu (Deep Peak): Giá gần BB Trên & RSI >= 52 -> Đặt Limit tại BB Trên
+    # Nhánh 2: Bắt nhịp hồi tiếp diễn sóng giảm (SMA 20 Pullback): Giá gần SMA 20 & RSI >= 46 -> Đặt Limit tại SMA 20
+    is_short_setup_sma = (close_p < ema_1h and close_p >= sma_bb * 0.994 and rsi >= 46.0)
+    is_short_setup_deep = (close_p < ema_1h and close_p >= upper_bb * 0.996 and rsi >= 52.0)
 
-    if (not state.active_position) and close_p < ema_1h and (is_short_deep_peak or is_short_sma_pullback):
-        strategy_tag = "DEEP PEAK" if is_short_deep_peak else "SMA 20 PULLBACK"
+    if (not state.active_position) and (not state.pending_limit_order) and (is_short_setup_sma or is_short_setup_deep):
+        strategy_tag = "DEEP PEAK" if is_short_setup_deep else "SMA 20 PULLBACK"
+        limit_p = round(upper_bb if is_short_setup_deep else sma_bb, 2)
+        if limit_p < close_p:
+            limit_p = round(close_p, 2)
+
         size, margin, est_risk = compute_smart_order_sizing(
             balance=state.balance,
-            close_p=close_p,
+            close_p=limit_p,
             leverage=state.leverage,
             sl_pct=state.quant_agent.sl_pct,
             risk_pct=state.risk_per_trade_pct,
             max_margin_pct=state.max_margin_pct
         )
 
-        # Nếu đang ở chế độ LIVE TRADING: gửi lệnh thật lên sàn BingX
+        order_id = None
         if state.mode == "LIVE TRADING":
             if not state.bingx_client:
                 logger.error("[LIVE ERROR] Chưa có BingX Client để mở lệnh Live!")
@@ -867,49 +1046,26 @@ def check_live_entry_signal():
             if state.balance < 2.0:
                 logger.warning(f"[LIVE INSUFFICIENT BALANCE] Số dư ${state.balance:.2f} < 2 USDT tối thiểu!")
                 return
-            ok, res = state.bingx_client.place_market_order("NCCOGOLD2USD-USDT", "SELL", "SHORT", size)
+            ok, res = state.bingx_client.place_limit_order("NCCOGOLD2USD-USDT", "SELL", "SHORT", size, limit_p)
             if not ok:
-                logger.error(f"[LIVE ORDER FAILED] Không thể khớp lệnh SHORT BingX: {res}")
+                logger.error(f"[LIVE LIMIT ORDER FAILED] Không thể đặt lệnh SELL LIMIT BingX: {res}")
                 return
+            order_id = res.get("orderId")
 
-        fee = close_p * size * state.fee_rate
-        state.balance -= fee
-        
-        sl = round(close_p * (1.0 + state.quant_agent.sl_pct), 2)
-        tp1 = round(close_p * (1.0 - state.quant_agent.tp1_pct), 2)
-        tp2 = round(close_p * (1.0 - state.quant_agent.tp2_pct), 2)
-        
-        state.active_position = {
+        state.pending_limit_order = {
+            "order_id": order_id,
             "side": "SHORT",
-            "entry_price": close_p,
+            "limit_price": limit_p,
             "size": size,
             "margin": margin,
-            "sl": sl,
-            "stop_loss": sl,
-            "tp1": tp1,
-            "tp2": tp2,
-            "tp1_hit": False,
-            "open_time": now_str,
             "strategy": strategy_tag,
-            "unrealized_pnl": 0.0,
-            "pnl_pct": 0.0
+            "placed_time": time.time(),
+            "placed_time_str": now_str,
+            "candle_time": cur_time,
+            "ttl_seconds": 900
         }
         state.last_trade_candle_time = cur_time
-        state.quant_agent.daily_trades_count += 1
-        if state.quant_agent.daily_trades_count >= state.quant_agent.max_daily_trades:
-            state.quant_agent.day_locked = True
-        save_bot_limits(state.quant_agent.daily_trades_count, state.quant_agent.daily_losses_count, state.quant_agent.day_locked)
-            
-        state.trades.insert(0, {
-            "time": now_str,
-            "action": f"VÀO LỆNH SHORT [{strategy_tag}]" + (" [BINGX LIVE]" if state.mode == "LIVE TRADING" else ""),
-            "price": close_p,
-            "size": f"{size:.3f} oz",
-            "pnl": f"-${fee:.2f} (Phí)",
-            "balance": f"${state.balance:.2f}",
-            "type": "OPEN"
-        })
-        logger.info(f"[LIVE OPEN SHORT ({strategy_tag})] @ {close_p:.2f} | TP1: {tp1} | TP2: {tp2} | SL: {sl}")
+        logger.info(f"[PLACED SELL LIMIT ({strategy_tag})] @ {limit_p:,.2f} | Size: {size:.3f} oz | TTL: 15 mins")
 
 async def bingx_realtime_ws_listener():
     url = "wss://open-api-swap.bingx.com/swap-market"
@@ -971,6 +1127,7 @@ async def bingx_realtime_ws_listener():
                                 state.is_alive = False
                                 state.death_reason = "Drawdown vượt 10% (Permadeath)"
                                 
+                            check_and_manage_pending_limit_order()
                             check_and_manage_live_position()
                             
                         # Bắn ngay lập tức gói tin cập nhật tới tất cả trình duyệt qua WebSocket
@@ -993,11 +1150,14 @@ async def background_trading_loop():
 
                 # 2. Định kỳ đồng bộ số dư ví BingX thật mỗi 20 giây nếu đang ở chế độ LIVE
                 if state.mode == "LIVE TRADING" and state.bingx_client and (now_t - state.last_balance_sync > 20):
-                    if not state.active_position:
+                    if not state.active_position and not state.pending_limit_order:
                         sync_live_balance()
                     state.last_balance_sync = now_t
 
-                # 3. Quét tín hiệu mở lệnh mới khi đủ điều kiện
+                # 3. Quản lý lệnh chờ Limit Maker (TTL & Khớp lệnh)
+                check_and_manage_pending_limit_order()
+
+                # 4. Quét tín hiệu mở lệnh mới khi đủ điều kiện
                 check_live_entry_signal()
 
             await asyncio.sleep(0.5)
@@ -1052,6 +1212,27 @@ def compute_wait_reason() -> Dict[str, Any]:
             "badge_color": "#388bfd",
             "icon": "fa-crosshairs",
             "detail_text": f"Đang quản trị lệnh {side} tại ${entry:,.2f} | PnL: {pnl_sign}${pnl:.2f} ({pnl_sign}{pnl_pct:.2f}%) | TP1: ${tp1:,.2f} | SL: ${sl:,.2f}. Kỷ luật vàng: Tuyệt đối không nhồi lệnh!"
+        }
+
+    # 3.5. ĐANG TREO LỆNH CHỜ LIMIT MAKER (TTL 15 PHÚT)
+    if state.pending_limit_order is not None:
+        p_ord = state.pending_limit_order
+        p_side = p_ord.get("side", "LONG")
+        p_price = p_ord.get("limit_price", 0.0)
+        p_strat = p_ord.get("strategy", "SMA 20 PULLBACK")
+        p_time = p_ord.get("placed_time", time.time())
+        p_ttl = p_ord.get("ttl_seconds", 900)
+        elapsed = int(time.time() - p_time)
+        remaining = max(0, p_ttl - elapsed)
+        rem_min = remaining // 60
+        rem_sec = remaining % 60
+        dist = abs(state.latest_price - p_price)
+        return {
+            "code": "PENDING_LIMIT_ORDER",
+            "status_text": f"ĐANG TREO LỆNH LIMIT {p_side} @ ${p_price:,.2f}",
+            "badge_color": "#0ecb81",
+            "icon": "fa-clock",
+            "detail_text": f"Đã đặt lệnh Limit Maker ({p_strat}) tại ${p_price:,.2f} (cách ${dist:,.1f}). Phí Maker 0.02% (Tiết kiệm 60%). Tự động hủy sau {rem_min:02d}:{rem_sec:02d} nếu chưa khớp."
         }
 
     # 4. Cầu dao tự ngắt (Circuit Breaker - 2 SL liên tiếp / trong ngày)
@@ -1185,6 +1366,7 @@ def get_full_state_payload() -> Dict[str, Any]:
         "is_alive": state.is_alive,
         "death_reason": state.death_reason,
         "wait_reason": wait_reason,
+        "pending_limit_order": state.pending_limit_order,
         "latest_price": state.latest_price,
         "price_change_24h": round(state.price_change_24h, 2),
         "high_24h": state.high_24h,
@@ -1232,6 +1414,37 @@ def get_full_state_payload() -> Dict[str, Any]:
             "day_locked": state.quant_agent.day_locked
         }
     }
+
+@app.post("/api/cancel_pending_limit")
+async def api_cancel_pending_limit():
+    if not state.pending_limit_order:
+        return {"status": "error", "message": "Không có lệnh chờ Limit nào đang hoạt động"}
+    
+    order = state.pending_limit_order
+    order_id = order.get("order_id")
+    side = order.get("side")
+    limit_p = order.get("limit_price", 0.0)
+    
+    if state.mode == "LIVE TRADING" and state.bingx_client and order_id:
+        try:
+            state.bingx_client.cancel_order("NCCOGOLD2USD-USDT", str(order_id))
+        except Exception as e:
+            logger.warning(f"[MANUAL CANCEL ORDER ERROR] {e}")
+
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    state.trades.insert(0, {
+        "time": now_str,
+        "action": f"HỦY LỆNH CHỜ {side} [THỦ CÔNG]",
+        "price": limit_p,
+        "size": f"{order.get('size', 0.001):.3f} oz",
+        "pnl": "ĐÃ HỦY (0 PHÍ)",
+        "balance": f"${state.balance:.2f}",
+        "type": "CLOSE"
+    })
+    state.trades = state.trades[:100]
+    state.pending_limit_order = None
+    logger.info(f"[MANUAL CANCEL PENDING LIMIT] Người dùng đã hủy lệnh chờ {side} @ ${limit_p:,.2f}")
+    return {"status": "success", "message": f"Đã hủy lệnh chờ Limit {side} thành công"}
 
 @app.on_event("startup")
 async def startup_event():
