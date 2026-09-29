@@ -293,6 +293,51 @@ class BingXAPIClient:
         except Exception as e:
             return False, {"error": str(e)}
 
+    def get_positions(self, symbol: str = "NCCOGOLD2USD-USDT") -> Tuple[bool, list, str]:
+        """
+        Lấy danh sách các vị thế đang mở thực tế trên sàn BingX.
+        """
+        if not self.api_key or not self.api_secret:
+            return False, [], "Chưa có API Key"
+        try:
+            params = {"symbol": symbol}
+            q = self._sign(params)
+            url = f"{self.base_url}/openApi/swap/v2/user/positions?{q}"
+            headers = {"X-BX-APIKEY": self.api_key}
+            r = requests.get(url, headers=headers, timeout=6)
+            if r.status_code == 200:
+                res = r.json()
+                if res.get("code") == 0:
+                    data = res.get("data", [])
+                    open_pos = [p for p in data if float(p.get("positionAmt", 0)) != 0]
+                    return True, open_pos, "Thành công"
+                return False, [], res.get("msg", "Lỗi API BingX")
+            return False, [], f"HTTP {r.status_code}"
+        except Exception as e:
+            return False, [], str(e)
+
+    def close_all_positions(self, symbol: str = "NCCOGOLD2USD-USDT") -> Tuple[bool, dict]:
+        """
+        Đóng toàn bộ vị thế đang mở trên sàn BingX lập tức với lệnh thị trường (Market).
+        """
+        if not self.api_key or not self.api_secret:
+            return False, {"error": "Chưa có API Key"}
+        try:
+            params = {"symbol": symbol}
+            q = self._sign(params)
+            url = f"{self.base_url}/openApi/swap/v2/trade/closeAllPositions?{q}"
+            headers = {"X-BX-APIKEY": self.api_key}
+            r = requests.post(url, headers=headers, timeout=6)
+            res = r.json()
+            if res.get("code") == 0:
+                logger.info(f"[BINGX CLOSE ALL POSITIONS SUCCESS] Symbol: {symbol} | Res: {res.get('data')}")
+                return True, res.get("data", {})
+            logger.warning(f"[BINGX CLOSE ALL POSITIONS FAILED] {res}")
+            return False, res
+        except Exception as e:
+            logger.error(f"[BINGX CLOSE ALL POSITIONS EXCEPTION] {e}")
+            return False, {"error": str(e)}
+
 DEFAULT_BINGX_API_KEY = "npUSTPD0PKerLK8jZj3tFdSGxMozv6F8HqlEbuFrQDdWhYHsH84xZ5t6Isj4MLTi18jj3C2hvOX5fKqL4POEg"
 DEFAULT_BINGX_SECRET_KEY = "RUPkdl0HBF4m6e7Thk6VyunJdfc4swyn8Glso7fMwDScSC6KfVJCT3MnBO520Hmevc6DWbWo6VrQ37a7QXw"
 
@@ -622,6 +667,59 @@ def load_candles_sync():
                 state.candles = candles[-80:]
     except Exception as e:
         logger.error(f"[SYNC CANDLES ERROR] {e}")
+
+def sync_live_positions_with_bingx():
+    """
+    Đồng bộ hóa 2 chiều liên tục giữa Web và Sàn BingX:
+    - Nếu sàn đã đóng vị thế (bằng TP/SL sàn hoặc đóng trên App điện thoại) -> Tự động xóa vị thế trên Web.
+    - Nếu sàn có vị thế đang mở -> Đồng bộ chính xác khối lượng, giá vào và PnL thực tế.
+    """
+    if state.mode != "LIVE TRADING" or not state.bingx_client:
+        return
+    try:
+        ok, open_pos, msg = state.bingx_client.get_positions("NCCOGOLD2USD-USDT")
+        if not ok:
+            return
+        
+        if not open_pos:
+            if state.active_position is not None:
+                logger.info("[LIVE SYNC] Vị thế trên sàn BingX đã được tất toán -> Đồng bộ xóa trên Web.")
+                state.active_position = None
+                sync_live_balance()
+        else:
+            p = open_pos[0]
+            pos_amt = abs(float(p.get("positionAmt", 0)))
+            pos_side = p.get("positionSide", "LONG")
+            avg_price = float(p.get("avgPrice", state.latest_price or 4150.0))
+            unrealized = float(p.get("unrealizedProfit", 0))
+            margin = float(p.get("initialMargin", p.get("margin", 5.0)))
+            leverage = int(p.get("leverage", state.leverage))
+            
+            if state.active_position is None:
+                state.active_position = {
+                    "side": pos_side,
+                    "entry_price": avg_price,
+                    "size": pos_amt,
+                    "margin": margin,
+                    "leverage": leverage,
+                    "sl": round(avg_price * 0.9975 if pos_side == "LONG" else avg_price * 1.0025, 2),
+                    "stop_loss": round(avg_price * 0.9975 if pos_side == "LONG" else avg_price * 1.0025, 2),
+                    "tp1": round(avg_price * 1.0055 if pos_side == "LONG" else avg_price * 0.9945, 2),
+                    "tp2": round(avg_price * 1.0110 if pos_side == "LONG" else avg_price * 0.9890, 2),
+                    "tp1_hit": False,
+                    "open_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "strategy": "BINGX SYNCED",
+                    "order_type": "LIVE_SYNC",
+                    "unrealized_pnl": unrealized,
+                    "pnl_pct": (unrealized / margin) * 100 if margin > 0 else 0
+                }
+                logger.info(f"[LIVE SYNC] Phát hiện & đồng bộ vị thế từ BingX: {pos_side} {pos_amt} oz @ ${avg_price}")
+            else:
+                state.active_position["size"] = pos_amt
+                state.active_position["margin"] = margin
+                state.active_position["leverage"] = leverage
+    except Exception as e:
+        logger.warning(f"[SYNC LIVE POS ERROR] {e}")
 
 def check_and_manage_live_position():
     if not state.active_position:
@@ -1148,11 +1246,11 @@ async def background_trading_loop():
                     await asyncio.to_thread(load_candles_sync)
                     last_candle_sync = now_t
 
-                # 2. Định kỳ đồng bộ số dư ví BingX thật mỗi 20 giây nếu đang ở chế độ LIVE
-                if state.mode == "LIVE TRADING" and state.bingx_client and (now_t - state.last_balance_sync > 20):
-                    if not state.active_position and not state.pending_limit_order:
-                        sync_live_balance()
-                    state.last_balance_sync = now_t
+                # 2. Định kỳ đồng bộ vị thế và số dư ví BingX thật mỗi 5 giây nếu đang ở chế độ LIVE
+                if state.mode == "LIVE TRADING" and state.bingx_client:
+                    if now_t - state.last_balance_sync > 5:
+                        await asyncio.to_thread(sync_live_positions_with_bingx)
+                        state.last_balance_sync = now_t
 
                 # 3. Quản lý lệnh chờ Limit Maker (TTL & Khớp lệnh)
                 check_and_manage_pending_limit_order()
@@ -1646,6 +1744,14 @@ async def api_test_trade(req: TestTradeRequest):
 @app.post("/api/close_position")
 async def api_close_position():
     if not state.active_position:
+        if state.mode == "LIVE TRADING" and state.bingx_client:
+            ok, res = await asyncio.to_thread(state.bingx_client.close_all_positions, "NCCOGOLD2USD-USDT")
+            await asyncio.to_thread(sync_live_balance)
+            return JSONResponse({
+                "status": "success" if ok else "error",
+                "message": "Đã gửi lệnh đóng toàn bộ vị thế trên sàn BingX thành công!" if ok else f"Lỗi đóng vị thế BingX: {res}",
+                "balance": state.balance
+            })
         return JSONResponse({
             "status": "error",
             "message": "Hiện không có vị thế nào đang chạy để đóng."
@@ -1662,9 +1768,12 @@ async def api_close_position():
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
     if state.mode == "LIVE TRADING" and state.bingx_client:
-        order_side = "SELL" if side == "LONG" else "BUY"
-        state.bingx_client.place_market_order("NCCOGOLD2USD-USDT", order_side, side, size)
-        sync_live_balance()
+        # 1. Đóng trực tiếp toàn bộ vị thế trên sàn BingX
+        ok_close, close_res = await asyncio.to_thread(state.bingx_client.close_all_positions, "NCCOGOLD2USD-USDT")
+        if not ok_close:
+            order_side = "SELL" if side == "LONG" else "BUY"
+            await asyncio.to_thread(state.bingx_client.place_market_order, "NCCOGOLD2USD-USDT", order_side, side, size)
+        await asyncio.to_thread(sync_live_balance)
         
     if side == "LONG":
         pnl = (cur_p - entry) * size
@@ -1690,7 +1799,7 @@ async def api_close_position():
     state.trades = state.trades[:100]
     record_closed_trade_to_pnl(net, fee, trade_type, act_name, cur_p, f"{size:.3f} oz", state.balance)
     state.active_position = None
-    logger.info(f"[MANUAL CLOSE] {side} closed @ {cur_p} | Net: {net:+.2f} USDT")
+    logger.info(f"[MANUAL CLOSE] {side} closed @ {cur_p} | Net: {net:+.2f} USDT (Đã đóng trên BingX)")
     
     try:
         await manager.broadcast(get_full_state_payload())
@@ -1699,7 +1808,7 @@ async def api_close_position():
 
     return JSONResponse({
         "status": "success",
-        "message": f"Đã đóng vị thế thị trường thành công tại giá ${cur_p:,.2f}! PnL ròng: {net:+.2f} USDT.",
+        "message": f"Đã đóng vị thế thị trường và đồng bộ sàn BingX thành công tại giá ${cur_p:,.2f}! PnL ròng: {net:+.2f} USDT.",
         "balance": state.balance
     })
 
