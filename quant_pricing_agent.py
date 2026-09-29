@@ -322,9 +322,15 @@ class QuantPricingAgent:
                     return None
 
             upper_bb, lower_bb, rsi, ema_1h = self.calculate_indicators(prices)
+            sma_bb = (upper_bb + lower_bb) / 2.0
 
-            # ĐIỀU KIỆN LONG: Xu hướng Tăng (Close > EMA) + Kéo ngược chạm dải dưới + RSI hồi quy
-            if close_p > ema_1h and close_p <= lower_bb and rsi <= self.rsi_low:
+            # 1. ĐIỀU KIỆN LONG (Dual A+ Sniper):
+            # Nhánh 1: Bắt đáy chiết khấu sâu (Deep Dip): Giá <= BB Dưới & RSI <= 45
+            # Nhánh 2: Bắt nhịp hồi tiếp diễn sóng tăng (SMA 20 Pullback): Giá <= SMA 20 & RSI <= 52 (Đã hạ nhiệt)
+            is_long_deep_dip = (close_p <= lower_bb and rsi <= self.rsi_low)
+            is_long_sma_pullback = (close_p <= sma_bb * 1.001 and rsi <= 52.0 and close_p > lower_bb)
+
+            if close_p > ema_1h and (is_long_deep_dip or is_long_sma_pullback):
                 self.active_position = "LONG"
                 self.entry_price = close_p
                 self.stop_loss = round(close_p * (1.0 - self.sl_pct), 2)
@@ -335,14 +341,15 @@ class QuantPricingAgent:
                 if self.daily_trades_count >= self.max_daily_trades:
                     self.day_locked = True
 
+                strategy_type = "DEEP DIP" if is_long_deep_dip else "SMA 20 PULLBACK"
                 logger.info(
-                    f"[F8 A+ SNIPER LONG] {symbol} @ {close_p:.2f} | Lệnh ngày: {self.daily_trades_count}/{self.max_daily_trades} | "
-                    f"RSI: {rsi:.1f} (<= {self.rsi_low}) | EMA: {ema_1h:.2f} | "
+                    f"[F8 A+ SNIPER LONG ({strategy_type})] {symbol} @ {close_p:.2f} | Lệnh ngày: {self.daily_trades_count}/{self.max_daily_trades} | "
+                    f"RSI: {rsi:.1f} | EMA: {ema_1h:.2f} | SMA20: {sma_bb:.2f} | "
                     f"TP1: {self.take_profit_1:.2f} (+0.55%) | TP2: {self.take_profit_2:.2f} (+1.10%) | SL: {self.stop_loss:.2f}"
                 )
 
                 return {
-                    "action": "OPEN_LONG",
+                    "action": f"OPEN_LONG_{strategy_type.replace(' ', '_')}",
                     "side": "LONG",
                     "symbol": symbol,
                     "price": close_p,
@@ -353,8 +360,13 @@ class QuantPricingAgent:
                     "timestamp": timestamp
                 }
 
-            # ĐIỀU KIỆN SHORT: Xu hướng Giảm (Close < EMA) + Hồi phục chạm dải trên + RSI hồi quy
-            elif close_p < ema_1h and close_p >= upper_bb and rsi >= self.rsi_high:
+            # 2. ĐIỀU KIỆN SHORT (Dual A+ Sniper):
+            # Nhánh 1: Bắt đỉnh sóng hồi sâu (Deep Peak): Giá >= BB Trên & RSI >= 55
+            # Nhánh 2: Bắt nhịp hồi tiếp diễn sóng giảm (SMA 20 Pullback): Giá >= SMA 20 & RSI >= 48 (Đã hồi phục)
+            is_short_deep_peak = (close_p >= upper_bb and rsi >= self.rsi_high)
+            is_short_sma_pullback = (close_p >= sma_bb * 0.999 and rsi >= 48.0 and close_p < upper_bb)
+
+            if (not self.active_position) and close_p < ema_1h and (is_short_deep_peak or is_short_sma_pullback):
                 self.active_position = "SHORT"
                 self.entry_price = close_p
                 self.stop_loss = round(close_p * (1.0 + self.sl_pct), 2)
@@ -365,14 +377,15 @@ class QuantPricingAgent:
                 if self.daily_trades_count >= self.max_daily_trades:
                     self.day_locked = True
 
+                strategy_type = "DEEP PEAK" if is_short_deep_peak else "SMA 20 PULLBACK"
                 logger.info(
-                    f"[F8 A+ SNIPER SHORT] {symbol} @ {close_p:.2f} | Lệnh ngày: {self.daily_trades_count}/{self.max_daily_trades} | "
-                    f"RSI: {rsi:.1f} (>= {self.rsi_high}) | EMA: {ema_1h:.2f} | "
+                    f"[F8 A+ SNIPER SHORT ({strategy_type})] {symbol} @ {close_p:.2f} | Lệnh ngày: {self.daily_trades_count}/{self.max_daily_trades} | "
+                    f"RSI: {rsi:.1f} | EMA: {ema_1h:.2f} | SMA20: {sma_bb:.2f} | "
                     f"TP1: {self.take_profit_1:.2f} (-0.55%) | TP2: {self.take_profit_2:.2f} (-1.10%) | SL: {self.stop_loss:.2f}"
                 )
 
                 return {
-                    "action": "OPEN_SHORT",
+                    "action": f"OPEN_SHORT_{strategy_type.replace(' ', '_')}",
                     "side": "SHORT",
                     "symbol": symbol,
                     "price": close_p,

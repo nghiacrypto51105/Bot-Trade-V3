@@ -768,11 +768,18 @@ def check_live_entry_signal():
     ema_1h = state.indicators["ema_1h"]
     upper_bb = state.indicators["upper_bb"]
     lower_bb = state.indicators["lower_bb"]
+    sma_bb = state.indicators.get("sma_bb", (upper_bb + lower_bb) / 2.0)
     rsi = state.indicators["rsi"]
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # ĐIỀU KIỆN LONG: Xu hướng Tăng (Close > EMA) + Kéo ngược chạm dải dưới + RSI hồi quy
-    if close_p > ema_1h and close_p <= lower_bb and rsi <= state.quant_agent.rsi_low:
+    # 1. ĐIỀU KIỆN LONG (Dual A+ Sniper):
+    # Nhánh 1: Bắt đáy chiết khấu sâu (Deep Dip): Giá <= BB Dưới & RSI <= 45
+    # Nhánh 2: Bắt nhịp hồi tiếp diễn sóng tăng (SMA 20 Pullback): Giá <= SMA 20 (+0.1%) & RSI <= 52 (Đã hạ nhiệt)
+    is_long_deep_dip = (close_p <= lower_bb and rsi <= state.quant_agent.rsi_low)
+    is_long_sma_pullback = (close_p <= sma_bb * 1.001 and rsi <= 52.0 and close_p > lower_bb)
+
+    if close_p > ema_1h and (is_long_deep_dip or is_long_sma_pullback):
+        strategy_tag = "DEEP DIP" if is_long_deep_dip else "SMA 20 PULLBACK"
         size, margin, est_risk = compute_smart_order_sizing(
             balance=state.balance,
             close_p=close_p,
@@ -813,6 +820,7 @@ def check_live_entry_signal():
             "tp2": tp2,
             "tp1_hit": False,
             "open_time": now_str,
+            "strategy": strategy_tag,
             "unrealized_pnl": 0.0,
             "pnl_pct": 0.0
         }
@@ -824,7 +832,7 @@ def check_live_entry_signal():
             
         state.trades.insert(0, {
             "time": now_str,
-            "action": "VÀO LỆNH LONG" + (" [BINGX LIVE]" if state.mode == "LIVE TRADING" else ""),
+            "action": f"VÀO LỆNH LONG [{strategy_tag}]" + (" [BINGX LIVE]" if state.mode == "LIVE TRADING" else ""),
             "price": close_p,
             "size": f"{size:.3f} oz",
             "pnl": f"-${fee:.2f} (Phí)",
@@ -832,10 +840,16 @@ def check_live_entry_signal():
             "type": "OPEN"
         })
         state.trades = state.trades[:100]
-        logger.info(f"[LIVE OPEN LONG] @ {close_p:.2f} | TP1: {tp1} | TP2: {tp2} | SL: {sl}")
+        logger.info(f"[LIVE OPEN LONG ({strategy_tag})] @ {close_p:.2f} | TP1: {tp1} | TP2: {tp2} | SL: {sl}")
 
-    # ĐIỀU KIỆN SHORT: Xu hướng Giảm (Close < EMA) + Hồi phục chạm dải trên + RSI hồi quy
-    elif close_p < ema_1h and close_p >= upper_bb and rsi >= state.quant_agent.rsi_high:
+    # 2. ĐIỀU KIỆN SHORT (Dual A+ Sniper):
+    # Nhánh 1: Bắt đỉnh sóng hồi sâu (Deep Peak): Giá >= BB Trên & RSI >= 55
+    # Nhánh 2: Bắt nhịp hồi tiếp diễn sóng giảm (SMA 20 Pullback): Giá >= SMA 20 & RSI >= 48
+    is_short_deep_peak = (close_p >= upper_bb and rsi >= state.quant_agent.rsi_high)
+    is_short_sma_pullback = (close_p >= sma_bb * 0.999 and rsi >= 48.0 and close_p < upper_bb)
+
+    if (not state.active_position) and close_p < ema_1h and (is_short_deep_peak or is_short_sma_pullback):
+        strategy_tag = "DEEP PEAK" if is_short_deep_peak else "SMA 20 PULLBACK"
         size, margin, est_risk = compute_smart_order_sizing(
             balance=state.balance,
             close_p=close_p,
@@ -876,6 +890,7 @@ def check_live_entry_signal():
             "tp2": tp2,
             "tp1_hit": False,
             "open_time": now_str,
+            "strategy": strategy_tag,
             "unrealized_pnl": 0.0,
             "pnl_pct": 0.0
         }
@@ -887,14 +902,14 @@ def check_live_entry_signal():
             
         state.trades.insert(0, {
             "time": now_str,
-            "action": "VÀO LỆNH SHORT" + (" [BINGX LIVE]" if state.mode == "LIVE TRADING" else ""),
+            "action": f"VÀO LỆNH SHORT [{strategy_tag}]" + (" [BINGX LIVE]" if state.mode == "LIVE TRADING" else ""),
             "price": close_p,
             "size": f"{size:.3f} oz",
             "pnl": f"-${fee:.2f} (Phí)",
             "balance": f"${state.balance:.2f}",
             "type": "OPEN"
         })
-        logger.info(f"[LIVE OPEN SHORT] @ {close_p:.2f} | TP1: {tp1} | TP2: {tp2} | SL: {sl}")
+        logger.info(f"[LIVE OPEN SHORT ({strategy_tag})] @ {close_p:.2f} | TP1: {tp1} | TP2: {tp2} | SL: {sl}")
 
 async def bingx_realtime_ws_listener():
     url = "wss://open-api-swap.bingx.com/swap-market"
@@ -1092,11 +1107,12 @@ def compute_wait_reason() -> Dict[str, Any]:
             "detail_text": f"Hiện tại {hour:02d}:{datetime.now().minute:02d} VN (phiên Á thanh khoản mỏng, tỷ lệ bẫy Stop Hunt quét 2 đầu cao). Bot chủ động né tránh bẫy!"
         }
 
-    # 9. Đang rình mồi thiết lập A+ (Stalking A+ Setup)
+    # 9. Đang rình mồi thiết lập Dual A+ (Stalking Dual A+ Setup)
     p = state.latest_price
     ema = state.indicators.get("ema_1h", p)
     upper_bb = state.indicators.get("upper_bb", p)
     lower_bb = state.indicators.get("lower_bb", p)
+    sma_bb = state.indicators.get("sma_bb", (upper_bb + lower_bb) / 2.0)
     rsi = state.indicators.get("rsi", 50.0)
 
     is_long_trend = p > ema
@@ -1104,35 +1120,37 @@ def compute_wait_reason() -> Dict[str, Any]:
 
     if is_long_trend:
         trend_name = "LONG"
-        if p > lower_bb:
-            dist = p - lower_bb
-            missing_conds.append(f"Chưa chạm BB Dưới (${lower_bb:,.1f}, còn cách ${dist:,.1f})")
-        if rsi > state.quant_agent.rsi_low:
-            missing_conds.append(f"RSI đang {rsi:.1f} (cần về <= {state.quant_agent.rsi_low})")
+        dist_sma = max(0.0, p - sma_bb)
+        dist_lower = max(0.0, p - lower_bb)
+        if p > sma_bb * 1.001:
+            missing_conds.append(f"Chờ hồi SMA 20 (${sma_bb:,.1f}, cách ${dist_sma:,.1f}) hoặc BB Dưới (${lower_bb:,.1f})")
+        if rsi > 52.0:
+            missing_conds.append(f"RSI đang {rsi:.1f} (cần nguội về <= 52.0)")
     else:
         trend_name = "SHORT"
-        if p < upper_bb:
-            dist = upper_bb - p
-            missing_conds.append(f"Chưa chạm BB Trên (${upper_bb:,.1f}, còn cách ${dist:,.1f})")
-        if rsi < state.quant_agent.rsi_high:
-            missing_conds.append(f"RSI đang {rsi:.1f} (cần lên >= {state.quant_agent.rsi_high})")
+        dist_sma = max(0.0, sma_bb - p)
+        dist_upper = max(0.0, upper_bb - p)
+        if p < sma_bb * 0.999:
+            missing_conds.append(f"Chờ hồi SMA 20 (${sma_bb:,.1f}, cách ${dist_sma:,.1f}) hoặc BB Trên (${upper_bb:,.1f})")
+        if rsi < 48.0:
+            missing_conds.append(f"RSI đang {rsi:.1f} (cần hồi lên >= 48.0)")
 
     if missing_conds:
         reasons_str = " | ".join(missing_conds)
         return {
             "code": "WAITING_SETUP",
-            "status_text": f"ĐANG RÌNH MỒI (ƯU TIÊN {trend_name})",
+            "status_text": f"ĐANG RÌNH MỒI DUAL A+ (ƯU TIÊN {trend_name})",
             "badge_color": "#f0ad4e",
             "icon": "fa-hourglass-half",
-            "detail_text": f"Sóng lớn {trend_name} (Giá {'>' if is_long_trend else '<'} EMA 300). Đang đợi: {reasons_str}. AI kiên định chờ nến hoàn hảo!"
+            "detail_text": f"Sóng lớn {trend_name} (Giá {'>' if is_long_trend else '<'} EMA 300). Đang đợi: {reasons_str}. AI Dual A+ sẵn sàng bóp cò!"
         }
     else:
         return {
             "code": "FIRING",
-            "status_text": f"HỘI TỤ 3/3 {trend_name} - KHAI HỎA!",
+            "status_text": f"HỘI TỤ TÍN HIỆU DUAL A+ {trend_name} - KHAI HỎA!",
             "badge_color": "#0ecb81",
             "icon": "fa-bolt",
-            "detail_text": f"Tất cả điều kiện {trend_name} đã hội tụ đầy đủ. Hệ thống đang tiến hành mở lệnh!"
+            "detail_text": f"Tín hiệu Dual A+ {trend_name} (SMA 20 Pullback / Deep Reversal) đã hội tụ đầy đủ. Hệ thống đang tiến hành mở lệnh!"
         }
 
 def get_full_state_payload() -> Dict[str, Any]:
@@ -1151,6 +1169,12 @@ def get_full_state_payload() -> Dict[str, Any]:
         max_margin_pct=state.max_margin_pct
     )
     
+    upper_bb = state.indicators.get("upper_bb", cur_p)
+    lower_bb = state.indicators.get("lower_bb", cur_p)
+    sma_bb = state.indicators.get("sma_bb", (upper_bb + lower_bb) / 2.0)
+    rsi_val = state.indicators.get("rsi", 50.0)
+    ema_val = state.indicators.get("ema_1h", cur_p)
+
     return {
         "symbol": state.symbol,
         "mode": state.mode,
@@ -1195,12 +1219,12 @@ def get_full_state_payload() -> Dict[str, Any]:
         "radar": {
             "heartbeat": datetime.now().strftime("%H:%M:%S"),
             "wait_reason": wait_reason,
-            "cond_trend_long": state.latest_price > state.indicators.get("ema_1h", state.latest_price),
-            "cond_bb_long": state.latest_price <= state.indicators.get("lower_bb", state.latest_price),
-            "cond_rsi_long": state.indicators.get("rsi", 50.0) <= 45.0,
-            "cond_trend_short": state.latest_price < state.indicators.get("ema_1h", state.latest_price),
-            "cond_bb_short": state.latest_price >= state.indicators.get("upper_bb", state.latest_price),
-            "cond_rsi_short": state.indicators.get("rsi", 50.0) >= 55.0,
+            "cond_trend_long": cur_p > ema_val,
+            "cond_bb_long": cur_p <= sma_bb * 1.001,
+            "cond_rsi_long": rsi_val <= 52.0,
+            "cond_trend_short": cur_p < ema_val,
+            "cond_bb_short": cur_p >= sma_bb * 0.999,
+            "cond_rsi_short": rsi_val >= 48.0,
             "daily_trades": state.quant_agent.daily_trades_count,
             "max_trades": state.quant_agent.max_daily_trades,
             "daily_losses": state.quant_agent.daily_losses_count,

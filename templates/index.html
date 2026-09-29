@@ -889,10 +889,10 @@
             <!-- Điều kiện 2 -->
             <div class="radar-condition-box" id="radar-box-bb">
               <div class="radar-cond-header">
-                <span class="cond-step">2</span> Điểm Tựa Giá Cực Trị (BB 20, 2)
+                <span class="cond-step">2</span> Điểm Tựa Dual A+ (SMA 20 / BB 20)
               </div>
               <div class="radar-cond-status" id="radar-stat-bb">ĐANG QUÉT...</div>
-              <div class="radar-cond-desc" id="radar-desc-bb">Chạm Upper / Lower Band</div>
+              <div class="radar-cond-desc" id="radar-desc-bb">Hồi SMA 20 hoặc BB Dưới/Trên</div>
             </div>
             <!-- Điều kiện 3 -->
             <div class="radar-condition-box" id="radar-box-rsi">
@@ -900,7 +900,7 @@
                 <span class="cond-step">3</span> Động Lượng Đảo Chiều (RSI 14)
               </div>
               <div class="radar-cond-status" id="radar-stat-rsi">ĐANG ĐO...</div>
-              <div class="radar-cond-desc" id="radar-desc-rsi">Mục tiêu: &lt;= 45 (Long) hoặc &gt;= 55 (Short)</div>
+              <div class="radar-cond-desc" id="radar-desc-rsi">Mục tiêu: &lt;= 52 (Long) hoặc &gt;= 48 (Short)</div>
             </div>
             <!-- Tổng kết tâm trí AI -->
             <div class="radar-condition-box" id="radar-box-verdict" style="border-left: 2px solid #2563eb;">
@@ -1741,22 +1741,27 @@
           elTrendDesc.innerText = 'Giá ($' + d.latest_price.toFixed(1) + ') ' + (isLongTrend ? '>' : '<') + ' EMA 1h ($' + (d.indicators.ema_1h||0).toFixed(1) + ')';
         }
 
-        // 2. Bollinger Bands
+        // 2. Bollinger Bands & SMA 20 Pullback (Dual A+)
         const elBBStat = document.getElementById('radar-stat-bb');
         const elBBDesc = document.getElementById('radar-desc-bb');
+        const smaBB = d.indicators.sma_bb || ((d.indicators.upper_bb + d.indicators.lower_bb) / 2);
         if (elBBStat) {
           if (d.radar.cond_bb_long) {
-            elBBStat.innerHTML = '<span style="color:#0ecb81;"><i class="fas fa-check-circle"></i> CHẠM BB DƯỚI (A+)</span>';
+            const isDeep = d.latest_price <= (d.indicators.lower_bb || 0);
+            elBBStat.innerHTML = '<span style="color:#0ecb81;"><i class="fas fa-check-circle"></i> ' + (isDeep ? 'CHẠM BB DƯỚI (DEEP A+)' : 'CHẠM SMA 20 (TREND A+)') + '</span>';
           } else if (d.radar.cond_bb_short) {
-            elBBStat.innerHTML = '<span style="color:#f6465d;"><i class="fas fa-check-circle"></i> CHẠM BB TRÊN (A+)</span>';
+            const isDeep = d.latest_price >= (d.indicators.upper_bb || 0);
+            elBBStat.innerHTML = '<span style="color:#f6465d;"><i class="fas fa-check-circle"></i> ' + (isDeep ? 'CHẠM BB TRÊN (DEEP A+)' : 'CHẠM SMA 20 (TREND A+)') + '</span>';
           } else {
             elBBStat.innerHTML = '<span style="color:#8b949e;"><i class="fas fa-hourglass-half"></i> ĐANG RÌNH MỒI</span>';
           }
         }
         if (elBBDesc) {
-          const distLow = Math.abs(d.latest_price - (d.indicators.lower_bb || 0)).toFixed(1);
-          const distHigh = Math.abs(d.latest_price - (d.indicators.upper_bb || 0)).toFixed(1);
-          elBBDesc.innerText = 'Cách BB Dưới: ' + distLow + '$ | BB Trên: ' + distHigh + '$';
+          const distSMA = Math.abs(d.latest_price - smaBB).toFixed(1);
+          const distExt = isLongTrend 
+            ? Math.abs(d.latest_price - (d.indicators.lower_bb || 0)).toFixed(1)
+            : Math.abs(d.latest_price - (d.indicators.upper_bb || 0)).toFixed(1);
+          elBBDesc.innerText = 'Cách SMA 20: ' + distSMA + '$ | BB Cực trị: ' + distExt + '$';
         }
 
         // 3. RSI
@@ -1765,15 +1770,15 @@
         const rsi = d.indicators.rsi || 50.0;
         if (elRSIStat) {
           if (d.radar.cond_rsi_long) {
-            elRSIStat.innerHTML = '<span style="color:#0ecb81;"><i class="fas fa-check-circle"></i> QUÁ BÁN (' + rsi.toFixed(1) + ' <= 45)</span>';
+            elRSIStat.innerHTML = '<span style="color:#0ecb81;"><i class="fas fa-check-circle"></i> HẠ NHIỆT (' + rsi.toFixed(1) + ' <= 52)</span>';
           } else if (d.radar.cond_rsi_short) {
-            elRSIStat.innerHTML = '<span style="color:#f6465d;"><i class="fas fa-check-circle"></i> QUÁ MUA (' + rsi.toFixed(1) + ' >= 55)</span>';
+            elRSIStat.innerHTML = '<span style="color:#f6465d;"><i class="fas fa-check-circle"></i> HỒI PHỤC (' + rsi.toFixed(1) + ' >= 48)</span>';
           } else {
-            elRSIStat.innerHTML = '<span style="color:#8b949e;"><i class="fas fa-hourglass-half"></i> TRUNG TÍNH (' + rsi.toFixed(1) + ')</span>';
+            elRSIStat.innerHTML = '<span style="color:#8b949e;"><i class="fas fa-hourglass-half"></i> ĐỘNG LƯỢNG (' + rsi.toFixed(1) + ')</span>';
           }
         }
         if (elRSIDesc) {
-          elRSIDesc.innerText = 'Chờ RSI <= 45 (Long) hoặc >= 55 (Short)';
+          elRSIDesc.innerText = 'Mục tiêu: <= 52 (Long) hoặc >= 48 (Short)';
         }
 
         // 4. Verdict & Detailed Wait Reason
