@@ -176,7 +176,7 @@ def load_bingx_keys() -> Tuple[str, str]:
 class TradingEngineState:
     def __init__(self):
         self.symbol = "XAU_USDT"
-        self.mode = "LIVE TRADING"
+        self.mode = "DEMO (Paper Trading)"
         self.is_running = True
         self.initial_balance = 1000.0
         self.balance = 1000.0
@@ -1247,7 +1247,7 @@ class SetModeRequest(BaseModel):
     api_secret: Optional[str] = None
 
 @app.post("/api/set_mode")
-def api_set_mode(req: SetModeRequest):
+async def api_set_mode(req: SetModeRequest):
     if req.mode == "LIVE":
         key = (req.api_key or "").strip()
         secret = (req.api_secret or "").strip()
@@ -1297,6 +1297,11 @@ def api_set_mode(req: SetModeRequest):
         state.real_balance_synced = True
         
         logger.info(f"[LIVE MODE ACTIVATED] Số dư đồng bộ từ BingX: ${bal:,.2f} USDT")
+        try:
+            await manager.broadcast(get_full_state_payload())
+        except Exception:
+            pass
+            
         return JSONResponse({
             "status": "success",
             "mode": "LIVE TRADING",
@@ -1317,6 +1322,12 @@ def api_set_mode(req: SetModeRequest):
         state.is_alive = True
         state.death_reason = None
         state.real_balance_synced = False
+        
+        try:
+            await manager.broadcast(get_full_state_payload())
+        except Exception:
+            pass
+            
         return JSONResponse({
             "status": "success",
             "mode": "DEMO (Paper Trading)",
@@ -1325,7 +1336,7 @@ def api_set_mode(req: SetModeRequest):
         })
 
 @app.post("/api/sync_balance")
-def api_sync_balance():
+async def api_sync_balance():
     if state.mode != "LIVE TRADING" or not state.bingx_client:
         return JSONResponse({
             "status": "not_live",
@@ -1335,6 +1346,10 @@ def api_sync_balance():
         })
     ok, bal, eq, msg = sync_live_balance()
     if ok:
+        try:
+            await manager.broadcast(get_full_state_payload())
+        except Exception:
+            pass
         return JSONResponse({
             "status": "success",
             "balance": bal,
