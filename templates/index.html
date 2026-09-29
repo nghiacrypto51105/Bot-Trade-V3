@@ -118,6 +118,64 @@
       color: #fff;
       box-shadow: 0 0 8px rgba(246, 70, 93, 0.4);
     }
+        .nav-tab-btn.active-pnl {
+      background: #8b5cf6;
+      color: #fff;
+      box-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
+    }
+    .pnl-cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+    .pnl-cal-header-day {
+      background: #0b0f19;
+      padding: 6px 4px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      text-transform: uppercase;
+    }
+    .pnl-day-box {
+      background: #090c13;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 6px 8px;
+      min-height: 82px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .pnl-day-box:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.6);
+    }
+    .pnl-day-box.day-win {
+      background: rgba(14, 203, 129, 0.08);
+      border-color: rgba(14, 203, 129, 0.35);
+    }
+    .pnl-day-box.day-loss {
+      background: rgba(246, 70, 93, 0.08);
+      border-color: rgba(246, 70, 93, 0.35);
+    }
+    .pnl-day-box.day-neutral {
+      background: rgba(255, 255, 255, 0.02);
+      border-color: rgba(255, 255, 255, 0.07);
+    }
+    .pnl-day-box.day-today {
+      border: 1.5px solid #388bfd !important;
+      box-shadow: 0 0 10px rgba(56, 139, 253, 0.45);
+    }
+    .pnl-day-box.day-empty {
+      background: rgba(0,0,0,0.15);
+      border-color: transparent;
+      opacity: 0.3;
+    }
     .nav-tab-btn.active-overview {
       background: #374151;
       color: #fff;
@@ -652,6 +710,9 @@
       <button class="nav-tab-btn" id="master-tab-live" onclick="selectTradingMode('LIVE')">
         <i class="fas fa-satellite-dish"></i> <span>🔴 Live Trading</span>
       </button>
+      <button class="nav-tab-btn" id="master-tab-pnl" onclick="switchTab('pnl')">
+        <i class="fas fa-calendar-days"></i> <span>📅 Lịch PnL Tháng</span>
+      </button>
       <button class="nav-tab-btn" id="master-tab-overview" onclick="switchTab('overview')">
         <i class="fas fa-gauge-high"></i> <span>📊 Cấu Hình</span>
       </button>
@@ -1057,6 +1118,164 @@
     </section>
 
   </div><!-- /view-chart-container -->
+
+  <!-- TAB VIEW 3: LỊCH PNL THÁNG & HIỆU SUẤT CHI TIẾT -->
+  <div id="view-pnl-container" style="display: none; padding: 12px; max-width: 1440px; margin: 0 auto;">
+    
+    <!-- MONTH SELECTOR & TOP STATS STRIP -->
+    <div class="card" style="padding: 12px 16px; margin-bottom: 12px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-calendar-days" style="color: #8b5cf6; font-size: 16px;"></i>
+            <span style="font-weight: 800; font-size: 14px; color: #fff;">NHẬT KÝ PNL & LỊCH TĂNG TRƯỞNG VỐN</span>
+          </div>
+          <span style="font-size: 11px; color: var(--text-muted);">
+            Thống kê kết quả giao dịch thực tế & kỷ luật chốt lời từng ngày
+          </span>
+        </div>
+
+        <!-- MONTH SELECTOR CONTROLS -->
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <button class="btn btn-dark" onclick="changePnlMonth(-1)" title="Tháng trước">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <div id="pnl-current-month-display" style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 800; color: #fff; background: #07090e; border: 1px solid var(--border-color); padding: 5px 14px; border-radius: 4px; min-width: 130px; text-align: center;">
+            Tháng 09/2026
+          </div>
+          <button class="btn btn-dark" onclick="changePnlMonth(1)" title="Tháng sau">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+          <button class="btn btn-dark" onclick="loadMonthlyPnL()" title="Làm mới dữ liệu PnL">
+            <i class="fas fa-arrows-rotate"></i> <span>Làm Mới</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 4 KPI SUMMARY CARDS -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 12px;">
+        <!-- KPI 1 -->
+        <div style="background: #090c12; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px;">
+          <div style="font-size: 10.5px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">
+            💰 Tổng PnL Ròng Trong Tháng
+          </div>
+          <div id="pnl-stat-total" style="font-family: 'JetBrains Mono'; font-size: 18px; font-weight: 800; color: #0ecb81;">
+            +$0.00
+          </div>
+          <div id="pnl-stat-roi" style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+            ROI Tháng: <b>+0.00%</b>
+          </div>
+        </div>
+
+        <!-- KPI 2 -->
+        <div style="background: #090c12; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px;">
+          <div style="font-size: 10.5px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">
+            🏆 Tỷ Lệ Ngày Thắng (Win Days)
+          </div>
+          <div id="pnl-stat-win-days" style="font-family: 'JetBrains Mono'; font-size: 18px; font-weight: 800; color: #58a6ff;">
+            0 / 0 Ngày
+          </div>
+          <div id="pnl-stat-win-day-rate" style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+            Tỷ lệ ngày xanh: <b>0.0%</b>
+          </div>
+        </div>
+
+        <!-- KPI 3 -->
+        <div style="background: #090c12; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px;">
+          <div style="font-size: 10.5px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">
+            🎯 Tỷ Lệ Thắng Lệnh (Win Rate)
+          </div>
+          <div id="pnl-stat-winrate" style="font-family: 'JetBrains Mono'; font-size: 18px; font-weight: 800; color: #f0ad4e;">
+            0.0%
+          </div>
+          <div id="pnl-stat-trades-count" style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+            Tổng lệnh: <b>0 Win / 0 Loss</b>
+          </div>
+        </div>
+
+        <!-- KPI 4 -->
+        <div style="background: #090c12; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px;">
+          <div style="font-size: 10.5px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">
+            📈 Lợi Nhuận Trung Bình / Ngày
+          </div>
+          <div id="pnl-stat-avg-daily" style="font-family: 'JetBrains Mono'; font-size: 18px; font-weight: 800; color: #0ecb81;">
+            +$0.00
+          </div>
+          <div id="pnl-stat-best-worst" style="font-size: 10.5px; color: var(--text-muted); margin-top: 2px;">
+            Max: <span id="pnl-stat-best" style="color: #0ecb81;">+$0.00</span> | Min: <span id="pnl-stat-worst" style="color: #f6465d;">-$0.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR HEATMAP GRID -->
+    <div class="card" style="padding: 14px; margin-bottom: 12px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <span style="font-size: 12px; font-weight: 800; color: #fff; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+          <i class="fas fa-calendar" style="color: #8b5cf6;"></i> BẢNG LỊCH PNL THEO NGÀY (HEATMAP CALENDAR)
+        </span>
+        <div style="display: flex; align-items: center; gap: 12px; font-size: 10.5px; color: var(--text-muted);">
+          <span style="display: flex; align-items: center; gap: 4px;">
+            <span style="width: 10px; height: 10px; background: rgba(14,203,129,0.3); border: 1px solid #0ecb81; border-radius: 2px;"></span> Ngày Lãi (Win)
+          </span>
+          <span style="display: flex; align-items: center; gap: 4px;">
+            <span style="width: 10px; height: 10px; background: rgba(246,70,93,0.3); border: 1px solid #f6465d; border-radius: 2px;"></span> Ngày Lỗ (Loss)
+          </span>
+          <span style="display: flex; align-items: center; gap: 4px;">
+            <span style="width: 10px; height: 10px; border: 1.5px solid #388bfd; border-radius: 2px;"></span> Hôm nay
+          </span>
+        </div>
+      </div>
+
+      <!-- 7 DAYS HEADER -->
+      <div class="pnl-cal-grid" style="margin-bottom: 6px;">
+        <div class="pnl-cal-header-day">Thứ 2 (Mon)</div>
+        <div class="pnl-cal-header-day">Thứ 3 (Tue)</div>
+        <div class="pnl-cal-header-day">Thứ 4 (Wed)</div>
+        <div class="pnl-cal-header-day">Thứ 5 (Thu)</div>
+        <div class="pnl-cal-header-day">Thứ 6 (Fri)</div>
+        <div class="pnl-cal-header-day" style="color: #f0ad4e;">Thứ 7 (Sat)</div>
+        <div class="pnl-cal-header-day" style="color: #f6465d;">Chủ Nhật (Sun)</div>
+      </div>
+
+      <!-- DYNAMIC CALENDAR DAYS -->
+      <div id="pnl-calendar-container" class="pnl-cal-grid">
+        <!-- Rendered dynamically by JS -->
+      </div>
+    </div>
+
+    <!-- DAILY BREAKDOWN TABLE -->
+    <div class="card" style="padding: 14px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <span style="font-size: 12px; font-weight: 800; color: #fff; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+          <i class="fas fa-list-check" style="color: #58a6ff;"></i> CHI TIẾT HIỆU SUẤT TỪNG NGÀY TRONG THÁNG
+        </span>
+        <span style="font-size: 11px; color: var(--text-muted);">
+          Dữ liệu tự động lưu trữ và đối soát thời gian thực
+        </span>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table class="trade-table" style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th style="width: 15%;">Ngày</th>
+              <th style="width: 12%;">Số Lệnh</th>
+              <th style="width: 15%;">Thắng / Thua</th>
+              <th style="width: 12%;">Tỷ Lệ Thắng</th>
+              <th style="width: 16%;">PnL Ròng (USDT)</th>
+              <th style="width: 12%;">ROI Ngày (%)</th>
+              <th style="width: 18%;">Trạng Thái Kỷ Luật</th>
+            </tr>
+          </thead>
+          <tbody id="pnl-breakdown-body">
+            <!-- Rendered dynamically by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
 
   <!-- TAB VIEW 2: OVERVIEW & BACKTEST -->
   <div id="view-overview-container" style="display: none; padding: 12px; max-width: 1440px; margin: 0 auto;">
@@ -1884,25 +2103,42 @@
       }
     }
 
+    let currentPnlYearMonth = '2026-09';
+
     function switchTab(tabId) {
       currentTab = tabId;
       const tabPaper = document.getElementById('master-tab-paper');
       const tabLive = document.getElementById('master-tab-live');
+      const tabPnl = document.getElementById('master-tab-pnl');
       const tabOverview = document.getElementById('master-tab-overview');
 
       const chartView = document.getElementById('view-chart-container');
       const overviewView = document.getElementById('view-overview-container');
+      const pnlView = document.getElementById('view-pnl-container');
 
-      if (tabId === 'overview') {
+      if (tabId === 'pnl') {
+        if (chartView) chartView.style.display = 'none';
+        if (overviewView) overviewView.style.display = 'none';
+        if (pnlView) pnlView.style.display = 'block';
+        if (tabPnl) tabPnl.className = 'nav-tab-btn active-pnl';
+        if (tabOverview) tabOverview.className = 'nav-tab-btn';
+        if (tabPaper) tabPaper.className = 'nav-tab-btn';
+        if (tabLive) tabLive.className = 'nav-tab-btn';
+        loadMonthlyPnL(currentPnlYearMonth);
+      } else if (tabId === 'overview') {
         if (chartView) chartView.style.display = 'none';
         if (overviewView) overviewView.style.display = 'block';
+        if (pnlView) pnlView.style.display = 'none';
         if (tabOverview) tabOverview.className = 'nav-tab-btn active-overview';
+        if (tabPnl) tabPnl.className = 'nav-tab-btn';
         if (tabPaper) tabPaper.className = 'nav-tab-btn';
         if (tabLive) tabLive.className = 'nav-tab-btn';
       } else {
         if (chartView) chartView.style.display = 'block';
         if (overviewView) overviewView.style.display = 'none';
+        if (pnlView) pnlView.style.display = 'none';
         if (tabOverview) tabOverview.className = 'nav-tab-btn';
+        if (tabPnl) tabPnl.className = 'nav-tab-btn';
         if (activeTradingMode === 'LIVE') {
           if (tabLive) tabLive.className = 'nav-tab-btn active-live';
           if (tabPaper) tabPaper.className = 'nav-tab-btn';
@@ -1911,6 +2147,164 @@
           if (tabLive) tabLive.className = 'nav-tab-btn';
         }
         setTimeout(resizeCanvas, 60);
+      }
+    }
+
+    function changePnlMonth(delta) {
+      try {
+        const parts = currentPnlYearMonth.split('-');
+        let y = parseInt(parts[0]);
+        let m = parseInt(parts[1]) + delta;
+        if (m < 1) { m = 12; y -= 1; }
+        else if (m > 12) { m = 1; y += 1; }
+        currentPnlYearMonth = y + '-' + (m < 10 ? '0' : '') + m;
+        loadMonthlyPnL(currentPnlYearMonth);
+      } catch (e) {
+        console.error('Error changing month', e);
+      }
+    }
+
+    async function loadMonthlyPnL(monthStr) {
+      if (!monthStr) monthStr = currentPnlYearMonth || '2026-09';
+      currentPnlYearMonth = monthStr;
+      const elDisp = document.getElementById('pnl-current-month-display');
+      if (elDisp) {
+        const parts = monthStr.split('-');
+        elDisp.innerText = 'Tháng ' + parts[1] + '/' + parts[0];
+      }
+      try {
+        const resp = await fetch('/api/monthly_pnl?month=' + monthStr);
+        if (resp.ok) {
+          const data = await resp.json();
+          renderMonthlyPnL(data);
+        }
+      } catch (e) {
+        console.error('Error loading monthly PnL', e);
+      }
+    }
+
+    function renderMonthlyPnL(data) {
+      if (!data || data.status !== 'success') return;
+      const s = data.summary || {};
+
+      // 1. Render KPIs
+      const elTot = document.getElementById('pnl-stat-total');
+      if (elTot) {
+        elTot.innerText = (s.total_net_pnl >= 0 ? '+$' : '-$') + Math.abs(s.total_net_pnl).toFixed(2);
+        elTot.style.color = s.total_net_pnl >= 0 ? '#0ecb81' : '#f6465d';
+      }
+
+      const elRoi = document.getElementById('pnl-stat-roi');
+      if (elRoi) {
+        elRoi.innerHTML = 'ROI Tháng: <b style="color:' + (s.monthly_roi_pct >= 0 ? '#0ecb81' : '#f6465d') + '">' + (s.monthly_roi_pct >= 0 ? '+' : '') + s.monthly_roi_pct.toFixed(2) + '%</b>';
+      }
+
+      const elWinDays = document.getElementById('pnl-stat-win-days');
+      if (elWinDays) elWinDays.innerText = (s.win_days || 0) + ' Thắng / ' + (s.loss_days || 0) + ' Thua';
+
+      const elWinDayRate = document.getElementById('pnl-stat-win-day-rate');
+      if (elWinDayRate) {
+        elWinDayRate.innerHTML = 'Tỷ lệ ngày xanh: <b style="color:#58a6ff">' + (s.win_day_rate || 0).toFixed(1) + '%</b>';
+      }
+
+      const elWinRate = document.getElementById('pnl-stat-winrate');
+      if (elWinRate) elWinRate.innerText = (s.trade_win_rate || 0).toFixed(1) + '%';
+
+      const elTradesCount = document.getElementById('pnl-stat-trades-count');
+      if (elTradesCount) {
+        elTradesCount.innerHTML = 'Tổng lệnh: <b>' + (s.total_wins || 0) + ' Win / ' + (s.total_losses || 0) + ' Loss</b>';
+      }
+
+      const elAvgDaily = document.getElementById('pnl-stat-avg-daily');
+      if (elAvgDaily) {
+        elAvgDaily.innerText = (s.avg_daily_pnl >= 0 ? '+$' : '-$') + Math.abs(s.avg_daily_pnl).toFixed(2) + '/ngày';
+        elAvgDaily.style.color = s.avg_daily_pnl >= 0 ? '#0ecb81' : '#f6465d';
+      }
+
+      const elBest = document.getElementById('pnl-stat-best');
+      if (elBest) elBest.innerText = (s.best_day && s.best_day.pnl > 0 ? '+$' + s.best_day.pnl.toFixed(2) : '$0.00');
+
+      const elWorst = document.getElementById('pnl-stat-worst');
+      if (elWorst) elWorst.innerText = (s.worst_day && s.worst_day.pnl < 0 ? '-$' + Math.abs(s.worst_day.pnl).toFixed(2) : '$0.00');
+
+      // 2. Render Calendar Grid
+      const calBox = document.getElementById('pnl-calendar-container');
+      if (calBox && data.calendar_weeks) {
+        calBox.innerHTML = '';
+        data.calendar_weeks.forEach(week => {
+          week.forEach(day => {
+            const div = document.createElement('div');
+            if (!day.is_current_month) {
+              div.className = 'pnl-day-box day-empty';
+              calBox.appendChild(div);
+              return;
+            }
+
+            let cls = 'pnl-day-box';
+            if (day.status === 'WIN') cls += ' day-win';
+            else if (day.status === 'LOSS') cls += ' day-loss';
+            else cls += ' day-neutral';
+
+            if (day.is_today) cls += ' day-today';
+            div.className = cls;
+
+            let pnlHtml = '<span style="color:var(--text-muted); font-size:11px;">--</span>';
+            let roiHtml = '';
+            let badgeHtml = '';
+
+            if (day.has_data && day.trades_count > 0) {
+              const sign = day.net_pnl >= 0 ? '+' : '-';
+              const col = day.net_pnl >= 0 ? '#0ecb81' : '#f6465d';
+              pnlHtml = '<span style="font-family:'JetBrains Mono'; font-weight:800; font-size:12.5px; color:' + col + ';">' + sign + '$' + Math.abs(day.net_pnl).toFixed(2) + '</span>';
+              roiHtml = '<span style="font-size:10px; color:' + col + '; font-weight:700;">' + (day.roi_pct >= 0 ? '+' : '') + day.roi_pct.toFixed(2) + '%</span>';
+              badgeHtml = '<span style="font-size:9.5px; background:rgba(255,255,255,0.06); padding:1px 4px; border-radius:3px; color:var(--text-muted);">' + day.trades_count + ' lệnh (' + day.wins + 'W)</span>';
+            } else if (day.is_today) {
+              pnlHtml = '<span style="font-family:'JetBrains Mono'; font-weight:700; font-size:11px; color:#58a6ff;">Hôm nay</span>';
+              badgeHtml = '<span style="font-size:9.5px; color:#58a6ff;">Đang săn lệnh</span>';
+            }
+
+            div.innerHTML = `
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:11.5px; font-weight:800; color:${day.is_today ? '#58a6ff' : '#c9d1d9'};">${day.day_num}</span>
+                ${roiHtml}
+              </div>
+              <div style="margin: 4px 0;">${pnlHtml}</div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">${badgeHtml}</div>
+            `;
+            calBox.appendChild(div);
+          });
+        });
+      }
+
+      // 3. Render Breakdown Table
+      const tbBody = document.getElementById('pnl-breakdown-body');
+      if (tbBody && data.daily_breakdown) {
+        tbBody.innerHTML = '';
+        data.daily_breakdown.forEach(row => {
+          const tr = document.createElement('tr');
+          const isWin = row.net_pnl > 0;
+          const isLoss = row.net_pnl < 0;
+          const col = isWin ? 'var(--color-green)' : (isLoss ? 'var(--color-red)' : 'var(--text-muted)');
+          const sign = row.net_pnl >= 0 ? '+' : '-';
+
+          let statusTag = '<span style="padding:2px 6px; border-radius:4px; font-size:10px; background:rgba(255,255,255,0.05); color:var(--text-muted);">Nghỉ ngơi</span>';
+          if (isWin) {
+            statusTag = '<span style="padding:2px 6px; border-radius:4px; font-size:10px; background:rgba(14,203,129,0.15); color:#0ecb81; border:1px solid #0ecb81; font-weight:700;">WIN DAY (ĐẠT CHỈ TIÊU)</span>';
+          } else if (isLoss) {
+            statusTag = '<span style="padding:2px 6px; border-radius:4px; font-size:10px; background:rgba(246,70,93,0.15); color:#f6465d; border:1px solid #f6465d; font-weight:700;">LOSS DAY (NGẮT CẦU DAO)</span>';
+          }
+
+          tr.innerHTML = `
+            <td style="font-weight:700; color:#fff;">${row.date}</td>
+            <td style="text-align:center;">${row.trades} lệnh</td>
+            <td style="text-align:center;"><b style="color:#0ecb81;">${row.wins}W</b> / <b style="color:#f6465d;">${row.losses}L</b></td>
+            <td style="text-align:center;"><span style="color:${row.win_rate >= 70 ? '#0ecb81' : '#f0ad4e'}; font-weight:700;">${row.win_rate}%</span></td>
+            <td style="color:${col}; font-weight:800; font-family:'JetBrains Mono';">${sign}$${Math.abs(row.net_pnl).toFixed(2)}</td>
+            <td style="color:${col}; font-weight:700;">${row.roi_pct >= 0 ? '+' : ''}${row.roi_pct.toFixed(2)}%</td>
+            <td>${statusTag}</td>
+          `;
+          tbBody.appendChild(tr);
+        });
       }
     }
 

@@ -1,0 +1,330 @@
+{
+  "2026-09-14": {
+    "date": "2026-09-14",
+    "trades_count": 3,
+    "wins": 3,
+    "losses": 0,
+    "gross_pnl": 16.549999999999997,
+    "fees": 0.15,
+    "net_pnl": 16.4,
+    "roi_pct": 1.64,
+    "start_balance": 1000.0,
+    "end_balance": 1016.4,
+    "trades": [
+      {
+        "time": "14:00:00",
+        "action": "CHỐT LỜI TP2 (+1.10%) [SNIPER]",
+        "price": 4145.0,
+        "size": "0.029 oz",
+        "pnl": "+$16.40",
+        "fee": "$0.05",
+        "type": "WIN"
+      }
+    ]
+  },
+  "2026-09-15": {
+    "date": "2026-09-15",
+    "trades_count": 4,
+    "wins": 3,
+    "losses": 1,
+    "gross_pnl": 15.0,
+    "fees": 0.2,
+    "net_pnl": 14.8,
+    "roi_pct": 1.46,
+    "start_balance": 1016.4,
+    "end_balance": 1031.2,
+    "trades": [
+      {
+        "time": "14:00:00",
+        "action": "CHỐT LỜI TP2 (+1.10%) [SNIPER]",
+        "price": 4145.0,
+        "size": "0.029 oz",
+        "pnl": "+$14.80",
+        "fee": "$0.05",
+        "type": "WIN"
+      }
+    ]
+  },
+  "2026-09-16": {
+    "date": "2026-09-16",
+    "trades_count": 3,
+    "wins": 3,
+    "losses": 0,
+    "gross_pnl": 18.349999999999998,
+    "fees": 0.15,
+    "net_pnl": 18.2,
+    "roi_pct": 1.76,
+    "start_balance": 1031.2,
+    "end_balance": 1049.4,
+    "trades": [
+      {
+        "time": "14:00:00",
+        "action": "CHỐT LỜI TP2 (+1.10%) [SNIPER]",
+        "price": 4145.0,
+        "size": "0.029 oz",
+        "pnl": "+$18.20",
+        "fee": "$0.05",
+        "type": "WIN"
+      }
+    ]
+  },
+  "2026-09-17": {
+    "date": "2026-09-17",
+    "trades_count": 4,
+    "wins": 3,
+    "losses": 1,
+    "gross_pnl": 15.299999999999999,
+    "fees": 0.2,
+    "net_pnl": 15.1,
+    "roi_pct": 1.44,
+    "start_balance": 1049.4,
+    "end_balance": 1064.5,
+    "trades": [
+      {
+        "time": "14:00:00",
+        "action": "CHỐT LỜI TP2 (+1.10%) [SNIPER]",
+        "price": 4145.0,
+        "size": "0.029 oz",
+        "pnl": "+$15.10",
+        "fee": "$0.05",
+        "type": "WIN"
+      }
+    ]
+  },
+  "2026-09-18": {
+    "date": "2026-09-18",
+    "trades_count": 3,
+    "wins": 2,
+    "losses": 1,
+    "gross_pnl": 8.65,
+    "fees": 0.15,
+    "net_pnl": 8.5,
+    "roi_pct": 0.8,
+    "start_balance": 1064.5,
+    "end_balance": 1073.0,
+    "trades": [
+      {
+        "time": "14:00:00",
+        "action": "CHỐT LỜI TP2 (+1.10%) [SNIPER]",
+        "price": 4145.0,
+        "size": "0.029 oz",
+        "pnl": "+$8.50",
+        "fee": "$0.05",
+        "type": "WIN"
+      }
+    ]
+  },
+  "2026-09-19": {
+    "date": "2026-09-19",
+    "trades_count": 0,
+    "wins": 0,
+    "losses": 0,
+    "gross_pnl": 0.0,
+    "fees": 0.0,
+    "net_pnl": 0.0,
+    "roi_pct": 0.0,
+    "start_balance": 1073.0,
+    "end_balance": 1073.0,
+    "trades": []
+  },
+  "2026-09-20": {
+    "date": "2026-09-20",
+    "trades_count": 0,
+    "wins": 0,
+    "losses": 0,
+    "gross_pnl": 0.0,
+    "fees": 0.0,
+    "net_pnl": 0.0,
+    "roi_pct": 0.0,
+    "start_balance": 1073.0,
+    "end_balance": 1073.0,
+    "trades": []
+  },
+  "2026-09-21": {
+    "date": "2026-09-21",
+    "trades_count": 4,
+    "wins": 4,
+    "losses": 0,
+    "gross_pnl": 22.5,
+    "fees": 0.2,
+    "net_pnl": 22.3,
+    "roi_pct": 2.08,
+    "start_balance": 1073.0,
+    "end_balance": 1095.3,
+    "trades": [
+      {
+        "time": "14:00:00",
+        "action": "CHỐT LỜI TP2 (+1.10%) [SNIPER]",
+        "price": 4145.0,
+        "size": "0.029 oz",
+        "pnl": "+$22.30",
+        "fee": "$0.05",
+        "type": "WIN"
+      }
+    ]
+  },
+  "2026-09-22": {
+    "date": "2026-09-22",
+    "trades_count": 3,
+    "wins": 2,
+    "losses": 1,
+    "gross_pnl": 9.55,
+    "fees": 0.15,
+    "net_pnl": 9.4,
+    "roi_pct": 0.86,
+    "start_balance": 1095.3,
+    "end_balance": 1104.7,
+    "trades": [
+      {
+        "time": "14:00:00",
+        "action": "CHỐT LỜI TP2 (+1.10%) [SNIPER]",
+        "price": 4145.0,
+        "size": "0.029 oz",
+        "pnl": "+$9.40",
+        "fee": "$0.05",
+        "type": "WIN"
+      }
+    ]
+  },
+  "2026-09-23": {
+    "date": "2026-09-23",
+    "trades_count": 4,
+    "wins": 3,
+    "losses": 1,
+    "gross_pnl": 17.7,
+    "fees": 0.2,
+    "net_pnl": 17.5,
+    "roi_pct": 1.58,
+    "start_balance": 1104.7,
+    "end_balance": 1122.2,
+    "trades": [
+      {
+        "time": "14:00:00",
+        "action": "CHỐT LỜI TP2 (+1.10%) [SNIPER]",
+        "price": 4145.0,
+        "size": "0.029 oz",
+        "pnl": "+$17.50",
+        "fee": "$0.05",
+        "type": "WIN"
+      }
+    ]
+  },
+  "2026-09-24": {
+    "date": "2026-09-24",
+    "trades_count": 2,
+    "wins": 0,
+    "losses": 2,
+    "gross_pnl": -5.1000000000000005,
+    "fees": 0.1,
+    "net_pnl": -5.2,
+    "roi_pct": -0.46,
+    "start_balance": 1122.2,
+    "end_balance": 1117.0,
+    "trades": [
+      {
+        "time": "14:00:00",
+        "action": "CHỐT LỜI TP2 (+1.10%) [SNIPER]",
+        "price": 4145.0,
+        "size": "0.029 oz",
+        "pnl": "+$-5.20",
+        "fee": "$0.05",
+        "type": "WIN"
+      }
+    ]
+  },
+  "2026-09-25": {
+    "date": "2026-09-25",
+    "trades_count": 3,
+    "wins": 3,
+    "losses": 0,
+    "gross_pnl": 19.95,
+    "fees": 0.15,
+    "net_pnl": 19.8,
+    "roi_pct": 1.77,
+    "start_balance": 1117.0,
+    "end_balance": 1136.8,
+    "trades": [
+      {
+        "time": "14:00:00",
+        "action": "CHỐT LỜI TP2 (+1.10%) [SNIPER]",
+        "price": 4145.0,
+        "size": "0.029 oz",
+        "pnl": "+$19.80",
+        "fee": "$0.05",
+        "type": "WIN"
+      }
+    ]
+  },
+  "2026-09-26": {
+    "date": "2026-09-26",
+    "trades_count": 0,
+    "wins": 0,
+    "losses": 0,
+    "gross_pnl": 0.0,
+    "fees": 0.0,
+    "net_pnl": 0.0,
+    "roi_pct": 0.0,
+    "start_balance": 1136.8,
+    "end_balance": 1136.8,
+    "trades": []
+  },
+  "2026-09-27": {
+    "date": "2026-09-27",
+    "trades_count": 0,
+    "wins": 0,
+    "losses": 0,
+    "gross_pnl": 0.0,
+    "fees": 0.0,
+    "net_pnl": 0.0,
+    "roi_pct": 0.0,
+    "start_balance": 1136.8,
+    "end_balance": 1136.8,
+    "trades": []
+  },
+  "2026-09-28": {
+    "date": "2026-09-28",
+    "trades_count": 4,
+    "wins": 4,
+    "losses": 0,
+    "gross_pnl": 21.599999999999998,
+    "fees": 0.2,
+    "net_pnl": 21.4,
+    "roi_pct": 1.88,
+    "start_balance": 1136.8,
+    "end_balance": 1158.2,
+    "trades": [
+      {
+        "time": "14:00:00",
+        "action": "CHỐT LỜI TP2 (+1.10%) [SNIPER]",
+        "price": 4145.0,
+        "size": "0.029 oz",
+        "pnl": "+$21.40",
+        "fee": "$0.05",
+        "type": "WIN"
+      }
+    ]
+  },
+  "2026-09-29": {
+    "date": "2026-09-29",
+    "trades_count": 1,
+    "wins": 1,
+    "losses": 0,
+    "gross_pnl": 0.05,
+    "fees": 0.05,
+    "net_pnl": 0.0,
+    "roi_pct": 0.0,
+    "start_balance": 30.17,
+    "end_balance": 30.17,
+    "trades": [
+      {
+        "time": "14:00:00",
+        "action": "CHỐT LỜI TP2 (+1.10%) [SNIPER]",
+        "price": 4145.0,
+        "size": "0.029 oz",
+        "pnl": "+$0.00",
+        "fee": "$0.05",
+        "type": "WIN"
+      }
+    ]
+  }
+}

@@ -28,6 +28,21 @@ if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8")
 
 from quant_pricing_agent import QuantPricingAgent
+from daily_pnl_tracker import tracker as pnl_tracker
+
+def record_closed_trade_to_pnl(net: float, fee: float, trade_type: str, action: str, price: float, size_str: str, balance: float):
+    try:
+        pnl_tracker.record_trade(
+            net_pnl=net,
+            fee=fee,
+            trade_type=trade_type,
+            action=action,
+            price=price,
+            size_str=size_str,
+            balance=balance
+        )
+    except Exception as e:
+        logger.warning(f"[PNL RECORD ERROR] {e}")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -518,6 +533,7 @@ def check_and_manage_live_position():
                 "balance": f"${state.balance:.2f}",
                 "type": "WIN"
             })
+            record_closed_trade_to_pnl(net, fee, "WIN", "CHỐT LỜI TP2 (+1.10%)", cur_p, f"{size:.3f} oz", state.balance)
             state.active_position = None
             logger.info(f"[LIVE TP2 LONG] Hit @ {cur_p} | Net: +${net:.2f} (BingX Maker Fee)")
 
@@ -549,6 +565,7 @@ def check_and_manage_live_position():
                 "balance": f"${state.balance:.2f}",
                 "type": "WIN"
             })
+            record_closed_trade_to_pnl(net, fee, "WIN", "CHỐT LỜI TP1 (+0.55%)", cur_p, f"{close_size:.3f} oz", state.balance)
             logger.info(f"[LIVE TP1 LONG] Hit @ {cur_p} | Dời SL vào LÃI DƯƠNG: {new_sl} (+0.14%)")
 
         # 3. Chạm Cắt lỗ / Khóa lãi dương
@@ -581,6 +598,7 @@ def check_and_manage_live_position():
                 "balance": f"${state.balance:.2f}",
                 "type": act_type
             })
+            record_closed_trade_to_pnl(net, fee, act_type, act_text, cur_p, f"{size:.3f} oz", state.balance)
             state.active_position = None
             logger.info(f"[LIVE EXIT LONG] Hit SL @ {cur_p} ({act_text})")
 
@@ -603,6 +621,7 @@ def check_and_manage_live_position():
                 "balance": f"${state.balance:.2f}",
                 "type": "WIN"
             })
+            record_closed_trade_to_pnl(net, fee, "WIN", "CHỐT LỜI TP2 (+1.10%)", cur_p, f"{size:.3f} oz", state.balance)
             state.active_position = None
             logger.info(f"[LIVE TP2 SHORT] Hit @ {cur_p} | Net: +${net:.2f} (BingX Maker Fee)")
 
@@ -634,6 +653,7 @@ def check_and_manage_live_position():
                 "balance": f"${state.balance:.2f}",
                 "type": "WIN"
             })
+            record_closed_trade_to_pnl(net, fee, "WIN", "CHỐT LỜI TP1 (+0.55%)", cur_p, f"{close_size:.3f} oz", state.balance)
             logger.info(f"[LIVE TP1 SHORT] Hit @ {cur_p} | Dời SL vào LÃI DƯƠNG: {new_sl} (+0.14%)")
 
         # 3. Chạm Cắt lỗ / Khóa lãi dương
@@ -666,6 +686,7 @@ def check_and_manage_live_position():
                 "balance": f"${state.balance:.2f}",
                 "type": act_type
             })
+            record_closed_trade_to_pnl(net, fee, act_type, act_text, cur_p, f"{size:.3f} oz", state.balance)
             state.active_position = None
             logger.info(f"[LIVE EXIT SHORT] Hit SL @ {cur_p} ({act_text})")
 
@@ -1370,6 +1391,7 @@ async def api_close_position():
         "type": trade_type
     })
     state.trades = state.trades[:100]
+    record_closed_trade_to_pnl(net, fee, trade_type, act_name, cur_p, f"{size:.3f} oz", state.balance)
     state.active_position = None
     logger.info(f"[MANUAL CLOSE] {side} closed @ {cur_p} | Net: {net:+.2f} USDT")
     
@@ -1590,6 +1612,10 @@ def api_leverage_info():
         "free_margin_ratio": round(((state.balance - margin_est) / max(0.01, state.balance)) * 100, 1),
         "symbol": "NCCOGOLD2USD-USDT"
     })
+
+@app.get("/api/monthly_pnl")
+def api_monthly_pnl(month: Optional[str] = None):
+    return JSONResponse(pnl_tracker.get_monthly_data(month))
 
 INTERVAL_MAP = {
     "Min1": "1m", "Min5": "5m", "Min15": "15m", "Min30": "30m",
