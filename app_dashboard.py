@@ -412,6 +412,19 @@ def check_and_manage_live_position():
             logger.info(f"[LIVE EXIT SHORT] Hit SL @ {cur_p} ({act_text})")
 
 def check_live_entry_signal():
+    # 1. Luôn tính toán cập nhật các chỉ báo kỹ thuật theo giá tick mới nhất
+    if len(state.candles) >= 30:
+        prices = [c["close"] for c in state.candles[:-1]] + [state.latest_price]
+        upper_bb, lower_bb, rsi, ema_1h = state.quant_agent.calculate_indicators(prices)
+        state.indicators = {
+            "upper_bb": round(upper_bb, 2),
+            "lower_bb": round(lower_bb, 2),
+            "sma_bb": round((upper_bb + lower_bb) / 2, 2),
+            "ema_1h": round(ema_1h, 2),
+            "rsi": round(rsi, 1)
+        }
+
+    # 2. Kiểm tra các bộ lọc sinh mệnh và kỷ luật trước khi vào lệnh
     if state.active_position is not None:
         return
     if state.quant_agent.day_locked or state.quant_agent.daily_trades_count >= state.quant_agent.max_daily_trades:
@@ -431,18 +444,11 @@ def check_live_entry_signal():
     if state.quant_agent.filter_asia_morning and (6 <= hour <= 8):
         return
 
-    # Tính chỉ báo chuẩn xác từ các nến đóng + giá tick hiện tại
-    prices = [c["close"] for c in state.candles[:-1]] + [state.latest_price]
-    upper_bb, lower_bb, rsi, ema_1h = state.quant_agent.calculate_indicators(prices)
-    state.indicators = {
-        "upper_bb": round(upper_bb, 2),
-        "lower_bb": round(lower_bb, 2),
-        "sma_bb": round((upper_bb + lower_bb) / 2, 2),
-        "ema_1h": round(ema_1h, 2),
-        "rsi": round(rsi, 1)
-    }
-
     close_p = state.latest_price
+    ema_1h = state.indicators["ema_1h"]
+    upper_bb = state.indicators["upper_bb"]
+    lower_bb = state.indicators["lower_bb"]
+    rsi = state.indicators["rsi"]
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # ĐIỀU KIỆN LONG: Xu hướng Tăng (Close > EMA) + Kéo ngược chạm dải dưới + RSI hồi quy
@@ -616,9 +622,145 @@ async def background_trading_loop():
             logger.error(f"[LOOP ERROR] {e}")
             await asyncio.sleep(1)
 
+def compute_wait_reason() -> Dict[str, Any]:
+    # 1. Trạng thái dừng hệ thống
+    if not state.is_running:
+        return {
+            "code": "PAUSED",
+            "status_text": "TẠM DỪNG HOẠT ĐỘNG",
+            "badge_color": "#8b949e",
+            "icon": "fa-pause-circle",
+            "detail_text": "Bot đang tạm dừng thủ công từ bảng điều khiển. Bấm 'TIẾP TỤC' để giao dịch."
+        }
+
+    # 2. Permadeath (cháy tài khoản hoặc sụt giảm >= 10%)
+    if not state.is_alive:
+        return {
+            "code": "PERMADEATH",
+            "status_text": "KÍCH HOẠT SINH TỬ (PERMADEATH)",
+            "badge_color": "#f6465d",
+            "icon": "fa-skull-crossbones",
+            "detail_text": f"Dừng vĩnh viễn: {state.death_reason or 'Drawdown chạm 10%'}. Cần bấm Reset Demo để tái sinh tài khoản."
+        }
+
+    # 3. Đang có vị thế mở (Active Trade)
+    if state.active_position is not None:
+        pos = state.active_position
+        side = pos.get("side", "N/A")
+        pnl = pos.get("unrealized_pnl", 0.0)
+        pnl_pct = pos.get("pnl_pct", 0.0)
+        entry = pos.get("entry_price", 0.0)
+        tp1 = pos.get("tp1", 0.0)
+        sl = pos.get("sl", 0.0)
+        pnl_sign = "+" if pnl >= 0 else ""
+        return {
+            "code": "IN_POSITION",
+            "status_text": f"ĐANG GIỮ VỊ THẾ {side}",
+            "badge_color": "#388bfd",
+            "icon": "fa-crosshairs",
+            "detail_text": f"Đang quản trị lệnh {side} tại ${entry:,.2f} | PnL: {pnl_sign}${pnl:.2f} ({pnl_sign}{pnl_pct:.2f}%) | TP1: ${tp1:,.2f} | SL: ${sl:,.2f}. Kỷ luật vàng: Tuyệt đối không nhồi lệnh!"
+        }
+
+    # 4. Cầu dao tự ngắt (Circuit Breaker - 2 SL liên tiếp / trong ngày)
+    if state.quant_agent.daily_losses_count >= state.quant_agent.max_daily_losses or (state.quant_agent.day_locked and state.quant_agent.daily_losses_count > 0):
+        return {
+            "code": "CIRCUIT_BREAKER",
+            "status_text": "CẦU DAO TỰ NGẮT (CIRCUIT BREAKER)",
+            "badge_color": "#f6465d",
+            "icon": "fa-ban",
+            "detail_text": f"Đã chạm ngưỡng dừng lỗ tối đa hôm nay ({state.quant_agent.daily_losses_count}/{state.quant_agent.max_daily_losses} SL). Khóa lệnh bảo vệ vốn đến ngày mai!"
+        }
+
+    # 5. Hạn mức lệnh ngày (Daily trade limit - tối đa 4 lệnh)
+    if state.quant_agent.daily_trades_count >= state.quant_agent.max_daily_trades:
+        return {
+            "code": "DAILY_LIMIT_REACHED",
+            "status_text": "ĐẠT HẠN MỨC NGÀY (4/4 LỆNH)",
+            "badge_color": "#f0ad4e",
+            "icon": "fa-shield-halved",
+            "detail_text": f"Đã hoàn tất {state.quant_agent.daily_trades_count}/{state.quant_agent.max_daily_trades} lệnh theo chiến lược Sniper. Nghỉ ngơi bảo toàn trọn vẹn lợi nhuận!"
+        }
+
+    # 6. Dữ liệu nến chưa đủ
+    if len(state.candles) < 30:
+        return {
+            "code": "INSUFFICIENT_DATA",
+            "status_text": f"ĐANG NẠP DỮ LIỆU ({len(state.candles)}/30 NẾN)",
+            "badge_color": "#8b949e",
+            "icon": "fa-database",
+            "detail_text": f"Đang đồng bộ nến 15m BingX ({len(state.candles)}/30). Cần tối thiểu 30 nến để tính EMA 300 và Bollinger Bands chuẩn xác."
+        }
+
+    # 7. Khóa cây nến hiện tại (Đã mở 1 lệnh trên cây nến 15m này)
+    cur_candle = state.candles[-1] if state.candles else {}
+    cur_time = cur_candle.get("time", 0)
+    if state.last_trade_candle_time == cur_time and cur_time > 0:
+        return {
+            "code": "BAR_LOCKED",
+            "status_text": "KHÓA NẾN HIỆN TẠI (1 LỆNH / 1 NẾN)",
+            "badge_color": "#f0ad4e",
+            "icon": "fa-lock",
+            "detail_text": "Đã có 1 lệnh khớp trong cây nến 15m hiện tại. Đang đợi nến này đóng cửa để tránh bẫy whipsaw rủi ro."
+        }
+
+    # 8. Lọc bẫy sáng phiên Á (06:00 - 08:59 VN)
+    hour = datetime.now().hour
+    if state.quant_agent.filter_asia_morning and (6 <= hour <= 8):
+        return {
+            "code": "ASIA_MORNING_FILTER",
+            "status_text": "LỌC BẪY PHIÊN Á (06:00 - 08:59)",
+            "badge_color": "#a371f7",
+            "icon": "fa-shield-alt",
+            "detail_text": f"Hiện tại {hour:02d}:{datetime.now().minute:02d} VN (phiên Á thanh khoản mỏng, tỷ lệ bẫy Stop Hunt quét 2 đầu cao). Bot chủ động né tránh bẫy!"
+        }
+
+    # 9. Đang rình mồi thiết lập A+ (Stalking A+ Setup)
+    p = state.latest_price
+    ema = state.indicators.get("ema_1h", p)
+    upper_bb = state.indicators.get("upper_bb", p)
+    lower_bb = state.indicators.get("lower_bb", p)
+    rsi = state.indicators.get("rsi", 50.0)
+
+    is_long_trend = p > ema
+    missing_conds = []
+
+    if is_long_trend:
+        trend_name = "LONG"
+        if p > lower_bb:
+            dist = p - lower_bb
+            missing_conds.append(f"Chưa chạm BB Dưới (${lower_bb:,.1f}, còn cách ${dist:,.1f})")
+        if rsi > state.quant_agent.rsi_low:
+            missing_conds.append(f"RSI đang {rsi:.1f} (cần về <= {state.quant_agent.rsi_low})")
+    else:
+        trend_name = "SHORT"
+        if p < upper_bb:
+            dist = upper_bb - p
+            missing_conds.append(f"Chưa chạm BB Trên (${upper_bb:,.1f}, còn cách ${dist:,.1f})")
+        if rsi < state.quant_agent.rsi_high:
+            missing_conds.append(f"RSI đang {rsi:.1f} (cần lên >= {state.quant_agent.rsi_high})")
+
+    if missing_conds:
+        reasons_str = " | ".join(missing_conds)
+        return {
+            "code": "WAITING_SETUP",
+            "status_text": f"ĐANG RÌNH MỒI (ƯU TIÊN {trend_name})",
+            "badge_color": "#f0ad4e",
+            "icon": "fa-hourglass-half",
+            "detail_text": f"Sóng lớn {trend_name} (Giá {'>' if is_long_trend else '<'} EMA 300). Đang đợi: {reasons_str}. AI kiên định chờ nến hoàn hảo!"
+        }
+    else:
+        return {
+            "code": "FIRING",
+            "status_text": f"HỘI TỤ 3/3 {trend_name} - KHAI HỎA!",
+            "badge_color": "#0ecb81",
+            "icon": "fa-bolt",
+            "detail_text": f"Tất cả điều kiện {trend_name} đã hội tụ đầy đủ. Hệ thống đang tiến hành mở lệnh!"
+        }
+
 def get_full_state_payload() -> Dict[str, Any]:
     pnl_net = state.equity - state.initial_balance
     roi_pct = (pnl_net / state.initial_balance) * 100
+    wait_reason = compute_wait_reason()
     
     return {
         "symbol": state.symbol,
@@ -626,6 +768,7 @@ def get_full_state_payload() -> Dict[str, Any]:
         "is_running": state.is_running,
         "is_alive": state.is_alive,
         "death_reason": state.death_reason,
+        "wait_reason": wait_reason,
         "latest_price": state.latest_price,
         "price_change_24h": round(state.price_change_24h, 2),
         "high_24h": state.high_24h,
@@ -649,6 +792,7 @@ def get_full_state_payload() -> Dict[str, Any]:
         "candles": state.candles[-80:],
         "radar": {
             "heartbeat": datetime.now().strftime("%H:%M:%S"),
+            "wait_reason": wait_reason,
             "cond_trend_long": state.latest_price > state.indicators.get("ema_1h", state.latest_price),
             "cond_bb_long": state.latest_price <= state.indicators.get("lower_bb", state.latest_price),
             "cond_rsi_long": state.indicators.get("rsi", 50.0) <= 45.0,
