@@ -2255,11 +2255,11 @@
             if (day.has_data && day.trades_count > 0) {
               const sign = day.net_pnl >= 0 ? '+' : '-';
               const col = day.net_pnl >= 0 ? '#0ecb81' : '#f6465d';
-              pnlHtml = '<span style="font-family:'JetBrains Mono'; font-weight:800; font-size:12.5px; color:' + col + ';">' + sign + '$' + Math.abs(day.net_pnl).toFixed(2) + '</span>';
+              pnlHtml = '<span style="font-family:\'JetBrains Mono\', monospace; font-weight:800; font-size:12.5px; color:' + col + ';">' + sign + '$' + Math.abs(day.net_pnl).toFixed(2) + '</span>';
               roiHtml = '<span style="font-size:10px; color:' + col + '; font-weight:700;">' + (day.roi_pct >= 0 ? '+' : '') + day.roi_pct.toFixed(2) + '%</span>';
               badgeHtml = '<span style="font-size:9.5px; background:rgba(255,255,255,0.06); padding:1px 4px; border-radius:3px; color:var(--text-muted);">' + day.trades_count + ' lệnh (' + day.wins + 'W)</span>';
             } else if (day.is_today) {
-              pnlHtml = '<span style="font-family:'JetBrains Mono'; font-weight:700; font-size:11px; color:#58a6ff;">Hôm nay</span>';
+              pnlHtml = '<span style="font-family:\'JetBrains Mono\', monospace; font-weight:700; font-size:11px; color:#58a6ff;">Hôm nay</span>';
               badgeHtml = '<span style="font-size:9.5px; color:#58a6ff;">Đang săn lệnh</span>';
             }
 
