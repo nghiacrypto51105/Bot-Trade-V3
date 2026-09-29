@@ -234,6 +234,37 @@ def load_bingx_keys() -> Tuple[str, str]:
         api_secret = DEFAULT_BINGX_SECRET_KEY
     return api_key, api_secret
 
+def save_bot_limits(trades: int = 0, losses: int = 0, locked: bool = False):
+    """Lưu trạng thái giới hạn Sniper vào file JSON để không bị mất khi reload hoặc restart server"""
+    try:
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        data_dir = os.path.join(os.path.dirname(__file__), "data")
+        os.makedirs(data_dir, exist_ok=True)
+        path = os.path.join(data_dir, "bot_limits.json")
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({
+                "date": today_str,
+                "daily_trades_count": trades,
+                "daily_losses_count": losses,
+                "day_locked": locked
+            }, f, indent=2)
+    except Exception as e:
+        logger.error(f"[SAVE LIMITS ERROR] {e}")
+
+def load_bot_limits() -> Tuple[int, int, bool]:
+    """Tải trạng thái giới hạn Sniper đã lưu cho ngày hôm nay"""
+    try:
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        path = os.path.join(os.path.dirname(__file__), "data", "bot_limits.json")
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if data.get("date") == today_str:
+                    return int(data.get("daily_trades_count", 0)), int(data.get("daily_losses_count", 0)), bool(data.get("day_locked", False))
+    except Exception as e:
+        logger.error(f"[LOAD LIMITS ERROR] {e}")
+    return 0, 0, False
+
 class TradingEngineState:
     def __init__(self):
         self.symbol = "XAU_USDT"
@@ -300,6 +331,11 @@ class TradingEngineState:
         self.last_balance_sync: float = 0.0
 
 state = TradingEngineState()
+_init_trades, _init_losses, _init_locked = load_bot_limits()
+state.quant_agent.daily_trades_count = _init_trades
+state.quant_agent.daily_losses_count = _init_losses
+state.quant_agent.day_locked = _init_locked
+logger.info(f"[INIT LIMITS] Giới hạn Sniper: {state.quant_agent.daily_trades_count}/{state.quant_agent.max_daily_trades} Lệnh | {state.quant_agent.daily_losses_count}/{state.quant_agent.max_daily_losses} SL")
 
 # Nạp sẵn BingX client nếu đã lưu keys trong .env
 _init_k, _init_s = load_bingx_keys()
@@ -446,18 +482,21 @@ def load_initial_candles():
                     "volume": float(item["volume"])
                 })
             
+            state.quant_agent.close_prices.clear()
+            state.quant_agent.volume_history.clear()
             for c in candles[-150:]:
-                state.quant_agent.process_candle({
-                    "symbol": "GOLD_USDT",
-                    "timestamp": c["time"],
-                    "open": c["open"],
-                    "high": c["high"],
-                    "low": c["low"],
-                    "close": c["close"],
-                    "volume": c["volume"]
-                })
+                state.quant_agent.close_prices.append(c["close"])
+                state.quant_agent.volume_history.append(c["volume"])
                 
             state.candles = candles[-80:]
+            
+            # Giữ nguyên giới hạn Sniper thực tế từ lưu trữ (không bị nến lịch sử làm sai lệch)
+            saved_trades, saved_losses, saved_locked = load_bot_limits()
+            state.quant_agent.daily_trades_count = saved_trades
+            state.quant_agent.daily_losses_count = saved_losses
+            state.quant_agent.day_locked = saved_locked
+            state.quant_agent.active_position = None
+            
             if candles:
                 state.latest_price = candles[-1]["close"]
                 prices = [c["close"] for c in candles]
@@ -469,7 +508,7 @@ def load_initial_candles():
                     "ema_1h": round(ema, 2),
                     "rsi": round(rsi, 1)
                 }
-            logger.info(f"[INIT READY] Đã nạp {len(state.candles)} nến 15m BingX.")
+            logger.info(f"[INIT READY] Đã nạp {len(state.candles)} nến 15m BingX. Giới hạn Sniper hiện tại: {state.quant_agent.daily_trades_count}/{state.quant_agent.max_daily_trades} Lệnh | {state.quant_agent.daily_losses_count}/{state.quant_agent.max_daily_losses} SL")
     except Exception as e:
         logger.error(f"[LOAD CANDLES ERROR] {e}")
 
@@ -493,15 +532,8 @@ def load_candles_sync():
                 last_time = state.candles[-1]["time"] if state.candles else 0
                 for c in candles:
                     if c["time"] > last_time:
-                        state.quant_agent.process_candle({
-                            "symbol": "GOLD_USDT",
-                            "timestamp": c["time"],
-                            "open": c["open"],
-                            "high": c["high"],
-                            "low": c["low"],
-                            "close": c["close"],
-                            "volume": c["volume"]
-                        })
+                        state.quant_agent.close_prices.append(c["close"])
+                        state.quant_agent.volume_history.append(c["volume"])
                 state.candles = candles[-80:]
     except Exception as e:
         logger.error(f"[SYNC CANDLES ERROR] {e}")
@@ -595,6 +627,7 @@ def check_and_manage_live_position():
                 if state.quant_agent.daily_losses_count >= state.quant_agent.max_daily_losses:
                     state.quant_agent.day_locked = True
                     logger.warning("[CIRCUIT BREAKER] Cầu dao tự ngắt: Dính 2 SL trong ngày!")
+                save_bot_limits(state.quant_agent.daily_trades_count, state.quant_agent.daily_losses_count, state.quant_agent.day_locked)
 
             state.trades.insert(0, {
                 "time": now_str,
@@ -683,6 +716,7 @@ def check_and_manage_live_position():
                 if state.quant_agent.daily_losses_count >= state.quant_agent.max_daily_losses:
                     state.quant_agent.day_locked = True
                     logger.warning("[CIRCUIT BREAKER] Cầu dao tự ngắt: Dính 2 SL trong ngày!")
+                save_bot_limits(state.quant_agent.daily_trades_count, state.quant_agent.daily_losses_count, state.quant_agent.day_locked)
 
             state.trades.insert(0, {
                 "time": now_str,
@@ -786,6 +820,7 @@ def check_live_entry_signal():
         state.quant_agent.daily_trades_count += 1
         if state.quant_agent.daily_trades_count >= state.quant_agent.max_daily_trades:
             state.quant_agent.day_locked = True
+        save_bot_limits(state.quant_agent.daily_trades_count, state.quant_agent.daily_losses_count, state.quant_agent.day_locked)
             
         state.trades.insert(0, {
             "time": now_str,
@@ -848,6 +883,7 @@ def check_live_entry_signal():
         state.quant_agent.daily_trades_count += 1
         if state.quant_agent.daily_trades_count >= state.quant_agent.max_daily_trades:
             state.quant_agent.day_locked = True
+        save_bot_limits(state.quant_agent.daily_trades_count, state.quant_agent.daily_losses_count, state.quant_agent.day_locked)
             
         state.trades.insert(0, {
             "time": now_str,
@@ -1241,6 +1277,7 @@ async def api_reset_account(req: Optional[ResetAccountRequest] = None):
     state.quant_agent.daily_losses_count = 0
     state.quant_agent.day_locked = False
     state.last_trade_candle_time = 0
+    save_bot_limits(0, 0, False)
     try:
         await manager.broadcast(get_full_state_payload())
     except Exception:
@@ -1254,12 +1291,28 @@ async def api_reset_limits():
     state.quant_agent.day_locked = False
     state.last_trade_candle_time = 0
     state.trades = []
-    logger.info("[RESET] Đã reset về 0 Giới hạn Sniper và nhật ký lệnh!")
+    save_bot_limits(0, 0, False)
+    
+    # Đồng bộ reset ngày hôm nay trong daily_pnl.json
+    try:
+        from daily_pnl_tracker import load_pnl_data, save_pnl_data
+        today_s = datetime.now().strftime("%Y-%m-%d")
+        pnl_db = load_pnl_data()
+        if today_s in pnl_db:
+            pnl_db[today_s]["trades_count"] = 0
+            pnl_db[today_s]["wins"] = 0
+            pnl_db[today_s]["losses"] = 0
+            pnl_db[today_s]["trades"] = []
+            save_pnl_data(pnl_db)
+    except Exception:
+        pass
+
+    logger.info("[RESET] Đã reset về 0 Giới hạn Sniper và lưu trữ bền vững!")
     try:
         await manager.broadcast(get_full_state_payload())
     except Exception:
         pass
-    return {"status": "success", "message": "Đã reset về 0 Giới hạn Sniper (0/4 Lệnh, 0/2 SL) & mở khóa bot thành công!"}
+    return {"status": "success", "message": "Đã reset về 0 Giới hạn Sniper (0/4 Lệnh, 0/2 SL) & lưu trữ thành công!"}
 
 class TestTradeRequest(BaseModel):
     side: str                          # "LONG" hoặc "SHORT"
