@@ -15,7 +15,9 @@ import webbrowser
 import gzip
 import websockets
 from datetime import datetime
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
+import hmac
+import hashlib
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
@@ -34,7 +36,142 @@ logging.basicConfig(
 )
 logger = logging.getLogger("WebDashboard")
 
-app = FastAPI(title="MEXC AI Trading Terminal")
+app = FastAPI(title="BingX AI Trading Terminal")
+
+class BingXAPIClient:
+    """
+    Client kết nối trực tiếp BingX Perpetual Swap API với xác thực HMAC-SHA256.
+    Hỗ trợ: Kiểm tra số dư ví thực, cài đặt đòn bẩy 16x, đặt lệnh thị trường và đóng lệnh.
+    """
+    def __init__(self, api_key: str = "", api_secret: str = ""):
+        self.api_key = api_key.strip()
+        self.api_secret = api_secret.strip()
+        self.base_url = "https://open-api.bingx.com"
+
+    def _sign(self, params: dict) -> str:
+        params["timestamp"] = str(int(time.time() * 1000))
+        params["recvWindow"] = "10000"
+        sorted_items = sorted(params.items(), key=lambda d: d[0])
+        query_str = "&".join([f"{k}={v}" for k, v in sorted_items])
+        signature = hmac.new(self.api_secret.encode("utf-8"), query_str.encode("utf-8"), hashlib.sha256).hexdigest()
+        return f"{query_str}&signature={signature}"
+
+    def get_account_balance(self) -> Tuple[bool, float, float, str]:
+        """
+        Lấy số dư thực tế từ ví Perpetual Futures của BingX.
+        Trả về: (thành_công, balance, equity, thông_điệp)
+        """
+        if not self.api_key or not self.api_secret:
+            return False, 0.0, 0.0, "Chưa cung cấp API Key hoặc Secret Key"
+
+        try:
+            # Thử qua Swap v3 endpoint
+            query = self._sign({})
+            url = f"{self.base_url}/openApi/swap/v3/user/balance?{query}"
+            headers = {"X-BX-APIKEY": self.api_key}
+            r = requests.get(url, headers=headers, timeout=6)
+            if r.status_code == 200:
+                data = r.json()
+                if data.get("code") == 0:
+                    d = data.get("data", {})
+                    b = d.get("balance", d)
+                    if isinstance(b, dict):
+                        bal = float(b.get("balance", b.get("availableMargin", 0.0)))
+                        eq = float(b.get("equity", bal))
+                        return True, bal, eq, "Thành công"
+                    elif isinstance(b, list):
+                        for item in b:
+                            if item.get("asset") == "USDT":
+                                bal = float(item.get("balance", item.get("availableMargin", 0.0)))
+                                eq = float(item.get("equity", bal))
+                                return True, bal, eq, "Thành công"
+                        if b:
+                            bal = float(b[0].get("balance", 0.0))
+                            eq = float(b[0].get("equity", bal))
+                            return True, bal, eq, "Thành công"
+                else:
+                    return False, 0.0, 0.0, data.get("msg", "Lỗi API BingX")
+
+            # Fallback sang Swap v2 endpoint
+            query_v2 = self._sign({})
+            url_v2 = f"{self.base_url}/openApi/swap/v2/user/balance?{query_v2}"
+            r2 = requests.get(url_v2, headers=headers, timeout=6)
+            if r2.status_code == 200:
+                data2 = r2.json()
+                if data2.get("code") == 0:
+                    d = data2.get("data", {})
+                    b = d.get("balance", d)
+                    if isinstance(b, dict):
+                        bal = float(b.get("balance", b.get("availableMargin", 0.0)))
+                        eq = float(b.get("equity", bal))
+                        return True, bal, eq, "Thành công"
+                return False, 0.0, 0.0, data2.get("msg", f"HTTP Error {r2.status_code}")
+
+            return False, 0.0, 0.0, f"HTTP Error {r.status_code}"
+        except Exception as e:
+            return False, 0.0, 0.0, str(e)
+
+    def set_leverage(self, symbol: str = "NCCOGOLD2USD-USDT", leverage: int = 16):
+        if not self.api_key or not self.api_secret:
+            return
+        try:
+            for side in ["LONG", "SHORT"]:
+                q = self._sign({"symbol": symbol, "side": side, "leverage": str(leverage)})
+                url = f"{self.base_url}/openApi/swap/v2/trade/leverage?{q}"
+                headers = {"X-BX-APIKEY": self.api_key}
+                requests.post(url, headers=headers, timeout=5)
+            logger.info(f"[BINGX LEVERAGE] Đã cài đặt đòn bẩy {leverage}x cho {symbol}")
+        except Exception as e:
+            logger.warning(f"[BINGX LEVERAGE ERROR] {e}")
+
+    def place_market_order(self, symbol: str, side: str, position_side: str, quantity: float) -> Tuple[bool, dict]:
+        """
+        Đặt lệnh thị trường trên sàn BingX.
+        side: 'BUY' hoặc 'SELL'
+        positionSide: 'LONG' hoặc 'SHORT'
+        quantity: Khối lượng (tối thiểu 0.0005 oz)
+        """
+        if not self.api_key or not self.api_secret:
+            return False, {"error": "Chưa có API Key"}
+        try:
+            qty_str = f"{max(0.0005, quantity):.4f}"
+            params = {
+                "symbol": symbol,
+                "side": side,
+                "positionSide": position_side,
+                "type": "MARKET",
+                "quantity": qty_str
+            }
+            q = self._sign(params)
+            url = f"{self.base_url}/openApi/swap/v2/trade/order?{q}"
+            headers = {"X-BX-APIKEY": self.api_key}
+            r = requests.post(url, headers=headers, timeout=6)
+            res = r.json()
+            if res.get("code") == 0:
+                logger.info(f"[BINGX LIVE ORDER SUCCESS] {side} {position_side} {qty_str} | ID: {res.get('data', {}).get('orderId')}")
+                return True, res.get("data", {})
+            logger.error(f"[BINGX LIVE ORDER FAILED] {res}")
+            return False, res
+        except Exception as e:
+            logger.error(f"[BINGX ORDER EXCEPTION] {e}")
+            return False, {"error": str(e)}
+
+def load_bingx_keys() -> Tuple[str, str]:
+    api_key = os.getenv("BINGX_API_KEY", "")
+    api_secret = os.getenv("BINGX_API_SECRET", "")
+    env_path = os.path.join(os.path.dirname(__file__), ".env")
+    if os.path.exists(env_path):
+        try:
+            with open(env_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith("BINGX_API_KEY="):
+                        api_key = line.split("=", 1)[1].strip()
+                    elif line.startswith("BINGX_API_SECRET="):
+                        api_secret = line.split("=", 1)[1].strip()
+        except Exception:
+            pass
+    return api_key, api_secret
 
 class TradingEngineState:
     def __init__(self):
@@ -95,7 +232,32 @@ class TradingEngineState:
             filter_asia_morning=True
         )
 
+        self.bingx_client: Optional[BingXAPIClient] = None
+        self.real_balance_synced: bool = False
+        self.last_balance_sync: float = 0.0
+
 state = TradingEngineState()
+
+# Nạp sẵn BingX client nếu đã lưu keys trong .env
+_init_k, _init_s = load_bingx_keys()
+if _init_k and _init_s:
+    state.bingx_client = BingXAPIClient(_init_k, _init_s)
+    logger.info("[INIT] Đã tìm thấy BingX API Keys trong .env.")
+
+def sync_live_balance() -> Tuple[bool, float, float, str]:
+    """Đồng bộ số dư thực tế từ sàn BingX"""
+    if state.bingx_client and state.bingx_client.api_key:
+        ok, bal, eq, msg = state.bingx_client.get_account_balance()
+        if ok:
+            state.balance = bal
+            state.equity = eq
+            if not state.real_balance_synced:
+                state.initial_balance = bal
+                state.peak_equity = eq
+                state.real_balance_synced = True
+            return True, bal, eq, msg
+        return False, state.balance, state.equity, msg
+    return False, state.balance, state.equity, "Chưa cấu hình API Key"
 
 class ConnectionManager:
     def __init__(self):
@@ -262,13 +424,16 @@ def check_and_manage_live_position():
     if side == "LONG":
         # 1. Chốt lời toàn phần TP2 (+1.10%)
         if cur_p >= tp2:
+            if state.mode == "LIVE TRADING" and state.bingx_client:
+                state.bingx_client.place_market_order("NCCOGOLD2USD-USDT", "SELL", "LONG", size)
+                sync_live_balance()
             pnl = (cur_p - entry) * size
             fee = cur_p * size * state.fee_rate_maker
             net = pnl - fee
             state.balance += net
             state.trades.insert(0, {
                 "time": now_str,
-                "action": "CHỐT LỜI TP2 (+1.10%)",
+                "action": "CHỐT LỜI TP2 (+1.10%)" + (" [BINGX LIVE]" if state.mode == "LIVE TRADING" else ""),
                 "price": cur_p,
                 "size": f"{size:.3f} oz",
                 "pnl": f"+${net:.2f}",
@@ -281,6 +446,9 @@ def check_and_manage_live_position():
         # 2. Chốt 50% ở TP1 (+0.55%) và Dời SL vào vùng LÃI DƯƠNG (+0.14%)
         elif not tp1_hit and cur_p >= tp1:
             close_size = size * 0.50
+            if state.mode == "LIVE TRADING" and state.bingx_client:
+                state.bingx_client.place_market_order("NCCOGOLD2USD-USDT", "SELL", "LONG", close_size)
+                sync_live_balance()
             pnl = (cur_p - entry) * close_size
             fee = cur_p * close_size * state.fee_rate_maker
             net = pnl - fee
@@ -296,7 +464,7 @@ def check_and_manage_live_position():
             
             state.trades.insert(0, {
                 "time": now_str,
-                "action": "CHỐT LỜI TP1 (+0.55%)",
+                "action": "CHỐT LỜI TP1 (+0.55%)" + (" [BINGX LIVE]" if state.mode == "LIVE TRADING" else ""),
                 "price": cur_p,
                 "size": f"{close_size:.3f} oz",
                 "pnl": f"+${net:.2f}",
@@ -307,6 +475,9 @@ def check_and_manage_live_position():
 
         # 3. Chạm Cắt lỗ / Khóa lãi dương
         elif cur_p <= sl:
+            if state.mode == "LIVE TRADING" and state.bingx_client:
+                state.bingx_client.place_market_order("NCCOGOLD2USD-USDT", "SELL", "LONG", size)
+                sync_live_balance()
             pnl = (cur_p - entry) * size
             fee = cur_p * size * state.fee_rate
             net = pnl - fee
@@ -325,7 +496,7 @@ def check_and_manage_live_position():
 
             state.trades.insert(0, {
                 "time": now_str,
-                "action": act_text,
+                "action": act_text + (" [BINGX LIVE]" if state.mode == "LIVE TRADING" else ""),
                 "price": cur_p,
                 "size": f"{size:.3f} oz",
                 "pnl": f"{net:+.2f} USDT",
@@ -338,13 +509,16 @@ def check_and_manage_live_position():
     elif side == "SHORT":
         # 1. Chốt lời toàn phần TP2 (+1.10%)
         if cur_p <= tp2:
+            if state.mode == "LIVE TRADING" and state.bingx_client:
+                state.bingx_client.place_market_order("NCCOGOLD2USD-USDT", "BUY", "SHORT", size)
+                sync_live_balance()
             pnl = (entry - cur_p) * size
             fee = cur_p * size * state.fee_rate_maker
             net = pnl - fee
             state.balance += net
             state.trades.insert(0, {
                 "time": now_str,
-                "action": "CHỐT LỜI TP2 (+1.10%)",
+                "action": "CHỐT LỜI TP2 (+1.10%)" + (" [BINGX LIVE]" if state.mode == "LIVE TRADING" else ""),
                 "price": cur_p,
                 "size": f"{size:.3f} oz",
                 "pnl": f"+${net:.2f}",
@@ -357,6 +531,9 @@ def check_and_manage_live_position():
         # 2. Chốt 50% ở TP1 (+0.55%) và Dời SL vào vùng LÃI DƯƠNG (+0.14%)
         elif not tp1_hit and cur_p <= tp1:
             close_size = size * 0.50
+            if state.mode == "LIVE TRADING" and state.bingx_client:
+                state.bingx_client.place_market_order("NCCOGOLD2USD-USDT", "BUY", "SHORT", close_size)
+                sync_live_balance()
             pnl = (entry - cur_p) * close_size
             fee = cur_p * close_size * state.fee_rate_maker
             net = pnl - fee
@@ -372,7 +549,7 @@ def check_and_manage_live_position():
             
             state.trades.insert(0, {
                 "time": now_str,
-                "action": "CHỐT LỜI TP1 (+0.55%)",
+                "action": "CHỐT LỜI TP1 (+0.55%)" + (" [BINGX LIVE]" if state.mode == "LIVE TRADING" else ""),
                 "price": cur_p,
                 "size": f"{close_size:.3f} oz",
                 "pnl": f"+${net:.2f}",
@@ -383,6 +560,9 @@ def check_and_manage_live_position():
 
         # 3. Chạm Cắt lỗ / Khóa lãi dương
         elif cur_p >= sl:
+            if state.mode == "LIVE TRADING" and state.bingx_client:
+                state.bingx_client.place_market_order("NCCOGOLD2USD-USDT", "BUY", "SHORT", size)
+                sync_live_balance()
             pnl = (entry - cur_p) * size
             fee = cur_p * size * state.fee_rate
             net = pnl - fee
@@ -401,7 +581,7 @@ def check_and_manage_live_position():
 
             state.trades.insert(0, {
                 "time": now_str,
-                "action": act_text,
+                "action": act_text + (" [BINGX LIVE]" if state.mode == "LIVE TRADING" else ""),
                 "price": cur_p,
                 "size": f"{size:.3f} oz",
                 "pnl": f"{net:+.2f} USDT",
@@ -455,6 +635,20 @@ def check_live_entry_signal():
     if close_p > ema_1h and close_p <= lower_bb and rsi <= state.quant_agent.rsi_low:
         margin = state.balance * state.margin_pct
         size = (margin * state.leverage) / close_p
+
+        # Nếu đang ở chế độ LIVE TRADING: gửi lệnh thật lên sàn BingX
+        if state.mode == "LIVE TRADING":
+            if not state.bingx_client:
+                logger.error("[LIVE ERROR] Chưa có BingX Client để mở lệnh Live!")
+                return
+            if state.balance < 2.0:
+                logger.warning(f"[LIVE INSUFFICIENT BALANCE] Số dư ${state.balance:.2f} < 2 USDT tối thiểu!")
+                return
+            ok, res = state.bingx_client.place_market_order("NCCOGOLD2USD-USDT", "BUY", "LONG", size)
+            if not ok:
+                logger.error(f"[LIVE ORDER FAILED] Không thể khớp lệnh LONG BingX: {res}")
+                return
+
         fee = close_p * size * state.fee_rate
         state.balance -= fee
         
@@ -483,7 +677,7 @@ def check_live_entry_signal():
             
         state.trades.insert(0, {
             "time": now_str,
-            "action": "VÀO LỆNH LONG",
+            "action": "VÀO LỆNH LONG" + (" [BINGX LIVE]" if state.mode == "LIVE TRADING" else ""),
             "price": close_p,
             "size": f"{size:.3f} oz",
             "pnl": f"-${fee:.2f} (Phí)",
@@ -497,6 +691,20 @@ def check_live_entry_signal():
     elif close_p < ema_1h and close_p >= upper_bb and rsi >= state.quant_agent.rsi_high:
         margin = state.balance * state.margin_pct
         size = (margin * state.leverage) / close_p
+
+        # Nếu đang ở chế độ LIVE TRADING: gửi lệnh thật lên sàn BingX
+        if state.mode == "LIVE TRADING":
+            if not state.bingx_client:
+                logger.error("[LIVE ERROR] Chưa có BingX Client để mở lệnh Live!")
+                return
+            if state.balance < 2.0:
+                logger.warning(f"[LIVE INSUFFICIENT BALANCE] Số dư ${state.balance:.2f} < 2 USDT tối thiểu!")
+                return
+            ok, res = state.bingx_client.place_market_order("NCCOGOLD2USD-USDT", "SELL", "SHORT", size)
+            if not ok:
+                logger.error(f"[LIVE ORDER FAILED] Không thể khớp lệnh SHORT BingX: {res}")
+                return
+
         fee = close_p * size * state.fee_rate
         state.balance -= fee
         
@@ -525,7 +733,7 @@ def check_live_entry_signal():
             
         state.trades.insert(0, {
             "time": now_str,
-            "action": "VÀO LỆNH SHORT",
+            "action": "VÀO LỆNH SHORT" + (" [BINGX LIVE]" if state.mode == "LIVE TRADING" else ""),
             "price": close_p,
             "size": f"{size:.3f} oz",
             "pnl": f"-${fee:.2f} (Phí)",
@@ -614,7 +822,13 @@ async def background_trading_loop():
                     await asyncio.to_thread(load_candles_sync)
                     last_candle_sync = now_t
 
-                # 2. Quét tín hiệu mở lệnh mới khi đủ điều kiện
+                # 2. Định kỳ đồng bộ số dư ví BingX thật mỗi 20 giây nếu đang ở chế độ LIVE
+                if state.mode == "LIVE TRADING" and state.bingx_client and (now_t - state.last_balance_sync > 20):
+                    if not state.active_position:
+                        sync_live_balance()
+                    state.last_balance_sync = now_t
+
+                # 3. Quét tín hiệu mở lệnh mới khi đủ điều kiện
                 check_live_entry_signal()
 
             await asyncio.sleep(0.5)
@@ -623,6 +837,16 @@ async def background_trading_loop():
             await asyncio.sleep(1)
 
 def compute_wait_reason() -> Dict[str, Any]:
+    # 0. Kiểm tra số dư ví khi ở chế độ LIVE TRADING
+    if state.mode == "LIVE TRADING" and state.balance < 2.0:
+        return {
+            "code": "LOW_BALANCE",
+            "status_text": "SỐ DƯ BINGX QUÁ THẤP (< $2)",
+            "badge_color": "#f6465d",
+            "icon": "fa-wallet",
+            "detail_text": f"Số dư tài khoản BingX hiện tại (${state.balance:.2f} USDT) chưa đủ mức ký quỹ tối thiểu ($2 USDT). Vui lòng nạp thêm USDT vào ví Hợp đồng BingX!"
+        }
+
     # 1. Trạng thái dừng hệ thống
     if not state.is_running:
         return {
@@ -765,6 +989,9 @@ def get_full_state_payload() -> Dict[str, Any]:
     return {
         "symbol": state.symbol,
         "mode": state.mode,
+        "is_live": state.mode == "LIVE TRADING",
+        "has_keys": bool(state.bingx_client and state.bingx_client.api_key),
+        "real_balance_synced": state.real_balance_synced,
         "is_running": state.is_running,
         "is_alive": state.is_alive,
         "death_reason": state.death_reason,
@@ -866,6 +1093,123 @@ def api_reset_account():
     state.last_trade_candle_time = 0
     return {"status": "success", "message": "Đã đặt lại tài khoản Demo về $1,000"}
 
+class SetModeRequest(BaseModel):
+    mode: str                          # "LIVE" hoặc "DEMO"
+    api_key: Optional[str] = None
+    api_secret: Optional[str] = None
+
+@app.post("/api/set_mode")
+def api_set_mode(req: SetModeRequest):
+    if req.mode == "LIVE":
+        key = (req.api_key or "").strip()
+        secret = (req.api_secret or "").strip()
+        
+        if not key or not secret:
+            env_k, env_s = load_bingx_keys()
+            if env_k and env_s:
+                key, secret = env_k, env_s
+            else:
+                return JSONResponse({
+                    "status": "need_keys",
+                    "message": "Vui lòng nhập API Key & Secret Key để kết nối tài khoản BingX thực."
+                })
+        
+        # Test kết nối & đồng bộ số dư thực tế
+        client = BingXAPIClient(key, secret)
+        ok, bal, eq, msg = client.get_account_balance()
+        if not ok:
+            return JSONResponse({
+                "status": "error",
+                "message": f"Kết nối BingX thất bại: {msg}. Vui lòng kiểm tra lại API Key, Secret và quyền Perpetual Futures!"
+            })
+            
+        # Lưu vào .env để ghi nhớ cho các lần chạy sau
+        env_path = os.path.join(os.path.dirname(__file__), ".env")
+        try:
+            with open(env_path, "w", encoding="utf-8") as f:
+                f.write(f"BINGX_API_KEY={key}\n")
+                f.write(f"BINGX_API_SECRET={secret}\n")
+        except Exception:
+            pass
+            
+        client.set_leverage(symbol="NCCOGOLD2USD-USDT", leverage=16)
+        
+        state.bingx_client = client
+        state.mode = "LIVE TRADING"
+        state.initial_balance = bal
+        state.balance = bal
+        state.equity = eq
+        state.peak_equity = eq
+        state.max_drawdown = 0.0
+        state.current_drawdown = 0.0
+        state.active_position = None
+        state.is_running = True
+        state.is_alive = True
+        state.death_reason = None
+        state.real_balance_synced = True
+        
+        logger.info(f"[LIVE MODE ACTIVATED] Số dư đồng bộ từ BingX: ${bal:,.2f} USDT")
+        return JSONResponse({
+            "status": "success",
+            "mode": "LIVE TRADING",
+            "balance": bal,
+            "equity": eq,
+            "message": f"KẾT NỐI BINGX THÀNH CÔNG! Đã đồng bộ số dư thực: ${bal:,.2f} USDT. Bot bắt đầu tự động giao dịch LIVE!"
+        })
+        
+    elif req.mode == "DEMO":
+        state.mode = "DEMO (Paper Trading)"
+        state.balance = 1000.0
+        state.equity = 1000.0
+        state.peak_equity = 1000.0
+        state.max_drawdown = 0.0
+        state.current_drawdown = 0.0
+        state.active_position = None
+        state.is_running = True
+        state.is_alive = True
+        state.death_reason = None
+        state.real_balance_synced = False
+        return JSONResponse({
+            "status": "success",
+            "mode": "DEMO (Paper Trading)",
+            "balance": 1000.0,
+            "message": "Đã chuyển về chế độ DEMO (Paper Trading) an toàn với số dư $1,000."
+        })
+
+@app.post("/api/sync_balance")
+def api_sync_balance():
+    if state.mode != "LIVE TRADING" or not state.bingx_client:
+        return JSONResponse({
+            "status": "not_live",
+            "balance": state.balance,
+            "equity": state.equity,
+            "message": "Đang ở chế độ Demo, số dư giả lập tĩnh."
+        })
+    ok, bal, eq, msg = sync_live_balance()
+    if ok:
+        return JSONResponse({
+            "status": "success",
+            "balance": bal,
+            "equity": eq,
+            "message": f"Đã đồng bộ số dư mới nhất từ sàn BingX: ${bal:,.2f} USDT"
+        })
+    return JSONResponse({
+        "status": "error",
+        "balance": state.balance,
+        "equity": state.equity,
+        "message": f"Không thể đồng bộ số dư: {msg}"
+    })
+
+@app.get("/api/account_info")
+def api_account_info():
+    return JSONResponse({
+        "mode": state.mode,
+        "is_live": state.mode == "LIVE TRADING",
+        "has_keys": bool(state.bingx_client and state.bingx_client.api_key),
+        "balance": state.balance,
+        "equity": state.equity
+    })
+
 class ApiKeyRequest(BaseModel):
     api_key: str
     api_secret: str
@@ -876,7 +1220,7 @@ def api_save_keys(req: ApiKeyRequest):
     with open(env_path, "w", encoding="utf-8") as f:
         f.write(f"BINGX_API_KEY={req.api_key.strip()}\n")
         f.write(f"BINGX_API_SECRET={req.api_secret.strip()}\n")
-    state.mode = "LIVE TRADING"
+    state.bingx_client = BingXAPIClient(req.api_key.strip(), req.api_secret.strip())
     return {"status": "success", "message": "Đã lưu BingX API Keys an toàn vào .env cục bộ"}
 
 INTERVAL_MAP = {

@@ -668,11 +668,18 @@
         <span class="mexc-badge" style="background: #0052ff; color: #fff;">BingX</span>
         <span>AI SNIPER PRO MAX</span>
       </div>
-      <div class="badge-live" id="status-badge">BINGX SWAP LIVE</div>
+      <div class="badge-live" id="status-badge">BINGX SWAP (DEMO)</div>
     </div>
     <div class="top-actions">
-      <button class="btn btn-dark" onclick="resetDemoAccount()"><i class="fas fa-rotate-left"></i> Reset Vốn $1,000</button>
+      <!-- NÚT CHUYỂN ĐỔI CHẾ ĐỘ LIVE / DEMO -->
+      <button class="btn" id="btn-mode-toggle" onclick="toggleTradingMode()" style="background: linear-gradient(135deg, #f6465d, #dc2626); color: #fff; font-weight: 700; border: none; box-shadow: 0 0 12px rgba(246, 70, 93, 0.4); display: flex; align-items: center; gap: 7px; padding: 7px 14px; cursor: pointer;">
+        <i class="fas fa-tower-broadcast"></i> <span id="btn-mode-label">BẬT CHẾ ĐỘ LIVE</span>
+      </button>
+      <button class="btn btn-dark" id="btn-sync-balance" onclick="syncLiveBalance()" style="display: none;" title="Đồng bộ số dư ví thực tế từ sàn BingX">
+        <i class="fas fa-arrows-rotate"></i> Đồng Bộ Vốn
+      </button>
       <button class="btn btn-dark" onclick="openApiModal()"><i class="fas fa-key"></i> Cài Đặt API Key</button>
+      <button class="btn btn-dark" id="btn-reset-demo" onclick="resetDemoAccount()"><i class="fas fa-rotate-left"></i> Reset Vốn $1,000</button>
       <button class="btn btn-primary" id="btn-toggle-run" onclick="toggleBotRun()"><i class="fas fa-pause"></i> Tạm Dừng Bot</button>
       <button class="btn btn-dark" onclick="runBacktestModal()"><i class="fas fa-bolt"></i> Kiểm Thử 4 Cấu Hình</button>
     </div>
@@ -903,12 +910,15 @@
     <div class="card">
       <div class="card-header">
         <span><i class="fas fa-shield-halved" style="color: #0ecb81;"></i> QUẢN TRỊ SINH MỆNH</span>
-        <span style="font-size: 11px; color: var(--text-muted);" id="lbl-mode">DEMO / PAPER TRADING</span>
+        <span style="font-size: 11px; color: var(--text-muted); cursor: pointer;" id="lbl-mode" onclick="toggleTradingMode()">DEMO / PAPER TRADING <span style="color:#0ecb81; font-weight:700;">[BẬT LIVE]</span></span>
       </div>
       <div class="card-body">
         <div class="metric-row">
           <span class="metric-label">Số dư khả dụng (Balance)</span>
-          <span class="metric-value" id="val-balance">$1,000.00</span>
+          <span class="metric-value">
+            <span id="val-balance">$1,000.00</span>
+            <button id="btn-quick-sync" onclick="syncLiveBalance()" style="display:none; background:none; border:none; color:#2962ff; cursor:pointer; font-size:11px; margin-left:6px;" title="Cập nhật số dư BingX"><i class="fas fa-arrows-rotate"></i></button>
+          </span>
         </div>
         <div class="metric-row">
           <span class="metric-label">Tổng tài sản thực (Equity)</span>
@@ -995,27 +1005,33 @@
 
   </section>
 
-  <!-- MODAL API KEY -->
-  <div class="modal-backdrop" id="apiModal">
-    <div class="modal-content">
-      <div class="modal-title">
-        <span><i class="fas fa-key" style="color:#0052ff;"></i> Cài Đặt API Key BingX</span>
-        <i class="fas fa-xmark" style="cursor:pointer; color:var(--text-muted);" onclick="closeApiModal()"></i>
+  <!-- MODAL API KEY & BẬT LIVE -->
+  <div class="modal-backdrop" id="apiModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); z-index:9999; backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+    <div class="modal-content" style="background:#0d1117; border:1px solid #30363d; border-radius:12px; width:90%; max-width:520px; box-shadow:0 12px 36px rgba(0,0,0,0.6); overflow:hidden; padding:22px;">
+      <div class="modal-title" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <span style="font-weight:700; font-size:15px; color:#e6edf3; display:flex; align-items:center; gap:8px;">
+          <i class="fas fa-tower-broadcast" style="color:#f6465d;"></i> KẾT NỐI BINGX & BẬT CHẾ ĐỘ LIVE
+        </span>
+        <i class="fas fa-xmark" style="cursor:pointer; color:var(--text-muted); font-size:18px;" onclick="closeApiModal()"></i>
       </div>
-      <p style="font-size:11px; color:var(--text-muted); margin-bottom:14px; line-height:1.5;">
-        API Key được lưu an toàn trực tiếp vào file <code>.env</code> cục bộ trên máy tính của bạn, không gửi qua bất kỳ bên thứ 3 nào.
-      </p>
-      <div class="form-group">
-        <label>BingX API Key (Access Key)</label>
-        <input type="text" id="input-api-key" placeholder="Nhập API Key BingX của bạn...">
+      <div style="background:rgba(56,139,253,0.1); border:1px solid rgba(56,139,253,0.3); border-radius:6px; padding:10px 14px; margin-bottom:16px; font-size:12px; color:#58a6ff; line-height:1.5;">
+        <i class="fas fa-shield-halved"></i> <b>Bảo Mật An Toàn:</b> API Key được lưu trực tiếp vào file <code>.env</code> trên máy của bạn. Chỉ bật quyền <b>"Hợp đồng vĩnh viễn" (Perpetual Futures)</b>, <u>tuyệt đối KHÔNG cấp quyền Rút tiền (Withdrawal)</u>!
       </div>
-      <div class="form-group">
-        <label>BingX Secret Key</label>
-        <input type="password" id="input-api-secret" placeholder="••••••••••••••••">
+      <div class="form-group" style="margin-bottom:14px;">
+        <label style="display:block; font-size:12px; color:#8b949e; margin-bottom:6px; font-weight:600;">BINGX API KEY (Access Key)</label>
+        <input type="text" id="input-api-key" placeholder="Nhập API Key BingX của bạn..." style="width:100%; background:#090c13; border:1px solid #30363d; border-radius:6px; padding:10px 12px; color:#e6edf3; font-family:'JetBrains Mono',monospace; font-size:12px; box-sizing:border-box;">
       </div>
-      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
-        <button class="btn btn-dark" onclick="closeApiModal()">Hủy</button>
-        <button class="btn btn-primary" onclick="saveApiKeys()"><i class="fas fa-floppy-disk"></i> Lưu Vào Máy</button>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label style="display:block; font-size:12px; color:#8b949e; margin-bottom:6px; font-weight:600;">BINGX SECRET KEY</label>
+        <input type="password" id="input-api-secret" placeholder="Nhập Secret Key BingX..." style="width:100%; background:#090c13; border:1px solid #30363d; border-radius:6px; padding:10px 12px; color:#e6edf3; font-family:'JetBrains Mono',monospace; font-size:12px; box-sizing:border-box;">
+      </div>
+      <div id="modal-api-alert" style="display:none; padding:10px 12px; border-radius:6px; margin-bottom:14px; font-size:12px; font-weight:500;"></div>
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px; flex-wrap:wrap;">
+        <button class="btn btn-dark" onclick="closeApiModal()" style="padding:8px 14px;">Hủy</button>
+        <button class="btn btn-dark" onclick="saveApiKeys()" style="padding:8px 14px;"><i class="fas fa-floppy-disk"></i> Chỉ Lưu Keys</button>
+        <button class="btn" id="btn-save-and-live" onclick="submitLiveConnect()" style="background:linear-gradient(135deg, #0ecb81, #059669); color:#fff; font-weight:700; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+          <i class="fas fa-arrows-rotate"></i> Đồng Bộ Vốn & Bật Live
+        </button>
       </div>
     </div>
   </div>
@@ -1188,9 +1204,64 @@
       if (d.high_24h) document.getElementById('header-high').innerText = d.high_24h.toFixed(1);
       if (d.low_24h) document.getElementById('header-low').innerText = d.low_24h.toFixed(1);
 
-      // 2. Financial Metrics
+      // 2. Financial Metrics & LIVE Mode UI sync
       document.getElementById('val-balance').innerText = '$' + (d.balance || 1000).toFixed(2);
       document.getElementById('val-equity').innerText = '$' + (d.equity || 1000).toFixed(2);
+
+      const isLive = d.is_live || (d.mode === "LIVE TRADING");
+      const btnModeToggle = document.getElementById('btn-mode-toggle');
+      const btnModeLabel = document.getElementById('btn-mode-label');
+      const btnSync = document.getElementById('btn-sync-balance');
+      const statusBadge = document.getElementById('status-badge');
+      const lblMode = document.getElementById('lbl-mode');
+      const btnQuickSync = document.getElementById('btn-quick-sync');
+      const btnResetDemo = document.getElementById('btn-reset-demo');
+
+      if (isLive) {
+        if (btnModeToggle) {
+          btnModeToggle.className = 'btn';
+          btnModeToggle.style.background = '#21262d';
+          btnModeToggle.style.border = '1px solid #30363d';
+          btnModeToggle.style.color = '#8b949e';
+          btnModeToggle.style.boxShadow = 'none';
+        }
+        if (btnModeLabel) btnModeLabel.innerHTML = 'Chuyển Về DEMO';
+        if (btnSync) btnSync.style.display = 'inline-flex';
+        if (btnQuickSync) btnQuickSync.style.display = 'inline-block';
+        if (btnResetDemo) btnResetDemo.style.display = 'none';
+        
+        if (statusBadge) {
+          statusBadge.innerHTML = '<span class="live-dot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#f6465d; margin-right:5px; animation:pulse 1.2s infinite;"></span> BINGX SWAP LIVE (TIỀN THẬT)';
+          statusBadge.style.background = 'rgba(246, 70, 93, 0.15)';
+          statusBadge.style.color = '#f6465d';
+          statusBadge.style.border = '1px solid rgba(246, 70, 93, 0.3)';
+        }
+        if (lblMode) {
+          lblMode.innerHTML = '<span style="color:#0ecb81; font-weight:700;"><i class="fas fa-satellite-dish"></i> BINGX LIVE TRADING</span> <span style="color:#8b949e; cursor:pointer;" onclick="toggleTradingMode()">[Về Demo]</span>';
+        }
+      } else {
+        if (btnModeToggle) {
+          btnModeToggle.className = 'btn';
+          btnModeToggle.style.background = 'linear-gradient(135deg, #f6465d, #dc2626)';
+          btnModeToggle.style.border = 'none';
+          btnModeToggle.style.color = '#fff';
+          btnModeToggle.style.boxShadow = '0 0 12px rgba(246, 70, 93, 0.4)';
+        }
+        if (btnModeLabel) btnModeLabel.innerHTML = 'BẬT CHẾ ĐỘ LIVE';
+        if (btnSync) btnSync.style.display = 'none';
+        if (btnQuickSync) btnQuickSync.style.display = 'none';
+        if (btnResetDemo) btnResetDemo.style.display = 'inline-flex';
+
+        if (statusBadge) {
+          statusBadge.innerHTML = 'BINGX SWAP (DEMO)';
+          statusBadge.style.background = 'rgba(0, 82, 255, 0.15)';
+          statusBadge.style.color = '#58a6ff';
+          statusBadge.style.border = '1px solid rgba(56, 139, 253, 0.3)';
+        }
+        if (lblMode) {
+          lblMode.innerHTML = 'DEMO / PAPER TRADING <span style="color:#0ecb81; cursor:pointer; font-weight:700;" onclick="toggleTradingMode()">[BẬT LIVE]</span>';
+        }
+      }
       
       const pnl = d.net_pnl || 0;
       const roi = d.roi_pct || 0;
@@ -1671,11 +1742,111 @@
       btn.innerHTML = isPause ? '<i class="fas fa-play"></i> Tiếp Tục Bot' : '<i class="fas fa-pause"></i> Tạm Dừng Bot';
     }
 
-    function openApiModal() { document.getElementById('apiModal').style.display = 'flex'; }
-    function closeApiModal() { document.getElementById('apiModal').style.display = 'none'; }
+    function openApiModal() { 
+      const modal = document.getElementById('apiModal');
+      if (modal) modal.style.display = 'flex'; 
+    }
+
+    function closeApiModal() { 
+      const modal = document.getElementById('apiModal');
+      if (modal) modal.style.display = 'none'; 
+      const alertBox = document.getElementById('modal-api-alert');
+      if (alertBox) alertBox.style.display = 'none';
+    }
+
+    async function toggleTradingMode() {
+      try {
+        const resp = await fetch('/api/account_info');
+        const info = await resp.json();
+        
+        if (info.is_live) {
+          if (!confirm('Bạn có chắc chắn muốn rời chế độ LIVE và chuyển về DEMO (Paper Trading) không?')) return;
+          const r = await fetch('/api/set_mode', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({mode: 'DEMO'})
+          });
+          const res = await r.json();
+          showToast(res.message, 'info');
+        } else {
+          if (info.has_keys) {
+            if (confirm('Đã tìm thấy API Key BingX đã lưu trên máy. Bạn có muốn kích hoạt CHẾ ĐỘ LIVE và đồng bộ số dư tài khoản thật ngay bây giờ không?')) {
+              showToast('Đang kết nối sàn BingX và đồng bộ số dư...', 'info');
+              const r = await fetch('/api/set_mode', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({mode: 'LIVE'})
+              });
+              const res = await r.json();
+              if (res.status === 'success') {
+                showToast(res.message, 'success');
+              } else {
+                alert(res.message);
+                openApiModal();
+              }
+            }
+          } else {
+            openApiModal();
+          }
+        }
+      } catch (err) {
+        openApiModal();
+      }
+    }
+
+    async function submitLiveConnect() {
+      const k = document.getElementById('input-api-key').value.trim();
+      const s = document.getElementById('input-api-secret').value.trim();
+      const alertBox = document.getElementById('modal-api-alert');
+      const btn = document.getElementById('btn-save-and-live');
+
+      if (!k || !s) {
+        if (alertBox) {
+          alertBox.style.display = 'block';
+          alertBox.style.background = 'rgba(246,70,93,0.15)';
+          alertBox.style.color = '#f6465d';
+          alertBox.innerText = 'Vui lòng điền đầy đủ cả API Key và Secret Key!';
+        }
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang kết nối BingX...';
+
+      try {
+        const r = await fetch('/api/set_mode', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({mode: 'LIVE', api_key: k, api_secret: s})
+        });
+        const res = await r.json();
+        if (res.status === 'success') {
+          closeApiModal();
+          showToast(res.message, 'success');
+        } else {
+          if (alertBox) {
+            alertBox.style.display = 'block';
+            alertBox.style.background = 'rgba(246,70,93,0.15)';
+            alertBox.style.color = '#f6465d';
+            alertBox.innerText = res.message;
+          }
+        }
+      } catch (e) {
+        if (alertBox) {
+          alertBox.style.display = 'block';
+          alertBox.style.background = 'rgba(246,70,93,0.15)';
+          alertBox.style.color = '#f6465d';
+          alertBox.innerText = 'Lỗi gửi yêu cầu: ' + e;
+        }
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-arrows-rotate"></i> Đồng Bộ Vốn & Bật Live';
+      }
+    }
+
     async function saveApiKeys() {
-      const k = document.getElementById('input-api-key').value;
-      const s = document.getElementById('input-api-secret').value;
+      const k = document.getElementById('input-api-key').value.trim();
+      const s = document.getElementById('input-api-secret').value.trim();
       if (!k || !s) return alert('Vui lòng nhập đầy đủ Key và Secret!');
       await fetch('/api/save_keys', {
         method: 'POST',
@@ -1684,6 +1855,51 @@
       });
       alert('Đã lưu API Keys thành công vào file .env trên máy bạn!');
       closeApiModal();
+    }
+
+    async function syncLiveBalance() {
+      showToast('Đang truy vấn số dư mới nhất từ sàn BingX...', 'info');
+      try {
+        const r = await fetch('/api/sync_balance', {method: 'POST'});
+        const res = await r.json();
+        if (res.status === 'success') {
+          showToast(res.message, 'success');
+        } else {
+          showToast(res.message, 'error');
+        }
+      } catch (e) {
+        showToast('Lỗi đồng bộ: ' + e, 'error');
+      }
+    }
+
+    function showToast(msg, type='info') {
+      let toast = document.getElementById('toast-notification');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast-notification';
+        toast.style.position = 'fixed';
+        toast.style.top = '20px';
+        toast.style.right = '20px';
+        toast.style.zIndex = '100000';
+        toast.style.padding = '12px 18px';
+        toast.style.borderRadius = '8px';
+        toast.style.fontSize = '13px';
+        toast.style.fontWeight = '600';
+        toast.style.boxShadow = '0 8px 24px rgba(0,0,0,0.5)';
+        toast.style.transition = 'all 0.3s ease';
+        toast.style.fontFamily = "'Inter', sans-serif";
+        document.body.appendChild(toast);
+      }
+      toast.style.background = type === 'success' ? '#0ecb81' : (type === 'error' ? '#f6465d' : '#2962ff');
+      toast.style.color = '#fff';
+      toast.innerHTML = (type === 'success' ? '<i class="fas fa-check-circle"></i> ' : '<i class="fas fa-info-circle"></i> ') + msg;
+      toast.style.display = 'block';
+      toast.style.opacity = '1';
+      clearTimeout(window.toastTimer);
+      window.toastTimer = setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.style.display = 'none', 300);
+      }, 3500);
     }
 
     async function runBacktestModal() {
