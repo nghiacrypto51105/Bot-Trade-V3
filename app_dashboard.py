@@ -176,7 +176,7 @@ def load_bingx_keys() -> Tuple[str, str]:
 class TradingEngineState:
     def __init__(self):
         self.symbol = "XAU_USDT"
-        self.mode = "DEMO (Paper Trading)"
+        self.mode = "LIVE TRADING"
         self.is_running = True
         self.initial_balance = 1000.0
         self.balance = 1000.0

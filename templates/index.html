@@ -377,18 +377,9 @@
       text-shadow: 0 1px 3px rgba(0,0,0,0.8);
     }
 
-    /* WATERMARK DEMO TRADING (IMAGE 1) */
+    /* WATERMARK DEMO TRADING - HIDDEN */
     .demo-trading-watermark {
-      position: absolute;
-      bottom: 50px;
-      right: 120px;
-      font-size: 42px;
-      font-weight: 800;
-      color: rgba(255, 255, 255, 0.04);
-      pointer-events: none;
-      user-select: none;
-      font-family: 'Inter', sans-serif;
-      letter-spacing: 2px;
+      display: none !important;
     }
 
     /* TRADINGVIEW IFRAME CONTAINER */
@@ -668,8 +659,8 @@
         <span class="mexc-badge" style="background: #0052ff; color: #fff;">BingX</span>
         <span>AI SNIPER PRO MAX</span>
       </div>
-      <div class="badge-live" id="status-badge" style="background: rgba(0, 82, 255, 0.15); color: #58a6ff; border: 1px solid rgba(56, 139, 253, 0.3); font-weight:700; display:flex; align-items:center; gap:6px;">
-        <i class="fas fa-shield-halved"></i> <span>CHẾ ĐỘ THỬ NGHIỆM (DEMO)</span>
+      <div class="badge-live" id="status-badge" style="background: rgba(14, 203, 129, 0.15); color: #0ecb81; border: 1px solid rgba(14, 203, 129, 0.3); font-weight:700; display:flex; align-items:center; gap:6px;">
+        <span class="live-dot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#0ecb81; animation:pulse 1.2s infinite;"></span> <span>BINGX LIVE TRADING</span>
       </div>
     </div>
 
@@ -687,20 +678,11 @@
     </div>
 
     <div class="top-actions">
-      <!-- NÚT MỞ LỆNH THỬ NGHIỆM -->
-      <button class="btn" id="btn-test-trade" onclick="switchTab('paper')" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; font-weight: 700; border: none; box-shadow: 0 0 10px rgba(37, 99, 235, 0.35); display: flex; align-items: center; gap: 6px; padding: 7px 13px; cursor: pointer;" title="Chuyển sang tab Paper Trading">
-        <i class="fas fa-flask"></i> <span>MỞ PAPER TRADING</span>
-      </button>
-
-      <!-- NÚT CHUYỂN ĐỔI CHẾ ĐỘ LIVE / DEMO -->
-      <button class="btn" id="btn-mode-toggle" onclick="toggleTradingMode()" style="background: #1c2230; color: #f6465d; font-weight: 700; border: 1px solid rgba(246, 70, 93, 0.4); display: flex; align-items: center; gap: 7px; padding: 7px 14px; cursor: pointer;">
-        <i class="fas fa-tower-broadcast"></i> <span id="btn-mode-label">🔴 CHUYỂN SANG LIVE (KHI TRADE THẬT)</span>
-      </button>
-      <button class="btn btn-dark" id="btn-sync-balance" onclick="syncLiveBalance()" style="display: none;" title="Đồng bộ số dư ví thực tế từ sàn BingX">
-        <i class="fas fa-arrows-rotate"></i> Đồng Bộ Vốn
+      <!-- NÚT ĐỒNG BỘ VỐN TỪ SÀN BINGX -->
+      <button class="btn" id="btn-sync-balance" onclick="syncLiveBalance()" style="background: linear-gradient(135deg, #0ecb81, #059669); color: #fff; font-weight: 700; border: none; box-shadow: 0 0 10px rgba(14, 203, 129, 0.3); display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; cursor: pointer;" title="Đồng bộ số dư ví thực tế từ sàn BingX">
+        <i class="fas fa-arrows-rotate"></i> <span>Đồng Bộ Vốn BingX</span>
       </button>
       <button class="btn btn-dark" onclick="openApiModal()"><i class="fas fa-key"></i> Cài Đặt API Key</button>
-      <button class="btn btn-dark" id="btn-reset-demo" onclick="resetDemoAccount()"><i class="fas fa-rotate-left"></i> Reset Vốn $1,000</button>
       <button class="btn btn-primary" id="btn-toggle-run" onclick="toggleBotRun()"><i class="fas fa-pause"></i> Tạm Dừng Bot</button>
       <button class="btn btn-dark" onclick="runBacktestModal()"><i class="fas fa-bolt"></i> Kiểm Thử 4 Cấu Hình</button>
     </div>
@@ -765,9 +747,9 @@
         <i class="fas fa-key" style="margin-right:6px;"></i> Cài Đặt BingX API
       </div>
     </div>
-    <a href="#" class="mexc-promo-link" onclick="switchTab('paper'); return false;">
-      <i class="fas fa-bolt" style="color: #f0ad4e;"></i>
-      <span>Trải nghiệm Paper Trading Vàng 16x không rủi ro &gt;</span>
+    <a href="#" class="mexc-promo-link" onclick="openApiModal(); return false;">
+      <i class="fas fa-shield-halved" style="color: #0ecb81;"></i>
+      <span>Hệ thống giao dịch tự động F8 Sniper Pro Max - BingX Live Perpetual Futures &gt;</span>
     </a>
   </section>
 
@@ -849,8 +831,6 @@
         <span>MA(10): <span style="color:var(--color-ma10);" id="ov-vol-ma10">38.9</span></span>
       </div>
 
-      <!-- WATERMARK DEMO TRADING (IMAGE 1) -->
-      <div class="demo-trading-watermark">Demo Trading</div>
 
       <!-- CANVAS ELEMENT -->
       <canvas id="mexcCanvas"></canvas>
@@ -942,14 +922,14 @@
     <div class="card">
       <div class="card-header">
         <span><i class="fas fa-shield-halved" style="color: #0ecb81;"></i> QUẢN TRỊ SINH MỆNH</span>
-        <span style="font-size: 11px; color: var(--text-muted); cursor: pointer;" id="lbl-mode" onclick="toggleTradingMode()">DEMO / PAPER TRADING <span style="color:#0ecb81; font-weight:700;">[BẬT LIVE]</span></span>
+        <span style="font-size: 11px;" id="lbl-mode"><span style="color:#0ecb81; font-weight:700;"><i class="fas fa-satellite-dish"></i> BINGX LIVE TRADING</span></span>
       </div>
       <div class="card-body">
         <div class="metric-row">
           <span class="metric-label">Số dư khả dụng (Balance)</span>
           <span class="metric-value">
             <span id="val-balance">$1,000.00</span>
-            <button id="btn-quick-sync" onclick="syncLiveBalance()" style="display:none; background:none; border:none; color:#2962ff; cursor:pointer; font-size:11px; margin-left:6px;" title="Cập nhật số dư BingX"><i class="fas fa-arrows-rotate"></i></button>
+            <button id="btn-quick-sync" onclick="syncLiveBalance()" style="display:inline-block; background:none; border:none; color:#2962ff; cursor:pointer; font-size:11px; margin-left:6px;" title="Cập nhật số dư BingX"><i class="fas fa-arrows-rotate"></i></button>
           </span>
         </div>
         <div class="metric-row">
@@ -1556,63 +1536,22 @@
       document.getElementById('val-balance').innerText = '$' + (d.balance || 1000).toFixed(2);
       document.getElementById('val-equity').innerText = '$' + (d.equity || 1000).toFixed(2);
 
-      const isLive = d.is_live || (d.mode === "LIVE TRADING");
-      const btnModeToggle = document.getElementById('btn-mode-toggle');
-      const btnModeLabel = document.getElementById('btn-mode-label');
-      const btnSync = document.getElementById('btn-sync-balance');
       const statusBadge = document.getElementById('status-badge');
       const lblMode = document.getElementById('lbl-mode');
+      const btnSync = document.getElementById('btn-sync-balance');
       const btnQuickSync = document.getElementById('btn-quick-sync');
-      const btnResetDemo = document.getElementById('btn-reset-demo');
 
-      const btnTestTrade = document.getElementById('btn-test-trade');
-
-      if (isLive) {
-        if (btnModeToggle) {
-          btnModeToggle.className = 'btn';
-          btnModeToggle.style.background = '#21262d';
-          btnModeToggle.style.border = '1px solid #30363d';
-          btnModeToggle.style.color = '#8b949e';
-          btnModeToggle.style.boxShadow = 'none';
-        }
-        if (btnModeLabel) btnModeLabel.innerHTML = '🛡️ VỀ CHẾ ĐỘ THỬ NGHIỆM';
-        if (btnSync) btnSync.style.display = 'inline-flex';
-        if (btnQuickSync) btnQuickSync.style.display = 'inline-block';
-        if (btnResetDemo) btnResetDemo.style.display = 'none';
-        if (btnTestTrade) btnTestTrade.style.display = 'none';
-        
-        if (statusBadge) {
-          statusBadge.innerHTML = '<span class="live-dot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#f6465d; margin-right:5px; animation:pulse 1.2s infinite;"></span> BINGX SWAP LIVE (TIỀN THẬT)';
-          statusBadge.style.background = 'rgba(246, 70, 93, 0.15)';
-          statusBadge.style.color = '#f6465d';
-          statusBadge.style.border = '1px solid rgba(246, 70, 93, 0.3)';
-        }
-        if (lblMode) {
-          lblMode.innerHTML = '<span style="color:#0ecb81; font-weight:700;"><i class="fas fa-satellite-dish"></i> BINGX LIVE TRADING</span> <span style="color:#8b949e; cursor:pointer;" onclick="toggleTradingMode()">[Về Thử Nghiệm]</span>';
-        }
-      } else {
-        if (btnModeToggle) {
-          btnModeToggle.className = 'btn';
-          btnModeToggle.style.background = '#1c2230';
-          btnModeToggle.style.border = '1px solid rgba(246, 70, 93, 0.4)';
-          btnModeToggle.style.color = '#f6465d';
-          btnModeToggle.style.boxShadow = 'none';
-        }
-        if (btnModeLabel) btnModeLabel.innerHTML = '🔴 CHUYỂN SANG LIVE (KHI TRADE THẬT)';
-        if (btnSync) btnSync.style.display = 'none';
-        if (btnQuickSync) btnQuickSync.style.display = 'none';
-        if (btnResetDemo) btnResetDemo.style.display = 'inline-flex';
-        if (btnTestTrade) btnTestTrade.style.display = 'inline-flex';
-
-        if (statusBadge) {
-          statusBadge.innerHTML = '<i class="fas fa-shield-halved" style="color:#58a6ff;"></i> CHẾ ĐỘ THỬ NGHIỆM (DEMO)';
-          statusBadge.style.background = 'rgba(0, 82, 255, 0.15)';
-          statusBadge.style.color = '#58a6ff';
-          statusBadge.style.border = '1px solid rgba(56, 139, 253, 0.3)';
-        }
-        if (lblMode) {
-          lblMode.innerHTML = 'DEMO (THỬ NGHIỆM) <span style="color:#f6465d; cursor:pointer; font-weight:700;" onclick="toggleTradingMode()">[CHUYỂN LIVE]</span>';
-        }
+      if (btnSync) btnSync.style.display = 'inline-flex';
+      if (btnQuickSync) btnQuickSync.style.display = 'inline-block';
+      
+      if (statusBadge) {
+        statusBadge.innerHTML = '<span class="live-dot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#0ecb81; margin-right:5px; animation:pulse 1.2s infinite;"></span> BINGX LIVE TRADING';
+        statusBadge.style.background = 'rgba(14, 203, 129, 0.15)';
+        statusBadge.style.color = '#0ecb81';
+        statusBadge.style.border = '1px solid rgba(14, 203, 129, 0.3)';
+      }
+      if (lblMode) {
+        lblMode.innerHTML = '<span style="color:#0ecb81; font-weight:700;"><i class="fas fa-satellite-dish"></i> BINGX LIVE TRADING</span>';
       }
       
       const pnl = d.net_pnl || 0;
@@ -1682,35 +1621,25 @@
         badge.className = 'pos-side-badge';
         badge.style.background = '#1c2230';
         badge.style.color = 'var(--text-muted)';
-        badge.innerText = 'CHƯA CÓ LỆNH';
+        badge.innerText = 'CHƯA VÀO LỆNH';
         container.innerHTML = `
-          <div style="padding: 14px 6px; text-align: center;">
-            <div style="margin-bottom: 8px;">
-              <span style="font-size: 11px; font-weight: 700; color: #58a6ff; background: rgba(56, 139, 253, 0.15); border: 1px solid rgba(56, 139, 253, 0.3); padding: 3px 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 5px;">
-                <i class="fas fa-shield-halved"></i> CHẾ ĐỘ THỬ NGHIỆM (DEMO)
-              </span>
+          <div style="text-align: center; padding: 32px 16px; color: var(--text-muted);">
+            <div style="width: 52px; height: 52px; margin: 0 auto 14px; border-radius: 50%; background: rgba(14, 203, 129, 0.08); border: 1px solid rgba(14, 203, 129, 0.2); display: flex; align-items: center; justify-content: center;">
+              <i class="fas fa-crosshairs" style="font-size: 22px; color: #0ecb81;"></i>
             </div>
-            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
-              Hệ thống đang rình mồi tín hiệu A+. Bạn có thể <b>mở ngay lệnh thử nghiệm</b> để quan sát lệnh đang chạy, theo dõi PnL trực tiếp và trải nghiệm tính năng chốt lời TP1 & dời SL:
+            <div style="font-size: 13px; font-weight: 700; color: #e6edf3; margin-bottom: 6px;">
+              CHƯA CÓ LỆNH ĐANG CHẠY
+            </div>
+            <p style="font-size: 12px; color: #8b949e; line-height: 1.6; max-width: 320px; margin: 0 auto;">
+              Bot AI đang quét nến BingX 15m realtime, phục kích tìm kiếm điểm vào lệnh A+ chuẩn xác theo kỷ luật F8 Sniper.
             </p>
-            <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 10px;">
-              <button onclick="executeTestTrade('LONG')" class="btn" style="flex: 1; max-width: 145px; background: linear-gradient(135deg, #0ecb81, #059669); color: #fff; font-weight: 700; padding: 9px 8px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; box-shadow: 0 4px 10px rgba(14,203,129,0.3);">
-                <i class="fas fa-arrow-trend-up"></i> Thử Lệnh LONG
-              </button>
-              <button onclick="executeTestTrade('SHORT')" class="btn" style="flex: 1; max-width: 145px; background: linear-gradient(135deg, #f6465d, #dc2626); color: #fff; font-weight: 700; padding: 9px 8px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; box-shadow: 0 4px 10px rgba(246,70,93,0.3);">
-                <i class="fas fa-arrow-trend-down"></i> Thử Lệnh SHORT
-              </button>
-            </div>
-            <div style="font-size: 11px; color: #6e7681;">
-              <i>* Mô phỏng 100% an toàn, không rủi ro tiền thật!</i>
-            </div>
           </div>
         `;
         return;
       }
 
       badge.className = 'pos-side-badge ' + (pos.side === 'LONG' ? 'pos-long' : 'pos-short');
-      badge.innerText = (pos.is_test ? '🧪 THỬ NGHIỆM: ' : '') + pos.side + ' 16x';
+      badge.innerText = pos.side + ' 16x';
 
       const unPnl = pos.unrealized_pnl || 0;
       const pnlPct = pos.pnl_pct || 0;
