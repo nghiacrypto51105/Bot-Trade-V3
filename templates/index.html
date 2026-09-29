@@ -925,18 +925,11 @@
       </div>
       <div class="card-body">
         <div class="metric-row">
-          <span class="metric-label" id="lbl-balance-type">Số dư mô phỏng (Demo Balance)</span>
+          <span class="metric-label">Số dư khả dụng (Balance)</span>
           <span class="metric-value">
             <span id="val-balance">$1,000.00</span>
-            <button id="btn-quick-sync" onclick="syncLiveBalance()" style="display:none; background:none; border:none; color:#0ecb81; cursor:pointer; font-size:12px; margin-left:6px;" title="Cập nhật số dư BingX"><i class="fas fa-arrows-rotate"></i></button>
+            <button id="btn-quick-sync" onclick="syncLiveBalance()" style="display:inline-block; background:none; border:none; color:#0ecb81; cursor:pointer; font-size:12px; margin-left:6px;" title="Cập nhật số dư BingX"><i class="fas fa-arrows-rotate"></i></button>
           </span>
-        </div>
-        <!-- QUICK DEMO RESETS -->
-        <div id="paper-quick-resets" style="display: flex; gap: 6px; margin: 4px 0 10px 0; align-items: center;">
-          <span style="font-size: 10px; color: var(--text-muted);">Đổi vốn thử:</span>
-          <button onclick="quickResetBalance(1000)" class="btn btn-dark" style="font-size: 10px; padding: 2px 7px;">$1,000</button>
-          <button onclick="quickResetBalance(5000)" class="btn btn-dark" style="font-size: 10px; padding: 2px 7px;">$5,000</button>
-          <button onclick="quickResetBalance(10000)" class="btn btn-dark" style="font-size: 10px; padding: 2px 7px;">$10,000</button>
         </div>
         <div class="metric-row">
           <span class="metric-label">Tổng tài sản thực (Equity)</span>
@@ -1009,217 +1002,6 @@
 
   </section>
   </div><!-- /view-chart-container -->
-
-  <!-- TAB VIEW 2: PAPER TRADING STUDIO -->
-  <div id="view-paper-container" style="display: none; padding: 16px; max-width: 1440px; margin: 0 auto;">
-    
-    <!-- PAPER TOP STATS BAR -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px;">
-      <div class="card" style="padding: 14px;">
-        <div style="font-size: 11px; color: var(--text-muted); display:flex; justify-content:space-between; align-items:center;">
-          <span>SỐ DƯ KHẢ DỤNG DEMO</span>
-          <span style="background: rgba(88, 166, 255, 0.15); color: #58a6ff; padding: 2px 6px; border-radius: 4px; font-weight:700; font-size:10px;">VỐN MÔ PHỎNG</span>
-        </div>
-        <div style="font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 800; color: #fff; margin-top: 6px;" id="paper-stat-balance">$1,000.00</div>
-        <div style="display:flex; gap:6px; margin-top:8px;">
-          <button onclick="quickResetBalance(1000)" class="btn btn-dark" style="font-size:11px; padding:3px 8px;" title="Đặt lại $1,000">$1,000</button>
-          <button onclick="quickResetBalance(5000)" class="btn btn-dark" style="font-size:11px; padding:3px 8px;" title="Đặt lại $5,000">$5,000</button>
-          <button onclick="quickResetBalance(10000)" class="btn btn-dark" style="font-size:11px; padding:3px 8px;" title="Đặt lại $10,000">$10,000</button>
-        </div>
-      </div>
-
-      <div class="card" style="padding: 14px;">
-        <div style="font-size: 11px; color: var(--text-muted);">TỔNG TÀI SẢN THỰC (EQUITY)</div>
-        <div style="font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 800; color: #0ecb81; margin-top: 6px;" id="paper-stat-equity">$1,000.00</div>
-        <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">
-          Lãi ròng: <span id="paper-stat-net-pnl" style="font-weight:700; color: #0ecb81;">+$0.00 (+0.00%)</span>
-        </div>
-      </div>
-
-      <div class="card" style="padding: 14px;">
-        <div style="font-size: 11px; color: var(--text-muted);">GIÁ VÀNG BINGX REALTIME</div>
-        <div style="font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 800; color: #f0b90b; margin-top: 6px;" id="paper-stat-price">4,284.8</div>
-        <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">
-          Biến động 24h: <span id="paper-stat-change" style="font-weight:700; color: #0ecb81;">+0.00%</span>
-        </div>
-      </div>
-
-      <div class="card" style="padding: 14px;">
-        <div style="font-size: 11px; color: var(--text-muted);">HIỆU SUẤT CHIẾN LƯỢC F8</div>
-        <div style="font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 800; color: #58a6ff; margin-top: 6px;" id="paper-stat-winrate">69.6%</div>
-        <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">
-          Cắt lỗ: <span style="color:var(--color-red); font-weight:700;">-0.25%</span> | Khóa lãi: <span style="color:#0ecb81; font-weight:700;">+0.14%</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- PAPER TRADING MAIN SPLIT: ORDER TERMINAL & LIVE POSITION -->
-    <div style="display: grid; grid-template-columns: 460px 1fr; gap: 16px; margin-bottom: 16px;">
-      
-      <!-- BẢNG ĐẶT LỆNH PAPER TRADING -->
-      <div class="card" style="padding: 0;">
-        <div class="card-header" style="background:#0f131c; border-bottom:1px solid var(--border-color); padding:12px 16px;">
-          <span style="font-weight:700; font-size:13px; display:flex; align-items:center; gap:8px;">
-            <i class="fas fa-sliders" style="color:#58a6ff;"></i> BẢNG ĐẶT LỆNH PAPER TRADING
-          </span>
-          <span style="font-size:11px; color:#58a6ff; font-weight:700; background:rgba(88,166,255,0.12); padding:2px 8px; border-radius:4px;">
-            Mô Phỏng Giá Thật 100%
-          </span>
-        </div>
-        <div class="card-body" style="padding: 16px;">
-          
-          <!-- HƯỚNG LỆNH LONG / SHORT -->
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom: 16px;">
-            <button type="button" id="paper-btn-side-long" onclick="selectPaperSide('LONG')" style="padding: 12px; border-radius: 6px; font-weight: 800; font-size: 14px; border: 2px solid #0ecb81; background: rgba(14,203,129,0.2); color: #0ecb81; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;">
-              <i class="fas fa-arrow-trend-up"></i> MUA / LONG
-            </button>
-            <button type="button" id="paper-btn-side-short" onclick="selectPaperSide('SHORT')" style="padding: 12px; border-radius: 6px; font-weight: 800; font-size: 14px; border: 1px solid var(--border-color); background: #161b26; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;">
-              <i class="fas fa-arrow-trend-down"></i> BÁN / SHORT
-            </button>
-          </div>
-
-          <!-- LOẠI LỆNH & GIÁ THỊ TRƯỜNG -->
-          <div style="background: #090c12; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px 12px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: var(--text-muted); font-size: 12px;">Loại lệnh / Giá thị trường:</span>
-            <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px; color: #fff;">
-              MARKET (<span id="paper-display-cur-price" style="color: #f0b90b;">4,284.8</span> USDT)
-            </span>
-          </div>
-
-          <!-- ĐÒN BẨY (LEVERAGE) -->
-          <div style="margin-bottom: 14px;">
-            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
-              <span style="color:var(--text-muted); font-weight:600;">Đòn Bẩy (Leverage):</span>
-              <span id="paper-display-lev" style="font-weight:700; color:#58a6ff; font-family:'JetBrains Mono';">16x (Chuẩn F8 Sniper)</span>
-            </div>
-            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:6px;">
-              <button type="button" class="btn btn-dark paper-lev-btn" onclick="selectPaperLev(5, this)" style="padding:7px; font-size:11px; font-weight:700; justify-content:center;">5x</button>
-              <button type="button" class="btn btn-dark paper-lev-btn" onclick="selectPaperLev(10, this)" style="padding:7px; font-size:11px; font-weight:700; justify-content:center;">10x</button>
-              <button type="button" class="btn paper-lev-btn active" onclick="selectPaperLev(16, this)" style="padding:7px; font-size:11px; font-weight:700; justify-content:center; background:#2962ff; color:#fff;">16x</button>
-              <button type="button" class="btn btn-dark paper-lev-btn" onclick="selectPaperLev(20, this)" style="padding:7px; font-size:11px; font-weight:700; justify-content:center;">20x</button>
-            </div>
-          </div>
-
-          <!-- KÝ QUỸ (MARGIN ALLOCATION) -->
-          <div style="margin-bottom: 16px;">
-            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
-              <span style="color:var(--text-muted); font-weight:600;">Ký Quỹ Lệnh (Margin):</span>
-              <span id="paper-display-margin-val" style="font-weight:700; color:#0ecb81; font-family:'JetBrains Mono';">$500.00 (50%)</span>
-            </div>
-            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:6px; margin-bottom: 8px;">
-              <button type="button" class="btn btn-dark paper-margin-btn" onclick="selectPaperMarginPct(0.25, this)" style="padding:7px; font-size:11px; font-weight:700; justify-content:center;">25%</button>
-              <button type="button" class="btn paper-margin-btn active" onclick="selectPaperMarginPct(0.50, this)" style="padding:7px; font-size:11px; font-weight:700; justify-content:center; background:#2962ff; color:#fff;">50%</button>
-              <button type="button" class="btn btn-dark paper-margin-btn" onclick="selectPaperMarginPct(0.75, this)" style="padding:7px; font-size:11px; font-weight:700; justify-content:center;">75%</button>
-              <button type="button" class="btn btn-dark paper-margin-btn" onclick="selectPaperMarginPct(1.00, this)" style="padding:7px; font-size:11px; font-weight:700; justify-content:center;">100%</button>
-            </div>
-            <input type="number" id="paper-input-custom-margin" placeholder="Hoặc nhập số USDT tùy ý..." oninput="onCustomMarginInput(this.value)" style="width:100%; background:#090c13; border:1px solid #30363d; border-radius:6px; padding:9px 10px; color:#e6edf3; font-family:'JetBrains Mono',monospace; font-size:12px; box-sizing:border-box;">
-          </div>
-
-          <!-- THÔNG SỐ VỊ THẾ DỰ KIẾN (CHI TIẾT SL/TP TỰ ĐỘNG) -->
-          <div style="background:#090c12; border:1px solid var(--border-color); border-radius:6px; padding:12px; margin-bottom:16px; font-size:12px; line-height:1.7;">
-            <div style="display:flex; justify-content:space-between;">
-              <span style="color:var(--text-muted);">Giá trị vị thế (Notional):</span>
-              <span id="paper-prev-notional" style="font-family:'JetBrains Mono'; font-weight:700; color:#fff;">$8,000.00</span>
-            </div>
-            <div style="display:flex; justify-content:space-between;">
-              <span style="color:var(--text-muted);">Khối lượng hợp đồng:</span>
-              <span id="paper-prev-size" style="font-family:'JetBrains Mono'; font-weight:700; color:#fff;">1.867 oz</span>
-            </div>
-            <div style="display:flex; justify-content:space-between;">
-              <span style="color:var(--text-muted);">Cắt lỗ (SL -0.25%):</span>
-              <span id="paper-prev-sl" style="font-family:'JetBrains Mono'; font-weight:700; color:var(--color-red);">$4,274.09</span>
-            </div>
-            <div style="display:flex; justify-content:space-between;">
-              <span style="color:var(--text-muted);">Chốt lời 1 (TP1 +0.55%):</span>
-              <span id="paper-prev-tp1" style="font-family:'JetBrains Mono'; font-weight:700; color:#f0ad4e;">$4,308.37 (Chốt 50% & kéo SL)</span>
-            </div>
-            <div style="display:flex; justify-content:space-between;">
-              <span style="color:var(--text-muted);">Chốt lời 2 (TP2 +1.10%):</span>
-              <span id="paper-prev-tp2" style="font-family:'JetBrains Mono'; font-weight:700; color:var(--color-green);">$4,331.93 (Chốt 50% còn lại)</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; border-top:1px solid rgba(255,255,255,0.06); padding-top:6px; margin-top:4px;">
-              <span style="color:var(--text-muted);">Ước tính phí Taker (0.05%):</span>
-              <span id="paper-prev-fee" style="font-family:'JetBrains Mono'; font-weight:700; color:#8b949e;">$4.00 USDT</span>
-            </div>
-          </div>
-
-          <!-- NÚT VÀO LỆNH PAPER TRADING -->
-          <button type="button" id="paper-btn-submit-order" onclick="submitPaperOrder()" style="width:100%; background:linear-gradient(135deg, #0ecb81, #059669); color:#fff; font-weight:800; font-size:14px; padding:12px; border-radius:6px; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 14px rgba(14,203,129,0.35); transition:all 0.2s;">
-            <i class="fas fa-bolt"></i> <span id="paper-submit-label">VÀO LỆNH PAPER TRADING (LONG)</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- VỊ THẾ ĐANG CHẠY TRONG TAB PAPER TRADING -->
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <div class="card" style="flex:1;">
-          <div class="card-header" style="background:#0f131c; border-bottom:1px solid var(--border-color); padding:12px 16px;">
-            <span><i class="fas fa-crosshairs" style="color:#f0ad4e;"></i> VỊ THẾ PAPER TRADING ĐANG CHẠY</span>
-            <span id="paper-pos-badge" class="pos-side-badge" style="background:#1c2230; color:var(--text-muted);">CHƯA MỞ VỊ THẾ</span>
-          </div>
-          <div class="card-body" id="paper-pos-card-body" style="padding:16px;">
-            <div style="text-align:center; padding:35px 10px; color:var(--text-muted);">
-              <i class="fas fa-radar" style="font-size:32px; margin-bottom:10px; color:var(--text-sub);"></i>
-              <p style="font-size:13px; margin-bottom:14px;">Chưa có lệnh nào đang chạy. Bạn có thể đặt lệnh ở bảng bên trái hoặc chọn mở nhanh:</p>
-              <div style="display:flex; gap:10px; justify-content:center;">
-                <button onclick="executeTestTrade('LONG')" class="btn" style="background: linear-gradient(135deg, #0ecb81, #059669); color:#fff; font-weight:700; padding:9px 16px; border-radius:6px; border:none; cursor:pointer; display:flex; align-items:center; gap:6px;">
-                  <i class="fas fa-arrow-trend-up"></i> Mở Nhanh LONG
-                </button>
-                <button onclick="executeTestTrade('SHORT')" class="btn" style="background: linear-gradient(135deg, #f6465d, #dc2626); color:#fff; font-weight:700; padding:9px 16px; border-radius:6px; border:none; cursor:pointer; display:flex; align-items:center; gap:6px;">
-                  <i class="fas fa-arrow-trend-down"></i> Mở Nhanh SHORT
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- HƯỚNG DẪN CHIẾN THUẬT -->
-        <div class="card" style="padding:16px; background:#0d1117;">
-          <div style="font-weight:700; font-size:13px; color:#58a6ff; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-            <i class="fas fa-lightbulb"></i> BÍ KÍP QUẢN TRỊ SINH TỒN F8 SNIPER PRO MAX
-          </div>
-          <div style="font-size:12px; color:var(--text-muted); line-height:1.6;">
-            • <b>Đòn bẩy 16x + Ký quỹ 50%:</b> Thiết lập đòn bẩy tối ưu theo tỷ lệ Kelly để đạt 1.5% - 2.0%/ngày mà không lo rủi ro sụt giảm Permadeath 10%.<br>
-            • <b>Quy tắc khóa lãi +0.14%:</b> Khi nến Vàng chạm TP1 (+0.55%), hệ thống sẽ tự động chốt 50% khối lượng và kéo SL vượt qua giá Entry lên +0.14%, biến lệnh trở thành <i>Risk-Free Trade (Lệnh không rủi ro)</i>.<br>
-            • <b>Chốt lời TP2 (+1.10%):</b> 50% khối lượng còn lại sẽ gồng trọn con sóng lớn tiếp diễn.
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- BẢNG LỊCH SỬ KHỚP LỆNH PAPER TRADING -->
-    <div class="card">
-      <div class="card-header" style="background:#0f131c; border-bottom:1px solid var(--border-color); padding:12px 16px; display:flex; justify-content:space-between; align-items:center;">
-        <span><i class="fas fa-list-check" style="color:#2962ff;"></i> NHẬT KÝ KHỚP LỆNH PAPER TRADING (BINGX GOLD)</span>
-        <button onclick="resetDemoAccount()" class="btn btn-dark" style="font-size:11px; padding:4px 10px;">
-          <i class="fas fa-rotate-left"></i> Đặt Lại Nhật Ký & Số Dư $1,000
-        </button>
-      </div>
-      <div class="card-body" style="padding: 0; max-height: 320px; overflow-y: auto;">
-        <table class="trade-table">
-          <thead>
-            <tr>
-              <th>Thời gian</th>
-              <th>Hành động</th>
-              <th>Giá khớp</th>
-              <th>Khối lượng</th>
-              <th>Lãi/Lỗ ròng</th>
-              <th>Số dư sau lệnh</th>
-            </tr>
-          </thead>
-          <tbody id="paper-trades-table-body">
-            <tr>
-              <td colspan="6" style="text-align:center; color:var(--text-sub); padding:30px;">
-                Chưa có lệnh nào được khớp. Hãy mở lệnh thử nghiệm ở bảng trên!
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-  </div>
 
   <!-- TAB VIEW 3: OVERVIEW & BACKTEST -->
   <div id="view-overview-container" style="display: none; padding: 16px; max-width: 1440px; margin: 0 auto;">
@@ -1653,30 +1435,7 @@
       currentBalance = d.balance || 1000.0;
       currentEquity = d.equity || 1000.0;
 
-      const paperBalEl = document.getElementById('paper-stat-balance');
-      if (paperBalEl) paperBalEl.innerText = '$' + currentBalance.toFixed(2);
-      const paperEqEl = document.getElementById('paper-stat-equity');
-      if (paperEqEl) paperEqEl.innerText = '$' + currentEquity.toFixed(2);
-      const paperPnlEl = document.getElementById('paper-stat-net-pnl');
-      if (paperPnlEl) {
-        paperPnlEl.innerText = (pnl >= 0 ? '+$' : '-$') + Math.abs(pnl).toFixed(2) + ' (' + (roi >= 0 ? '+' : '') + roi.toFixed(2) + '%)';
-        paperPnlEl.style.color = pnl >= 0 ? 'var(--color-green)' : 'var(--color-red)';
-      }
-      const paperPriceEl = document.getElementById('paper-stat-price');
-      if (paperPriceEl) paperPriceEl.innerText = p.toFixed(1);
-      const paperCurPriceEl = document.getElementById('paper-display-cur-price');
-      if (paperCurPriceEl) paperCurPriceEl.innerText = p.toFixed(1);
-      const paperChangeEl = document.getElementById('paper-stat-change');
-      if (paperChangeEl) {
-        paperChangeEl.innerText = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
-        paperChangeEl.style.color = change >= 0 ? 'var(--color-green)' : 'var(--color-red)';
-      }
-
-      renderPaperPositionCard(activePosition, p);
-      renderPaperTradesTable(d.trades || []);
-      updatePaperPreview();
-
-      // 6. Update Candles if provided
+      // 5. Update Candles if provided
       if (d.candles && d.candles.length > 0) {
         candlesData = d.candles;
         drawChart();
@@ -2153,7 +1912,7 @@
 
     function switchTab(tabId) {
       currentTab = tabId;
-      const views = ['chart', 'paper', 'overview'];
+      const views = ['chart', 'overview'];
       views.forEach(v => {
         const el = document.getElementById('view-' + v + '-container');
         if (el) el.style.display = (v === tabId) ? 'block' : 'none';
@@ -2163,8 +1922,6 @@
         setTimeout(() => {
           resizeCanvas();
         }, 60);
-      } else if (tabId === 'paper') {
-        updatePaperPreview();
       }
     }
 
