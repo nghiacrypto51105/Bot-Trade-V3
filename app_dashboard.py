@@ -1017,7 +1017,7 @@ def get_full_state_payload() -> Dict[str, Any]:
         "active_position": state.active_position,
         "indicators": state.indicators,
         "trades": state.trades[:15],
-        "candles": state.candles[-80:],
+        "candles": state.candles[-160:],
         "radar": {
             "heartbeat": datetime.now().strftime("%H:%M:%S"),
             "wait_reason": wait_reason,
@@ -1426,7 +1426,7 @@ INTERVAL_MAP = {
 }
 
 @app.get("/api/kline")
-def api_kline(interval: str = "Min15", limit: int = 120):
+def api_kline(interval: str = "Min15", limit: int = 200):
     try:
         bingx_int = INTERVAL_MAP.get(interval, "15m")
         url_kline = f"https://open-api.bingx.com/openApi/swap/v2/quote/klines?symbol=NCCOGOLD2USD-USDT&interval={bingx_int}&limit={limit}"

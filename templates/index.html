@@ -35,64 +35,65 @@
       color: var(--text-main);
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       overflow-x: hidden;
-      font-size: 13px;
+      font-size: 12.5px;
+      line-height: 1.4;
     }
 
-    /* TOP UNIFIED NAVBAR */
+    /* TOP UNIFIED NAVBAR (COMPACT 44px) */
     .top-navbar {
-      height: 52px;
+      height: 44px;
       background: var(--bg-header);
       border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 16px;
-      gap: 12px;
+      padding: 0 14px;
+      gap: 10px;
     }
     .brand-group {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
     .brand-logo {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       font-weight: 800;
-      font-size: 14px;
+      font-size: 13.5px;
       letter-spacing: 0.5px;
       white-space: nowrap;
     }
     .bingx-badge {
       background: #0052ff;
       color: #fff;
-      padding: 3px 8px;
+      padding: 2px 7px;
       border-radius: 4px;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 800;
       letter-spacing: 0.5px;
     }
 
-    /* MASTER NAV TABS (ONLY 1 SINGLE CLEAN BAR) */
+    /* MASTER NAV TABS */
     .nav-tab-switcher {
       display: flex;
       align-items: center;
       gap: 4px;
       background: #07090e;
-      padding: 4px;
-      border-radius: 8px;
+      padding: 3px;
+      border-radius: 7px;
       border: 1px solid var(--border-color);
     }
     .nav-tab-btn {
-      padding: 7px 15px;
-      font-size: 12.5px;
+      padding: 5px 13px;
+      font-size: 12px;
       font-weight: 700;
       border: none;
-      border-radius: 6px;
+      border-radius: 5px;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
       transition: all 0.2s ease;
       background: transparent;
       color: var(--text-muted);
@@ -105,35 +106,34 @@
     .nav-tab-btn.active-paper {
       background: #2563eb;
       color: #fff;
-      box-shadow: 0 0 12px rgba(37, 99, 235, 0.4);
+      box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
     }
     .nav-tab-btn.active-live {
       background: #f6465d;
       color: #fff;
-      box-shadow: 0 0 12px rgba(246, 70, 93, 0.4);
+      box-shadow: 0 0 10px rgba(246, 70, 93, 0.4);
     }
     .nav-tab-btn.active-overview {
       background: #374151;
       color: #fff;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
     }
 
     /* TOP ACTIONS BUTTONS */
     .top-actions {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
     .btn {
-      padding: 6px 13px;
-      border-radius: 5px;
-      font-size: 12px;
+      padding: 5px 11px;
+      border-radius: 4px;
+      font-size: 11.5px;
       font-weight: 600;
       cursor: pointer;
       border: none;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       transition: all 0.2s;
       white-space: nowrap;
     }
@@ -146,25 +146,25 @@
     .btn-success { background: linear-gradient(135deg, #0ecb81, #059669); color: #fff; font-weight: 700; border: none; box-shadow: 0 0 10px rgba(14,203,129,0.3); }
     .btn-success:hover { filter: brightness(1.1); }
 
-    /* TICKER HEADER */
+    /* TICKER HEADER (COMPACT) */
     .mexc-ticker-header {
       background: #090c12;
       border-bottom: 1px solid var(--border-color);
-      padding: 8px 16px;
+      padding: 6px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 10px;
     }
     .pair-badge-group {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
     .coin-icon {
-      width: 28px;
-      height: 28px;
+      width: 24px;
+      height: 24px;
       background: #0052ff;
       border-radius: 50%;
       display: flex;
@@ -172,29 +172,28 @@
       justify-content: center;
       color: #fff;
       font-weight: 900;
-      font-size: 12px;
-      box-shadow: 0 0 10px rgba(0, 82, 255, 0.4);
+      font-size: 11px;
     }
     .pair-title {
-      font-size: 15px;
+      font-size: 13.5px;
       font-weight: 800;
       color: #fff;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
     .zero-fee-tag {
       background: rgba(14,203,129,0.15);
       color: #0ecb81;
       border: 1px solid rgba(14,203,129,0.3);
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 4px;
+      padding: 1px 6px;
+      border-radius: 3px;
     }
     .large-price {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 24px;
+      font-size: 20px;
       font-weight: 800;
       color: var(--color-green);
       letter-spacing: -0.5px;
@@ -203,15 +202,15 @@
     .ticker-stat-item {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 1px;
     }
     .ticker-stat-label {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--text-muted);
     }
     .ticker-stat-val {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 600;
       color: var(--text-main);
     }
@@ -223,9 +222,9 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 5px 14px;
+      padding: 4px 12px;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
     }
     .tf-group {
       display: flex;
@@ -236,10 +235,10 @@
       background: transparent;
       border: none;
       color: var(--text-muted);
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 600;
-      padding: 4px 8px;
-      border-radius: 4px;
+      padding: 3px 7px;
+      border-radius: 3px;
       cursor: pointer;
       transition: all 0.15s;
     }
@@ -247,7 +246,7 @@
     .tf-btn.active { background: #21293a; color: #fff; font-weight: 700; }
     .toolbar-divider {
       width: 1px;
-      height: 16px;
+      height: 14px;
       background: var(--border-color);
       margin: 0 4px;
     }
@@ -255,39 +254,39 @@
       background: transparent;
       border: none;
       color: var(--text-muted);
-      font-size: 12px;
-      padding: 5px 8px;
-      border-radius: 4px;
+      font-size: 11.5px;
+      padding: 3px 6px;
+      border-radius: 3px;
       cursor: pointer;
       transition: all 0.15s;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
     }
     .tool-icon-btn:hover { background: #191f2c; color: #fff; }
 
-    /* CHART WRAPPER */
+    /* CHART WRAPPER (OPTIMIZED COMPACT HEIGHT: 310px) */
     .chart-layout-box {
       display: flex;
-      height: 480px;
+      height: 310px;
       position: relative;
       background: #0c0e15;
       border-bottom: 1px solid var(--border-color);
     }
     .drawing-toolbar {
-      width: 38px;
+      width: 32px;
       background: #090c12;
       border-right: 1px solid var(--border-color);
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 8px 0;
-      gap: 10px;
+      padding: 6px 0;
+      gap: 8px;
       z-index: 5;
     }
     .draw-tool-btn {
-      width: 28px;
-      height: 28px;
+      width: 24px;
+      height: 24px;
       border-radius: 4px;
       background: transparent;
       border: none;
@@ -296,7 +295,7 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 12px;
+      font-size: 11px;
       transition: all 0.15s;
     }
     .draw-tool-btn:hover { background: #1c2230; color: #fff; }
@@ -311,21 +310,21 @@
 
     .ohlc-ma-overlay {
       position: absolute;
-      top: 8px;
-      left: 12px;
+      top: 6px;
+      left: 10px;
       z-index: 10;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
+      font-size: 10.5px;
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 2px;
       pointer-events: none;
       text-shadow: 0 1px 3px rgba(0,0,0,0.8);
     }
     .ohlc-row {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       color: var(--text-muted);
       flex-wrap: wrap;
     }
@@ -336,7 +335,7 @@
     .ma-row {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       font-weight: 600;
     }
     .ma5-val { color: var(--color-ma5); }
@@ -346,14 +345,14 @@
 
     .vol-overlay {
       position: absolute;
-      bottom: 95px;
-      left: 12px;
+      bottom: 72px;
+      left: 10px;
       z-index: 10;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
+      font-size: 10px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       pointer-events: none;
       color: var(--text-muted);
       text-shadow: 0 1px 3px rgba(0,0,0,0.8);
@@ -365,17 +364,17 @@
       display: none;
     }
 
-    /* AI RADAR STYLES */
+    /* AI RADAR STYLES (COMPACT) */
     .ai-radar-section {
-      padding: 12px 16px 0 16px;
+      padding: 8px 14px 0 14px;
     }
     .radar-tag-live {
       background: rgba(14,203,129,0.15);
       color: #0ecb81;
       border: 1px solid rgba(14,203,129,0.3);
-      padding: 2px 7px;
+      padding: 1px 6px;
       border-radius: 4px;
-      font-size: 10px;
+      font-size: 9.5px;
       font-weight: 700;
     }
     .heartbeat-pulse {
@@ -393,8 +392,8 @@
     .radar-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-bottom: 10px;
+      gap: 8px;
+      margin-bottom: 8px;
     }
     @media (max-width: 900px) {
       .radar-grid { grid-template-columns: 1fr; }
@@ -402,8 +401,8 @@
     .radar-condition-box {
       background: #0e121a;
       border: 1px solid #1a2233;
-      border-radius: 6px;
-      padding: 9px 12px;
+      border-radius: 5px;
+      padding: 7px 10px;
       transition: all 0.2s;
     }
     .radar-condition-box:hover {
@@ -411,66 +410,65 @@
       background: #121722;
     }
     .radar-cond-header {
-      font-size: 11px;
+      font-size: 10.5px;
       color: #8b949e;
       display: flex;
       align-items: center;
-      gap: 6px;
-      margin-bottom: 5px;
+      gap: 5px;
+      margin-bottom: 3px;
     }
     .cond-step {
-      width: 16px;
-      height: 16px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       background: #1f2738;
       color: #fff;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
     }
     .radar-cond-status {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 700;
-      margin-bottom: 3px;
+      margin-bottom: 2px;
     }
     .radar-cond-desc {
-      font-size: 11px;
+      font-size: 10.5px;
       color: #6e7681;
     }
     .radar-log-ticker {
       background: #07090f;
       border: 1px solid #161b26;
       border-radius: 4px;
-      padding: 7px 12px;
+      padding: 5px 10px;
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    /* REASON BANNER */
+    /* REASON BANNER (COMPACT) */
     .radar-reason-banner {
-      margin-top: 10px;
-      margin-bottom: 10px;
+      margin-top: 7px;
+      margin-bottom: 7px;
       background: rgba(13, 17, 23, 0.95);
       border: 1px solid rgba(240, 173, 78, 0.35);
       border-left: 4px solid #f0ad4e;
-      border-radius: 6px;
-      padding: 10px 14px;
+      border-radius: 5px;
+      padding: 7px 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      gap: 8px;
     }
 
     /* SMART DYNAMIC POSITION BANNER */
     #dynamic-position-container {
       display: none;
-      padding: 12px 16px 0 16px;
+      padding: 8px 14px 0 14px;
       animation: fadeIn 0.3s ease;
     }
     @keyframes fadeIn {
@@ -480,9 +478,9 @@
     .active-pos-card {
       background: linear-gradient(135deg, rgba(14,203,129,0.08) 0%, rgba(9,12,18,0.98) 100%);
       border: 1px solid rgba(14,203,129,0.4);
-      border-radius: 8px;
-      padding: 14px 18px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      border-radius: 7px;
+      padding: 10px 14px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
     }
     .active-pos-card.short {
       background: linear-gradient(135deg, rgba(246,70,93,0.08) 0%, rgba(9,12,18,0.98) 100%);
@@ -492,9 +490,9 @@
     /* LOWER TERMINAL METRICS & TRADES */
     .lower-dashboard-grid {
       display: grid;
-      grid-template-columns: 360px 1fr;
-      gap: 14px;
-      padding: 14px 16px 16px 16px;
+      grid-template-columns: 340px 1fr;
+      gap: 12px;
+      padding: 10px 14px 14px 14px;
     }
     @media (max-width: 1200px) {
       .lower-dashboard-grid {
@@ -505,21 +503,21 @@
     .card {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: 7px;
+      border-radius: 6px;
       overflow: hidden;
     }
     .card-header {
-      padding: 9px 14px;
+      padding: 8px 12px;
       border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
       justify-content: space-between;
       background: #0f131c;
       font-weight: 700;
-      font-size: 12.5px;
+      font-size: 12px;
     }
     .card-body {
-      padding: 14px;
+      padding: 11px 13px;
     }
 
     /* METRIC ROWS */
@@ -527,27 +525,27 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 7px 0;
+      padding: 5px 0;
       border-bottom: 1px solid rgba(255,255,255,0.04);
     }
     .metric-row:last-child { border-bottom: none; }
-    .metric-label { color: var(--text-muted); font-size: 12px; }
-    .metric-value { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px; }
+    .metric-label { color: var(--text-muted); font-size: 11.5px; }
+    .metric-value { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 12px; }
 
     /* PERMADEATH METER */
     .permadeath-meter-box {
       background: #090c12;
-      border-radius: 6px;
-      padding: 10px 12px;
+      border-radius: 5px;
+      padding: 8px 10px;
       border: 1px solid var(--border-color);
-      margin-top: 10px;
+      margin-top: 8px;
     }
     .meter-progress-track {
-      height: 7px;
+      height: 6px;
       background: #1c2230;
-      border-radius: 4px;
+      border-radius: 3px;
       overflow: hidden;
-      margin: 6px 0 4px 0;
+      margin: 5px 0 3px 0;
       position: relative;
     }
     .meter-progress-bar {
@@ -561,17 +559,17 @@
     .trade-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 12px;
+      font-size: 11.5px;
     }
     .trade-table th {
       text-align: left;
-      padding: 8px 10px;
+      padding: 6px 8px;
       color: var(--text-muted);
       border-bottom: 1px solid var(--border-color);
       font-weight: 600;
     }
     .trade-table td {
-      padding: 8px 10px;
+      padding: 6px 8px;
       border-bottom: 1px solid rgba(255,255,255,0.03);
       font-family: 'JetBrains Mono', monospace;
     }
@@ -590,38 +588,38 @@
     .modal-content {
       background: #0d1117;
       border: 1px solid #30363d;
-      border-radius: 10px;
+      border-radius: 8px;
       width: 90%;
-      max-width: 500px;
-      padding: 22px;
+      max-width: 480px;
+      padding: 18px;
       box-shadow: 0 12px 36px rgba(0,0,0,0.7);
     }
   </style>
 </head>
 <body>
 
-  <!-- TOP UNIFIED NAVBAR (ONE AUTHORITATIVE BAR) -->
+  <!-- TOP UNIFIED NAVBAR -->
   <header class="top-navbar">
     <div class="brand-group">
       <div class="brand-logo">
         <span class="bingx-badge">BingX</span>
         <span>AI SNIPER PRO MAX</span>
       </div>
-      <div id="status-badge" style="background: rgba(37, 99, 235, 0.15); color: #58a6ff; border: 1px solid rgba(56, 139, 253, 0.3); font-weight:700; font-size:11px; padding:3px 8px; border-radius:12px; display:flex; align-items:center; gap:6px;">
-        <i class="fas fa-flask"></i> <span>CHẾ ĐỘ THỬ NGHIỆM (PAPER TRADING)</span>
+      <div id="status-badge" style="background: rgba(37, 99, 235, 0.15); color: #58a6ff; border: 1px solid rgba(56, 139, 253, 0.3); font-weight:700; font-size:10.5px; padding:2px 7px; border-radius:10px; display:flex; align-items:center; gap:5px;">
+        <i class="fas fa-flask"></i> <span>CHẾ ĐỘ THỬ NGHIỆM</span>
       </div>
     </div>
 
     <!-- 3 MASTER TABS -->
     <div class="nav-tab-switcher">
       <button class="nav-tab-btn active-paper" id="master-tab-paper" onclick="selectTradingMode('DEMO')">
-        <i class="fas fa-flask"></i> <span>🧪 Paper Trading (Chạy Thử Nghiệm)</span>
+        <i class="fas fa-flask"></i> <span>🧪 Paper Trading</span>
       </button>
       <button class="nav-tab-btn" id="master-tab-live" onclick="selectTradingMode('LIVE')">
-        <i class="fas fa-satellite-dish"></i> <span>🔴 Live Trading (Trade Thật BingX)</span>
+        <i class="fas fa-satellite-dish"></i> <span>🔴 Live Trading (BingX)</span>
       </button>
       <button class="nav-tab-btn" id="master-tab-overview" onclick="switchTab('overview')">
-        <i class="fas fa-gauge-high"></i> <span>📊 Cấu Hình F8 Sniper</span>
+        <i class="fas fa-gauge-high"></i> <span>📊 Cấu Hình F8</span>
       </button>
     </div>
 
@@ -637,7 +635,7 @@
         <i class="fas fa-pause"></i> <span>Tạm Dừng</span>
       </button>
       <button class="btn" id="btn-action-primary" onclick="selectTradingMode('LIVE')" style="background: linear-gradient(135deg, #f6465d, #dc2626); color: #fff; font-weight: 700; box-shadow: 0 0 10px rgba(246, 70, 93, 0.4);">
-        <i class="fas fa-tower-broadcast"></i> <span id="btn-action-label">🔴 BẬT TRADE THẬT BINGX</span>
+        <i class="fas fa-tower-broadcast"></i> <span id="btn-action-label">🔴 BẬT TRADE THẬT</span>
       </button>
     </div>
   </header>
@@ -647,8 +645,8 @@
     <div class="pair-badge-group">
       <div class="coin-icon">AU</div>
       <div class="pair-title">
-        <span>GOLD / USD (BingX Perpetual Futures - NCCOGOLD2USD)</span>
-        <span class="zero-fee-tag">Taker: 0.05% | Maker TP: 0.02%</span>
+        <span>GOLD / USD (NCCOGOLD2USD)</span>
+        <span class="zero-fee-tag">Taker 0.05% | Maker TP 0.02%</span>
       </div>
     </div>
 
@@ -671,15 +669,15 @@
       <span class="ticker-stat-val" id="header-fair">4,284.8</span>
     </div>
     <div class="ticker-stat-item">
-      <span class="ticker-stat-label">Tỷ lệ Funding / Đếm ngược</span>
+      <span class="ticker-stat-label">Funding / Đếm ngược</span>
       <span class="ticker-stat-val" style="color: #f0ad4e;">+0.0050% / <span id="header-countdown">00:26:53</span></span>
     </div>
     <div class="ticker-stat-item">
-      <span class="ticker-stat-label">Giá cao 24h</span>
+      <span class="ticker-stat-label">Cao nhất 24h</span>
       <span class="ticker-stat-val" id="header-high">4,288.9</span>
     </div>
     <div class="ticker-stat-item">
-      <span class="ticker-stat-label">Giá thấp 24h</span>
+      <span class="ticker-stat-label">Thấp nhất 24h</span>
       <span class="ticker-stat-val" id="header-low">4,283.6</span>
     </div>
   </section>
@@ -690,34 +688,36 @@
     <!-- TIMEFRAME & TOOLBAR -->
     <section class="mexc-chart-toolbar">
       <div class="tf-group">
-        <button class="tf-btn" onclick="changeTimeframe('Min1', this)">1 phút</button>
-        <button class="tf-btn" onclick="changeTimeframe('Min5', this)">5 phút</button>
-        <button class="tf-btn active" onclick="changeTimeframe('Min15', this)">15 phút</button>
-        <button class="tf-btn" onclick="changeTimeframe('Min60', this)">1 giờ</button>
-        <button class="tf-btn" onclick="changeTimeframe('Hour4', this)">4 giờ</button>
-        <button class="tf-btn" onclick="changeTimeframe('Day1', this)">1 ngày</button>
+        <button class="tf-btn" onclick="changeTimeframe('Min1', this)">1m</button>
+        <button class="tf-btn" onclick="changeTimeframe('Min5', this)">5m</button>
+        <button class="tf-btn active" onclick="changeTimeframe('Min15', this)">15m</button>
+        <button class="tf-btn" onclick="changeTimeframe('Min60', this)">1h</button>
+        <button class="tf-btn" onclick="changeTimeframe('Hour4', this)">4h</button>
+        <button class="tf-btn" onclick="changeTimeframe('Day1', this)">1d</button>
+        <div class="toolbar-divider"></div>
+        <button class="tool-icon-btn" onclick="zoomIn()" title="Phóng to nến"><i class="fas fa-magnifying-glass-plus"></i></button>
+        <button class="tool-icon-btn" onclick="zoomOut()" title="Thu nhỏ (xem nhiều nến hơn)"><i class="fas fa-magnifying-glass-minus"></i></button>
+        <button class="tool-icon-btn" onclick="resetZoom()" title="Mặc định zoom"><i class="fas fa-rotate-right"></i> 100%</button>
         <div class="toolbar-divider"></div>
         <button class="tool-icon-btn" id="view-mode-toggle" onclick="toggleChartView()">
-          <i class="fas fa-exchange-alt"></i> <span id="view-mode-label">Chuyển TradingView Gốc</span>
+          <i class="fas fa-exchange-alt"></i> <span id="view-mode-label">TradingView Gốc</span>
         </button>
       </div>
       <div class="tf-group">
-        <span style="font-size:11px; color:var(--text-muted); margin-right:8px;">Chỉ báo: MA(5, 10, 30, 60) | BB(20, 2) | RSI(14)</span>
+        <span style="font-size:10.5px; color:var(--text-muted); margin-right:6px;">Chỉ báo: MA(5,10,30,60) | BB(20,2) | RSI(14)</span>
         <button class="tool-icon-btn" onclick="toggleFullscreen()" title="Toàn màn hình biểu đồ"><i class="fas fa-expand"></i></button>
       </div>
     </section>
 
-    <!-- CHART WRAPPER (SIDEBAR + CANVAS) -->
+    <!-- CHART WRAPPER (HEIGHT: 310px, SHOWS 110+ CANDLES PROPORTIONATELY) -->
     <section class="chart-layout-box" id="chart-box">
       <!-- LEFT DRAWING TOOLBAR -->
       <div class="drawing-toolbar" id="drawing-bar">
         <button class="draw-tool-btn active" title="Con trỏ Crosshair"><i class="fas fa-plus"></i></button>
         <button class="draw-tool-btn" title="Đường xu hướng (Trendline)"><i class="fas fa-slash"></i></button>
-        <button class="draw-tool-btn" title="Fibonacci Retracement"><i class="fas fa-draw-polygon"></i></button>
+        <button class="draw-tool-btn" title="Fibonacci"><i class="fas fa-draw-polygon"></i></button>
         <button class="draw-tool-btn" title="Cọ vẽ"><i class="fas fa-paint-brush"></i></button>
         <button class="draw-tool-btn" title="Thước đo giá"><i class="fas fa-ruler"></i></button>
-        <button class="draw-tool-btn" title="Phóng to"><i class="fas fa-magnifying-glass-plus"></i></button>
-        <button class="draw-tool-btn" title="Chế độ Nam châm"><i class="fas fa-magnet"></i></button>
       </div>
 
       <!-- MAIN CANVAS VIEWPORT -->
@@ -761,16 +761,16 @@
     <section class="ai-radar-section">
       <div class="card">
         <div class="card-header" style="background: #0b0f19;">
-          <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
             <span class="heartbeat-pulse"><i class="fas fa-heart-pulse"></i></span>
-            <span style="font-weight: 800; color: #fff; font-size: 13px;">RADAR TƯ DUY AI AGENT (LIVE SURVIVAL COGNITION)</span>
+            <span style="font-weight: 800; color: #fff; font-size: 12px;">RADAR TƯ DUY AI AGENT (LIVE SURVIVAL COGNITION)</span>
             <span class="radar-tag-live">QUÉT 24/7 BINGX REALTIME</span>
           </div>
-          <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted);">
-            Nhịp đập cuối: <span id="radar-heartbeat" style="color: #0ecb81; font-weight: 700;">--:--:--</span> | Trạng thái: <span style="color: #0ecb81; font-weight: 700;">ĐANG SỐNG & HOẠT ĐỘNG</span>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted);">
+            Nhịp đập: <span id="radar-heartbeat" style="color: #0ecb81; font-weight: 700;">--:--:--</span> | Trạng thái: <span style="color: #0ecb81; font-weight: 700;">ĐANG HOẠT ĐỘNG</span>
           </div>
         </div>
-        <div class="card-body" style="background: #090c13; padding: 12px 14px;">
+        <div class="card-body" style="background: #090c13; padding: 8px 12px;">
           <div class="radar-grid">
             <!-- Điều kiện 1 -->
             <div class="radar-condition-box" id="radar-box-trend">
@@ -808,18 +808,18 @@
 
           <!-- DEDICATED REASON FOR NOT TRADING BANNER -->
           <div class="radar-reason-banner" id="radar-reason-banner">
-            <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 280px;">
-              <div id="wait-reason-badge" style="background: rgba(240, 173, 78, 0.15); color: #f0ad4e; font-weight: 700; font-size: 11px; padding: 5px 12px; border-radius: 4px; white-space: nowrap; border: 1px solid rgba(240, 173, 78, 0.3); display: flex; align-items: center; gap: 7px; text-transform: uppercase; letter-spacing: 0.5px;">
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 260px;">
+              <div id="wait-reason-badge" style="background: rgba(240, 173, 78, 0.15); color: #f0ad4e; font-weight: 700; font-size: 10.5px; padding: 4px 10px; border-radius: 4px; white-space: nowrap; border: 1px solid rgba(240, 173, 78, 0.3); display: flex; align-items: center; gap: 6px; text-transform: uppercase;">
                 <i id="wait-reason-icon" class="fas fa-hourglass-half"></i>
                 <span id="wait-reason-title">LÝ DO CHƯA VÀO LỆNH</span>
               </div>
-              <div id="wait-reason-detail" style="color: #e6edf3; font-size: 12.5px; line-height: 1.4; font-weight: 500;">
+              <div id="wait-reason-detail" style="color: #e6edf3; font-size: 11.5px; font-weight: 500;">
                 Đang phân tích điều kiện thị trường BingX...
               </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 10px; font-size: 11px; color: #8b949e;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 11px; color: #8b949e;">
               <span><i class="fas fa-shield-alt" style="color: #2563eb;"></i> Giới hạn Sniper: <b id="wait-reason-trades" style="color: #e6edf3;">0/4</b> Lệnh | <b id="wait-reason-losses" style="color: #e6edf3;">0/2</b> SL</span>
-              <button onclick="resetSniperLimits()" title="Reset về 0 Lệnh & SL, mở khóa bot ngay lập tức" style="background: rgba(246, 70, 93, 0.15); border: 1px solid rgba(246, 70, 93, 0.4); color: #f6465d; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all 0.2s ease;">
+              <button onclick="resetSniperLimits()" title="Reset về 0 Lệnh & SL, mở khóa bot ngay lập tức" style="background: rgba(246, 70, 93, 0.15); border: 1px solid rgba(246, 70, 93, 0.4); color: #f6465d; font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s ease;">
                 <i class="fas fa-rotate-left"></i> Reset Về 0
               </button>
             </div>
@@ -827,9 +827,9 @@
 
           <!-- LIVE TELEMETRY LOG -->
           <div class="radar-log-ticker">
-            <i class="fas fa-terminal" style="color: #0ecb81; font-size: 11px;"></i>
-            <span style="color: #8b949e; font-size: 11px;">Nhật ký suy nghĩ AI:</span>
-            <span id="radar-log-text" style="color: #e6edf3; font-family: 'JetBrains Mono', monospace; font-size: 11px;">Đang lắng nghe K-Line BingX 15m... Chờ thiết lập hội tụ A+ hoàn chỉnh.</span>
+            <i class="fas fa-terminal" style="color: #0ecb81; font-size: 10.5px;"></i>
+            <span style="color: #8b949e; font-size: 10.5px;">Nhật ký suy nghĩ AI:</span>
+            <span id="radar-log-text" style="color: #e6edf3; font-family: 'JetBrains Mono', monospace; font-size: 10.5px;">Đang lắng nghe K-Line BingX 15m... Chờ thiết lập hội tụ A+ hoàn chỉnh.</span>
           </div>
         </div>
       </div>
@@ -838,47 +838,47 @@
     <!-- SMART DYNAMIC POSITION BANNER (EXPANDS ONLY WHEN TRADE IS ACTIVE) -->
     <div id="dynamic-position-container">
       <div class="active-pos-card" id="active-pos-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <span id="active-pos-badge" style="padding: 4px 12px; border-radius: 6px; font-weight: 800; font-size: 12px; background: rgba(14,203,129,0.2); color: #0ecb81; border: 1px solid #0ecb81;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span id="active-pos-badge" style="padding: 3px 10px; border-radius: 5px; font-weight: 800; font-size: 11px; background: rgba(14,203,129,0.2); color: #0ecb81; border: 1px solid #0ecb81;">
               🔴 VỊ THẾ LONG 16x ĐANG CHẠY
             </span>
-            <span style="font-size: 12px; color: var(--text-muted);">
+            <span style="font-size: 11.5px; color: var(--text-muted);">
               Khối lượng: <b id="active-pos-size" style="color:#fff;">0.000 oz</b> | Ký quỹ: <b id="active-pos-margin" style="color:#fff;">$0.00</b>
             </span>
           </div>
-          <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
             <div>
-              <span style="font-size: 11px; color: var(--text-muted);">LÃI / LỖ THẢ NỔI: </span>
-              <span id="active-pos-pnl" style="font-family: 'JetBrains Mono'; font-size: 18px; font-weight: 800; color: #0ecb81;">+$0.00 (+0.00%)</span>
+              <span style="font-size: 10.5px; color: var(--text-muted);">LÃI / LỖ THẢ NỔI: </span>
+              <span id="active-pos-pnl" style="font-family: 'JetBrains Mono'; font-size: 16px; font-weight: 800; color: #0ecb81;">+$0.00 (+0.00%)</span>
             </div>
-            <button onclick="closeActivePosition()" class="btn btn-danger" style="padding: 7px 14px; font-weight: 700; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <button onclick="closeActivePosition()" class="btn btn-danger" style="padding: 5px 12px; font-weight: 700; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
               <i class="fas fa-hand-holding-dollar"></i> ĐÓNG LỆNH NGAY
             </button>
           </div>
         </div>
 
         <!-- POSITION TARGET MILESTONES -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; background: rgba(0,0,0,0.4); border-radius: 6px; padding: 10px 14px; border: 1px solid rgba(255,255,255,0.06);">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; background: rgba(0,0,0,0.4); border-radius: 5px; padding: 7px 10px; border: 1px solid rgba(255,255,255,0.06);">
           <div>
-            <span style="font-size: 11px; color: var(--text-muted); display:block;">Giá vào lệnh (Entry)</span>
-            <span id="active-pos-entry" style="font-family: 'JetBrains Mono'; font-weight: 700; font-size: 13px;">$0.00</span>
+            <span style="font-size: 10px; color: var(--text-muted); display:block;">Giá vào (Entry)</span>
+            <span id="active-pos-entry" style="font-family: 'JetBrains Mono'; font-weight: 700; font-size: 12px;">$0.00</span>
           </div>
           <div>
-            <span style="font-size: 11px; color: var(--color-red); display:block;">Cắt lỗ (SL -0.25%)</span>
-            <span id="active-pos-sl" style="font-family: 'JetBrains Mono'; font-weight: 700; font-size: 13px; color: var(--color-red);">$0.00</span>
+            <span style="font-size: 10px; color: var(--color-red); display:block;">Cắt lỗ (SL -0.25%)</span>
+            <span id="active-pos-sl" style="font-family: 'JetBrains Mono'; font-weight: 700; font-size: 12px; color: var(--color-red);">$0.00</span>
           </div>
           <div>
-            <span style="font-size: 11px; color: #f0ad4e; display:block;">Chốt lời 1 (TP1 +0.55%)</span>
-            <span id="active-pos-tp1" style="font-family: 'JetBrains Mono'; font-weight: 700; font-size: 13px; color: #f0ad4e;">$0.00</span>
+            <span style="font-size: 10px; color: #f0ad4e; display:block;">Chốt lời 1 (TP1 +0.55%)</span>
+            <span id="active-pos-tp1" style="font-family: 'JetBrains Mono'; font-weight: 700; font-size: 12px; color: #f0ad4e;">$0.00</span>
           </div>
           <div>
-            <span style="font-size: 11px; color: var(--color-green); display:block;">Chốt lời 2 (TP2 +1.10%)</span>
-            <span id="active-pos-tp2" style="font-family: 'JetBrains Mono'; font-weight: 700; font-size: 13px; color: var(--color-green);">$0.00</span>
+            <span style="font-size: 10px; color: var(--color-green); display:block;">Chốt lời 2 (TP2 +1.10%)</span>
+            <span id="active-pos-tp2" style="font-family: 'JetBrains Mono'; font-weight: 700; font-size: 12px; color: var(--color-green);">$0.00</span>
           </div>
           <div>
-            <span style="font-size: 11px; color: var(--text-muted); display:block;">Khóa lãi an toàn</span>
-            <span id="active-pos-lock" style="font-family: 'JetBrains Mono'; font-weight: 700; font-size: 12px; color: var(--text-muted);">CHƯA KÍCH HOẠT</span>
+            <span style="font-size: 10px; color: var(--text-muted); display:block;">Khóa lãi an toàn</span>
+            <span id="active-pos-lock" style="font-family: 'JetBrains Mono'; font-weight: 700; font-size: 11px; color: var(--text-muted);">CHƯA KÍCH HOẠT</span>
           </div>
         </div>
       </div>
@@ -890,16 +890,16 @@
       <div class="card">
         <div class="card-header">
           <span><i class="fas fa-shield-halved" style="color: #0ecb81;"></i> QUẢN TRỊ SINH MỆNH</span>
-          <span style="font-size: 11px;" id="lbl-mode">
-            <span style="color:#58a6ff; font-weight:700;"><i class="fas fa-flask"></i> VỐN GIẢ LẬP (PAPER TRADING)</span>
+          <span style="font-size: 10.5px;" id="lbl-mode">
+            <span style="color:#58a6ff; font-weight:700;"><i class="fas fa-flask"></i> VỐN GIẢ LẬP (PAPER)</span>
           </span>
         </div>
         <div class="card-body">
           <div class="metric-row">
-            <span class="metric-label" id="lbl-balance-type">Số dư mô phỏng (Demo Balance)</span>
+            <span class="metric-label" id="lbl-balance-type">Số dư khả dụng (Balance)</span>
             <span class="metric-value">
               <span id="val-balance">$1,000.00</span>
-              <button id="btn-quick-sync" onclick="syncLiveBalance()" style="display:none; background:none; border:none; color:#0ecb81; cursor:pointer; font-size:12px; margin-left:6px;" title="Cập nhật số dư BingX"><i class="fas fa-arrows-rotate"></i></button>
+              <button id="btn-quick-sync" onclick="syncLiveBalance()" style="display:none; background:none; border:none; color:#0ecb81; cursor:pointer; font-size:11px; margin-left:5px;" title="Cập nhật số dư BingX"><i class="fas fa-arrows-rotate"></i></button>
             </span>
           </div>
           <div class="metric-row">
@@ -916,9 +916,9 @@
           </div>
 
           <!-- MỤC TIÊU NGÀY -->
-          <div style="margin-top: 12px;">
-            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
-              <span style="color:var(--text-muted);">Tiến Độ Chỉ Tiêu Ngày (1.5% - 2.0%)</span>
+          <div style="margin-top: 8px;">
+            <div style="display:flex; justify-content:space-between; font-size:10.5px; margin-bottom:3px;">
+              <span style="color:var(--text-muted);">Mục Tiêu Ngày (1.5% - 2.0%)</span>
               <span id="val-target-text" style="color:#f0ad4e; font-weight:700;">0.0% / 1.5%</span>
             </div>
             <div class="meter-progress-track">
@@ -928,24 +928,24 @@
 
           <!-- PERMADEATH GAUGE -->
           <div class="permadeath-meter-box">
-            <div style="display:flex; justify-content:space-between; font-size:11px;">
+            <div style="display:flex; justify-content:space-between; font-size:10.5px;">
               <span style="color: var(--color-red); font-weight:700;"><i class="fas fa-skull"></i> Ngưỡng Chết Permadeath (10%)</span>
               <span id="val-dd" style="font-weight:700;">Sụt giảm: 0.00%</span>
             </div>
             <div class="meter-progress-track">
               <div class="meter-progress-bar" id="bar-dd" style="width: 0%; background: #f6465d;"></div>
             </div>
-            <div style="font-size:10px; color:var(--text-muted); margin-top:4px;">
+            <div style="font-size:9.5px; color:var(--text-muted); margin-top:2px;">
               Tối đa từng bị: <span id="val-max-dd">0.00%</span> (Kỷ luật tuyệt đối dưới 10%)
             </div>
           </div>
 
           <!-- QUICK RESETS FOR PAPER TRADING -->
-          <div id="paper-quick-resets" style="display: flex; gap: 8px; margin-top: 12px; align-items: center;">
-            <span style="font-size: 11px; color: var(--text-muted);">Đổi vốn demo:</span>
-            <button onclick="quickResetBalance(1000)" class="btn btn-dark" style="padding: 3px 8px; font-size: 11px;">$1,000</button>
-            <button onclick="quickResetBalance(5000)" class="btn btn-dark" style="padding: 3px 8px; font-size: 11px;">$5,000</button>
-            <button onclick="quickResetBalance(10000)" class="btn btn-dark" style="padding: 3px 8px; font-size: 11px;">$10,000</button>
+          <div id="paper-quick-resets" style="display: flex; gap: 6px; margin-top: 8px; align-items: center;">
+            <span style="font-size: 10.5px; color: var(--text-muted);">Đổi vốn demo:</span>
+            <button onclick="quickResetBalance(1000)" class="btn btn-dark" style="padding: 2px 7px; font-size: 10px;">$1k</button>
+            <button onclick="quickResetBalance(5000)" class="btn btn-dark" style="padding: 2px 7px; font-size: 10px;">$5k</button>
+            <button onclick="quickResetBalance(10000)" class="btn btn-dark" style="padding: 2px 7px; font-size: 10px;">$10k</button>
           </div>
         </div>
       </div>
@@ -953,15 +953,15 @@
       <!-- CARD 2: LỊCH SỬ KHỚP LỆNH -->
       <div class="card">
         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-          <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 6px;">
             <span><i class="fas fa-list-check" style="color:#2563eb;"></i> NHẬT KÝ KHỚP LỆNH REALTIME (F8 SNIPER PRO MAX)</span>
-            <span style="font-size: 11px; color: var(--text-muted);">(Tối đa 4 lệnh/ngày | 2 SL)</span>
+            <span style="font-size: 10.5px; color: var(--text-muted);">(Tối đa 4 lệnh/ngày | 2 SL)</span>
           </div>
-          <button onclick="resetSniperLimits()" title="Reset giới hạn và xóa nhật ký lệnh" style="background: rgba(246, 70, 93, 0.15); border: 1px solid rgba(246, 70, 93, 0.4); color: #f6465d; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all 0.2s ease;">
+          <button onclick="resetSniperLimits()" title="Reset giới hạn và xóa nhật ký lệnh" style="background: rgba(246, 70, 93, 0.15); border: 1px solid rgba(246, 70, 93, 0.4); color: #f6465d; font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s ease;">
             <i class="fas fa-rotate-left"></i> Reset Giới Hạn & Lệnh
           </button>
         </div>
-        <div class="card-body" style="padding: 0; max-height: 280px; overflow-y: auto;">
+        <div class="card-body" style="padding: 0; max-height: 240px; overflow-y: auto;">
           <table class="trade-table">
             <thead>
               <tr>
@@ -975,7 +975,7 @@
             </thead>
             <tbody id="trades-table-body">
               <tr>
-                <td colspan="6" style="text-align:center; color:var(--text-sub); padding:30px;">
+                <td colspan="6" style="text-align:center; color:var(--text-sub); padding:24px;">
                   Đang chờ tín hiệu A+ hội tụ Bollinger Bands & RSI & EMA...
                 </td>
               </tr>
@@ -988,53 +988,53 @@
   </div><!-- /view-chart-container -->
 
   <!-- TAB VIEW 2: OVERVIEW & BACKTEST -->
-  <div id="view-overview-container" style="display: none; padding: 16px; max-width: 1440px; margin: 0 auto;">
-    <div class="card" style="padding: 20px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap:wrap; gap:10px;">
+  <div id="view-overview-container" style="display: none; padding: 14px; max-width: 1440px; margin: 0 auto;">
+    <div class="card" style="padding: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap:wrap; gap:10px;">
         <div>
-          <h2 style="font-size: 17px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px;">
+          <h2 style="font-size: 15px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 7px;">
             <i class="fas fa-gauge-high" style="color: #f0ad4e;"></i> TỔNG QUAN CHIẾN LƯỢC F8 SNIPER PRO MAX
           </h2>
-          <p style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">
+          <p style="color: var(--text-muted); font-size: 11.5px; margin-top: 3px;">
             Mô hình phục kích sóng Vàng BingX Perpetual Futures với cơ chế Permadeath & quản trị vốn phân đoạn.
           </p>
         </div>
-        <button onclick="runBacktestModal()" class="btn btn-primary" style="padding: 8px 16px; font-weight: 700;">
+        <button onclick="runBacktestModal()" class="btn btn-primary" style="padding: 6px 14px; font-weight: 700;">
           <i class="fas fa-bolt"></i> Chạy Kiểm Thử 4 Cấu Hình (2,000 Nến)
         </button>
       </div>
 
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 16px;">
-        <div style="background: #090c12; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px;">
-          <div style="color: #58a6ff; font-weight: 700; font-size: 13px; margin-bottom: 8px;">ĐÒN BẨY & KÝ QUỸ</div>
-          <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 12px;">
+        <div style="background: #090c12; border: 1px solid var(--border-color); border-radius: 6px; padding: 12px;">
+          <div style="color: #58a6ff; font-weight: 700; font-size: 12px; margin-bottom: 6px;">ĐÒN BẨY & KÝ QUỸ</div>
+          <div style="font-size: 11.5px; color: var(--text-muted); line-height: 1.5;">
             • Đòn bẩy: <b>16x</b><br>
             • Tỷ lệ ký quỹ: <b>50%</b> vốn<br>
             • Rủi ro tối đa/lệnh: <b>2.0% vốn</b> (rất xa mức tử thần 10%)
           </div>
         </div>
 
-        <div style="background: #090c12; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px;">
-          <div style="color: #0ecb81; font-weight: 700; font-size: 13px; margin-bottom: 8px;">CHỐT LỜI PHÂN ĐOẠN</div>
-          <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+        <div style="background: #090c12; border: 1px solid var(--border-color); border-radius: 6px; padding: 12px;">
+          <div style="color: #0ecb81; font-weight: 700; font-size: 12px; margin-bottom: 6px;">CHỐT LỜI PHÂN ĐOẠN</div>
+          <div style="font-size: 11.5px; color: var(--text-muted); line-height: 1.5;">
             • TP1: <b>+0.55%</b> (Chốt 50% khối lượng)<br>
             • Khóa lãi dương: <b>+0.14%</b> (Kéo SL qua Entry)<br>
             • TP2: <b>+1.10%</b> (Ăn trọn sóng lớn)
           </div>
         </div>
 
-        <div style="background: #090c12; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px;">
-          <div style="color: #f6465d; font-weight: 700; font-size: 13px; margin-bottom: 8px;">KỶ LUẬT & SINH MỆNH</div>
-          <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+        <div style="background: #090c12; border: 1px solid var(--border-color); border-radius: 6px; padding: 12px;">
+          <div style="color: #f6465d; font-weight: 700; font-size: 12px; margin-bottom: 6px;">KỶ LUẬT & SINH MỆNH</div>
+          <div style="font-size: 11.5px; color: var(--text-muted); line-height: 1.5;">
             • Cắt lỗ kỷ luật: <b>-0.25%</b><br>
             • Tối đa <b>4 lệnh/ngày</b><br>
             • Cầu dao tự ngắt: Dính <b>2 SL/ngày</b> là khóa
           </div>
         </div>
 
-        <div style="background: #090c12; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px;">
-          <div style="color: #f0ad4e; font-weight: 700; font-size: 13px; margin-bottom: 8px;">HIỆU SUẤT BACKTEST</div>
-          <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+        <div style="background: #090c12; border: 1px solid var(--border-color); border-radius: 6px; padding: 12px;">
+          <div style="color: #f0ad4e; font-weight: 700; font-size: 12px; margin-bottom: 6px;">HIỆU SUẤT BACKTEST</div>
+          <div style="font-size: 11.5px; color: var(--text-muted); line-height: 1.5;">
             • ROI 15 ngày: <b>+23.82%</b><br>
             • Trung bình ngày: <b>+1.59%/ngày</b><br>
             • Max Drawdown: <b>5.01%</b> (An toàn &lt; 10%)
@@ -1047,25 +1047,25 @@
   <!-- MODAL API KEY & BẬT LIVE -->
   <div class="modal-backdrop" id="apiModal">
     <div class="modal-content">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <span style="font-weight:700; font-size:15px; color:#e6edf3; display:flex; align-items:center; gap:8px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <span style="font-weight:700; font-size:14px; color:#e6edf3; display:flex; align-items:center; gap:7px;">
           <i class="fas fa-tower-broadcast" style="color:#f6465d;"></i> KẾT NỐI BINGX & BẬT CHẾ ĐỘ LIVE
         </span>
-        <i class="fas fa-xmark" style="cursor:pointer; color:var(--text-muted); font-size:18px;" onclick="closeApiModal()"></i>
+        <i class="fas fa-xmark" style="cursor:pointer; color:var(--text-muted); font-size:16px;" onclick="closeApiModal()"></i>
       </div>
-      <div style="background:rgba(56,139,253,0.1); border:1px solid rgba(56,139,253,0.3); border-radius:6px; padding:10px 14px; margin-bottom:16px; font-size:12px; color:#58a6ff; line-height:1.5;">
-        <i class="fas fa-shield-halved"></i> <b>Bảo Mật An Toàn:</b> API Key được lưu trực tiếp vào file <code>.env</code> trên máy của bạn. Chỉ bật quyền <b>"Hợp đồng vĩnh viễn" (Perpetual Futures)</b>, <u>tuyệt đối KHÔNG cấp quyền Rút tiền (Withdrawal)</u>!
+      <div style="background:rgba(56,139,253,0.1); border:1px solid rgba(56,139,253,0.3); border-radius:5px; padding:9px 12px; margin-bottom:14px; font-size:11.5px; color:#58a6ff; line-height:1.4;">
+        <i class="fas fa-shield-halved"></i> <b>Bảo Mật An Toàn:</b> API Key được lưu trực tiếp vào file <code>.env</code> trên máy của bạn. Chỉ bật quyền <b>"Hợp đồng vĩnh viễn" (Perpetual Futures)</b>, <u>tuyệt đối KHÔNG cấp quyền Rút tiền</u>!
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="display:block; font-size:11.5px; color:#8b949e; margin-bottom:5px; font-weight:600;">BINGX API KEY (Access Key)</label>
+        <input type="text" id="input-api-key" placeholder="Nhập API Key BingX của bạn..." style="width:100%; background:#090c13; border:1px solid #30363d; border-radius:5px; padding:8px 10px; color:#e6edf3; font-family:'JetBrains Mono',monospace; font-size:11.5px; box-sizing:border-box;">
       </div>
       <div style="margin-bottom:14px;">
-        <label style="display:block; font-size:12px; color:#8b949e; margin-bottom:6px; font-weight:600;">BINGX API KEY (Access Key)</label>
-        <input type="text" id="input-api-key" placeholder="Nhập API Key BingX của bạn..." style="width:100%; background:#090c13; border:1px solid #30363d; border-radius:6px; padding:10px 12px; color:#e6edf3; font-family:'JetBrains Mono',monospace; font-size:12px; box-sizing:border-box;">
+        <label style="display:block; font-size:11.5px; color:#8b949e; margin-bottom:5px; font-weight:600;">BINGX SECRET KEY</label>
+        <input type="password" id="input-api-secret" placeholder="Nhập Secret Key BingX..." style="width:100%; background:#090c13; border:1px solid #30363d; border-radius:5px; padding:8px 10px; color:#e6edf3; font-family:'JetBrains Mono',monospace; font-size:11.5px; box-sizing:border-box;">
       </div>
-      <div style="margin-bottom:16px;">
-        <label style="display:block; font-size:12px; color:#8b949e; margin-bottom:6px; font-weight:600;">BINGX SECRET KEY</label>
-        <input type="password" id="input-api-secret" placeholder="Nhập Secret Key BingX..." style="width:100%; background:#090c13; border:1px solid #30363d; border-radius:6px; padding:10px 12px; color:#e6edf3; font-family:'JetBrains Mono',monospace; font-size:12px; box-sizing:border-box;">
-      </div>
-      <div id="modal-api-alert" style="display:none; padding:10px 12px; border-radius:6px; margin-bottom:14px; font-size:12px; font-weight:500;"></div>
-      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px; flex-wrap:wrap;">
+      <div id="modal-api-alert" style="display:none; padding:8px 10px; border-radius:5px; margin-bottom:12px; font-size:11.5px; font-weight:500;"></div>
+      <div style="display:flex; justify-content:flex-end; gap:6px; margin-top:14px; flex-wrap:wrap;">
         <button class="btn btn-dark" onclick="closeApiModal()">Hủy</button>
         <button class="btn btn-dark" onclick="saveApiKeys()"><i class="fas fa-floppy-disk"></i> Chỉ Lưu Keys</button>
         <button class="btn btn-success" id="btn-save-and-live" onclick="submitLiveConnect()">
@@ -1077,36 +1077,36 @@
 
   <!-- MODAL VÀO LỆNH THỬ NGHIỆM (DEMO) -->
   <div class="modal-backdrop" id="testTradeModal">
-    <div class="modal-content" style="max-width: 460px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <span style="font-weight:700; font-size:15px; color:#e6edf3; display:flex; align-items:center; gap:8px;">
+    <div class="modal-content" style="max-width: 440px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <span style="font-weight:700; font-size:14px; color:#e6edf3; display:flex; align-items:center; gap:7px;">
           <i class="fas fa-flask" style="color:#58a6ff;"></i> MỞ VỊ THẾ THỬ NGHIỆM (DEMO)
         </span>
-        <i class="fas fa-xmark" style="cursor:pointer; color:var(--text-muted); font-size:18px;" onclick="closeTestModal()"></i>
+        <i class="fas fa-xmark" style="cursor:pointer; color:var(--text-muted); font-size:16px;" onclick="closeTestModal()"></i>
       </div>
-      <div style="background:rgba(56,139,253,0.1); border:1px solid rgba(56,139,253,0.3); border-radius:6px; padding:12px 14px; margin-bottom:16px; font-size:12px; color:#58a6ff; line-height:1.5;">
+      <div style="background:rgba(56,139,253,0.1); border:1px solid rgba(56,139,253,0.3); border-radius:5px; padding:10px 12px; margin-bottom:14px; font-size:11.5px; color:#58a6ff; line-height:1.4;">
         <i class="fas fa-shield-halved"></i> <b>Lưu ý An Toàn:</b> Lệnh thử nghiệm sử dụng vốn mô phỏng (không mất tiền thật) để bạn theo dõi trực tiếp cách bot quản trị lệnh đang chạy, tự động chốt lời TP1 (+0.55%), dời SL bảo toàn vốn (+0.14%) và chốt hết TP2 (+1.10%).
       </div>
-      <div style="margin-bottom:16px;">
-        <label style="display:block; font-size:12px; color:#8b949e; margin-bottom:8px; font-weight:600;">Chọn Hướng Lệnh Bạn Muốn Thử Nghiệm:</label>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-          <button onclick="executeTestTrade('LONG')" class="btn" style="background: linear-gradient(135deg, #0ecb81, #059669); color: #fff; font-weight: 700; padding: 14px 10px; border-radius: 8px; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; box-shadow: 0 4px 12px rgba(14,203,129,0.3);">
-            <span style="font-size:14px;"><i class="fas fa-arrow-trend-up"></i> THỬ LỆNH LONG</span>
-            <span style="font-size:11px; opacity:0.85;">Kỳ vọng giá Vàng tăng</span>
+      <div style="margin-bottom:14px;">
+        <label style="display:block; font-size:11.5px; color:#8b949e; margin-bottom:6px; font-weight:600;">Chọn Hướng Lệnh Bạn Muốn Thử Nghiệm:</label>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <button onclick="executeTestTrade('LONG')" class="btn" style="background: linear-gradient(135deg, #0ecb81, #059669); color: #fff; font-weight: 700; padding: 12px 8px; border-radius: 6px; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; box-shadow: 0 4px 10px rgba(14,203,129,0.3);">
+            <span style="font-size:13px;"><i class="fas fa-arrow-trend-up"></i> THỬ LỆNH LONG</span>
+            <span style="font-size:10px; opacity:0.85;">Kỳ vọng giá Vàng tăng</span>
           </button>
-          <button onclick="executeTestTrade('SHORT')" class="btn" style="background: linear-gradient(135deg, #f6465d, #dc2626); color: #fff; font-weight: 700; padding: 14px 10px; border-radius: 8px; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; box-shadow: 0 4px 12px rgba(246,70,93,0.3);">
-            <span style="font-size:14px;"><i class="fas fa-arrow-trend-down"></i> THỬ LỆNH SHORT</span>
-            <span style="font-size:11px; opacity:0.85;">Kỳ vọng giá Vàng giảm</span>
+          <button onclick="executeTestTrade('SHORT')" class="btn" style="background: linear-gradient(135deg, #f6465d, #dc2626); color: #fff; font-weight: 700; padding: 12px 8px; border-radius: 6px; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; box-shadow: 0 4px 10px rgba(246,70,93,0.3);">
+            <span style="font-size:13px;"><i class="fas fa-arrow-trend-down"></i> THỬ LỆNH SHORT</span>
+            <span style="font-size:10px; opacity:0.85;">Kỳ vọng giá Vàng giảm</span>
           </button>
         </div>
       </div>
-      <div style="background:#161b22; border-radius:6px; padding:10px 14px; font-size:11.5px; color:#8b949e; line-height:1.6;">
+      <div style="background:#161b22; border-radius:5px; padding:8px 12px; font-size:11px; color:#8b949e; line-height:1.5;">
         <div>• <b>Đòn bẩy:</b> 16x (Chuẩn BingX Futures)</div>
         <div>• <b>Ký quỹ:</b> 50% số dư Demo</div>
         <div>• <b>Cắt lỗ kỷ luật:</b> -0.25% (Bảo vệ tuyệt đối Permadeath)</div>
         <div>• <b>Chốt lời thông minh:</b> TP1 +0.55% (Khóa lãi dương +0.14%), TP2 +1.10%</div>
       </div>
-      <div style="display:flex; justify-content:flex-end; margin-top:16px;">
+      <div style="display:flex; justify-content:flex-end; margin-top:14px;">
         <button class="btn btn-dark" onclick="closeTestModal()">Đóng</button>
       </div>
     </div>
@@ -1120,7 +1120,10 @@
     let isTvView = false;
     let canvas = document.getElementById('mexcCanvas');
     let ctx = canvas.getContext('2d');
-    let zoomLevel = 1.0;
+    
+    // DEFAULT ZOOM: 110 candles (Sleek, proportional, full-view trend)
+    let zoomLevel = 1.0; 
+    let defaultBaseCandles = 110; 
     let activeTradingMode = 'DEMO';
     let currentTab = 'chart';
 
@@ -1150,11 +1153,11 @@
       };
     }
 
-    // LOAD KLINE VIA REST
+    // LOAD KLINE VIA REST (Fetch 200 candles)
     async function loadKline(interval) {
       try {
         currentInterval = interval;
-        const resp = await fetch('/api/kline?interval=' + interval + '&limit=120');
+        const resp = await fetch('/api/kline?interval=' + interval + '&limit=200');
         const res = await resp.json();
         if (res.status === 'success' && res.candles && res.candles.length > 0) {
           candlesData = res.candles;
@@ -1172,6 +1175,20 @@
       loadKline(interval);
     }
 
+    // ZOOM CONTROLS
+    function zoomIn() {
+      zoomLevel = Math.min(2.2, zoomLevel + 0.2);
+      drawChart();
+    }
+    function zoomOut() {
+      zoomLevel = Math.max(0.65, zoomLevel - 0.2);
+      drawChart();
+    }
+    function resetZoom() {
+      zoomLevel = 1.0;
+      drawChart();
+    }
+
     // RENDER FULL STATE UPDATE FROM BACKEND
     function renderState(d) {
       // 0. RADAR UPDATE
@@ -1185,8 +1202,8 @@
         const elTrendDesc = document.getElementById('radar-desc-trend');
         if (elTrendStat) {
           elTrendStat.innerHTML = isLongTrend 
-            ? '<span style="color:#0ecb81;"><i class="fas fa-arrow-trend-up"></i> THUẬN LONG (ƯU TIÊN MUA)</span>'
-            : '<span style="color:#f6465d;"><i class="fas fa-arrow-trend-down"></i> THUẬN SHORT (ƯU TIÊN BÁN)</span>';
+            ? '<span style="color:#0ecb81;"><i class="fas fa-arrow-trend-up"></i> THUẬN LONG (MUA)</span>'
+            : '<span style="color:#f6465d;"><i class="fas fa-arrow-trend-down"></i> THUẬN SHORT (BÁN)</span>';
         }
         if (elTrendDesc) {
           elTrendDesc.innerText = 'Giá ($' + d.latest_price.toFixed(1) + ') ' + (isLongTrend ? '>' : '<') + ' EMA 1h ($' + (d.indicators.ema_1h||0).toFixed(1) + ')';
@@ -1197,17 +1214,17 @@
         const elBBDesc = document.getElementById('radar-desc-bb');
         if (elBBStat) {
           if (d.radar.cond_bb_long) {
-            elBBStat.innerHTML = '<span style="color:#0ecb81;"><i class="fas fa-check-circle"></i> ĐÃ CHẠM DẢI DƯỚI BB (A+)</span>';
+            elBBStat.innerHTML = '<span style="color:#0ecb81;"><i class="fas fa-check-circle"></i> CHẠM BB DƯỚI (A+)</span>';
           } else if (d.radar.cond_bb_short) {
-            elBBStat.innerHTML = '<span style="color:#f6465d;"><i class="fas fa-check-circle"></i> ĐÃ CHẠM DẢI TRÊN BB (A+)</span>';
+            elBBStat.innerHTML = '<span style="color:#f6465d;"><i class="fas fa-check-circle"></i> CHẠM BB TRÊN (A+)</span>';
           } else {
-            elBBStat.innerHTML = '<span style="color:#8b949e;"><i class="fas fa-hourglass-half"></i> ĐANG RÌNH MỒI (CHƯA CHẠM)</span>';
+            elBBStat.innerHTML = '<span style="color:#8b949e;"><i class="fas fa-hourglass-half"></i> ĐANG RÌNH MỒI</span>';
           }
         }
         if (elBBDesc) {
           const distLow = Math.abs(d.latest_price - (d.indicators.lower_bb || 0)).toFixed(1);
           const distHigh = Math.abs(d.latest_price - (d.indicators.upper_bb || 0)).toFixed(1);
-          elBBDesc.innerText = 'Cách BB Dưới: ' + distLow + '$ | Cách BB Trên: ' + distHigh + '$';
+          elBBDesc.innerText = 'Cách BB Dưới: ' + distLow + '$ | BB Trên: ' + distHigh + '$';
         }
 
         // 3. RSI
@@ -1220,11 +1237,11 @@
           } else if (d.radar.cond_rsi_short) {
             elRSIStat.innerHTML = '<span style="color:#f6465d;"><i class="fas fa-check-circle"></i> QUÁ MUA (' + rsi.toFixed(1) + ' >= 55.0)</span>';
           } else {
-            elRSIStat.innerHTML = '<span style="color:#8b949e;"><i class="fas fa-hourglass-half"></i> TRUNG TÍNH (RSI: ' + rsi.toFixed(1) + ')</span>';
+            elRSIStat.innerHTML = '<span style="color:#8b949e;"><i class="fas fa-hourglass-half"></i> TRUNG TÍNH (' + rsi.toFixed(1) + ')</span>';
           }
         }
         if (elRSIDesc) {
-          elRSIDesc.innerText = 'Chờ RSI <= 45 (để Long) hoặc >= 55 (để Short)';
+          elRSIDesc.innerText = 'Chờ RSI <= 45 (Long) hoặc >= 55 (Short)';
         }
 
         // 4. Verdict & Detailed Wait Reason
@@ -1320,13 +1337,13 @@
         if (tabPaper) tabPaper.className = 'nav-tab-btn';
 
         if (statusBadge) {
-          statusBadge.innerHTML = '<span class="live-dot" style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#0ecb81; margin-right:4px;"></span> BINGX LIVE TRADING (TIỀN THẬT)';
+          statusBadge.innerHTML = '<span class="live-dot" style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#0ecb81; margin-right:4px;"></span> BINGX LIVE (TIỀN THẬT)';
           statusBadge.style.background = 'rgba(14, 203, 129, 0.15)';
           statusBadge.style.color = '#0ecb81';
           statusBadge.style.border = '1px solid rgba(14, 203, 129, 0.3)';
         }
         if (lblMode) lblMode.innerHTML = '<span style="color:#0ecb81; font-weight:700;"><i class="fas fa-satellite-dish"></i> BINGX LIVE TRADING</span>';
-        if (lblBalanceType) lblBalanceType.innerText = 'Số dư ví BingX thực (Live Balance)';
+        if (lblBalanceType) lblBalanceType.innerText = 'Số dư ví BingX thực (Live)';
         if (btnQuickSync) btnQuickSync.style.display = 'inline-block';
         if (paperQuickResets) paperQuickResets.style.display = 'none';
         if (btnTestTrade) btnTestTrade.style.display = 'none';
@@ -1334,7 +1351,7 @@
         if (btnAction && btnActionLabel) {
           btnAction.style.background = 'linear-gradient(135deg, #0ecb81, #059669)';
           btnAction.style.boxShadow = '0 0 10px rgba(14, 203, 129, 0.3)';
-          btnActionLabel.innerText = '⚡ Đồng Bộ Vốn BingX';
+          btnActionLabel.innerText = '⚡ Đồng Bộ Vốn';
           btnAction.onclick = syncLiveBalance;
         }
       } else {
@@ -1342,13 +1359,13 @@
         if (tabLive) tabLive.className = 'nav-tab-btn';
 
         if (statusBadge) {
-          statusBadge.innerHTML = '<i class="fas fa-flask" style="color:#58a6ff; margin-right:4px;"></i> CHẾ ĐỘ THỬ NGHIỆM (PAPER TRADING)';
+          statusBadge.innerHTML = '<i class="fas fa-flask" style="color:#58a6ff; margin-right:4px;"></i> CHẾ ĐỘ THỬ NGHIỆM';
           statusBadge.style.background = 'rgba(37, 99, 235, 0.15)';
           statusBadge.style.color = '#58a6ff';
           statusBadge.style.border = '1px solid rgba(56, 139, 253, 0.3)';
         }
-        if (lblMode) lblMode.innerHTML = '<span style="color:#58a6ff; font-weight:700;"><i class="fas fa-flask"></i> VỐN GIẢ LẬP (PAPER TRADING)</span>';
-        if (lblBalanceType) lblBalanceType.innerText = 'Số dư mô phỏng (Demo Balance)';
+        if (lblMode) lblMode.innerHTML = '<span style="color:#58a6ff; font-weight:700;"><i class="fas fa-flask"></i> VỐN GIẢ LẬP (PAPER)</span>';
+        if (lblBalanceType) lblBalanceType.innerText = 'Số dư mô phỏng (Demo)';
         if (btnQuickSync) btnQuickSync.style.display = 'none';
         if (paperQuickResets) paperQuickResets.style.display = 'flex';
         if (btnTestTrade) btnTestTrade.style.display = 'inline-flex';
@@ -1356,7 +1373,7 @@
         if (btnAction && btnActionLabel) {
           btnAction.style.background = 'linear-gradient(135deg, #f6465d, #dc2626)';
           btnAction.style.boxShadow = '0 0 10px rgba(246, 70, 93, 0.4)';
-          btnActionLabel.innerText = '🔴 BẬT TRADE THẬT BINGX';
+          btnActionLabel.innerText = '🔴 BẬT TRADE THẬT';
           btnAction.onclick = () => selectTradingMode('LIVE');
         }
       }
@@ -1463,7 +1480,7 @@
       const tb = document.getElementById('trades-table-body');
       if (!tb) return;
       if (!trades || trades.length === 0) {
-        tb.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-sub); padding:30px;">Đang chờ tín hiệu A+ hội tụ Bollinger Bands & RSI & EMA...</td></tr>';
+        tb.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-sub); padding:24px;">Đang chờ tín hiệu A+ hội tụ Bollinger Bands & RSI & EMA...</td></tr>';
         return;
       }
 
@@ -1472,7 +1489,7 @@
         const isWin = t.type === 'WIN' || t.type === 'PROFIT_LOCK' || (t.pnl && t.pnl.includes('+'));
         html += `
           <tr>
-            <td style="color:var(--text-muted); font-size:11px;">${t.time.split(' ')[1] || t.time}</td>
+            <td style="color:var(--text-muted); font-size:10.5px;">${t.time.split(' ')[1] || t.time}</td>
             <td style="font-weight:700; color:${isWin ? 'var(--color-green)' : 'var(--color-red)'};">${t.action}</td>
             <td>$${typeof t.price === 'number' ? t.price.toFixed(1) : t.price}</td>
             <td>${t.size}</td>
@@ -1758,12 +1775,12 @@
         toast = document.createElement('div');
         toast.id = 'toast-notification';
         toast.style.position = 'fixed';
-        toast.style.top = '20px';
-        toast.style.right = '20px';
+        toast.style.top = '16px';
+        toast.style.right = '16px';
         toast.style.zIndex = '100000';
-        toast.style.padding = '12px 18px';
-        toast.style.borderRadius = '8px';
-        toast.style.fontSize = '13px';
+        toast.style.padding = '10px 16px';
+        toast.style.borderRadius = '6px';
+        toast.style.fontSize = '12px';
         toast.style.fontWeight = '600';
         toast.style.boxShadow = '0 8px 24px rgba(0,0,0,0.5)';
         toast.style.transition = 'all 0.3s ease';
@@ -1818,7 +1835,7 @@
           tvContainer.style.display = 'block';
           tvContainer.innerHTML = '<iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_widget&symbol=OANDA%3AXAUUSD&interval=15&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&theme=dark&style=1&timezone=Asia%2FHo_Chi_Minh" style="width:100%; height:100%; border:none;"></iframe>';
         }
-        if (lbl) lbl.innerText = 'Quay Lại Canvas AI';
+        if (lbl) lbl.innerText = 'Canvas AI';
       } else {
         if (cvContainer) cvContainer.style.display = 'block';
         if (drawingBar) drawingBar.style.display = 'flex';
@@ -1826,7 +1843,7 @@
           tvContainer.style.display = 'none';
           tvContainer.innerHTML = '';
         }
-        if (lbl) lbl.innerText = 'Chuyển TradingView Gốc';
+        if (lbl) lbl.innerText = 'TradingView Gốc';
         resizeCanvas();
       }
     }
@@ -1889,6 +1906,7 @@
       if (document.getElementById('ov-vol')) document.getElementById('ov-vol').innerText = (c.volume || 0).toFixed(1);
     }
 
+    // DRAW CHART ENGINE (PROPORTIONAL & FULL TREND VIEW)
     function drawChart() {
       if (!canvas.offsetParent || !candlesData || candlesData.length === 0) return;
 
@@ -1898,15 +1916,16 @@
 
       ctx.clearRect(0, 0, width, height);
 
-      const margin = { top: 38, right: 68, bottom: 25, left: 10 };
+      const margin = { top: 28, right: 65, bottom: 22, left: 10 };
       const chartWidth = width - margin.left - margin.right;
       const chartHeight = height - margin.top - margin.bottom;
 
-      const priceHeight = chartHeight * 0.74;
-      const volHeight = chartHeight * 0.22;
+      const priceHeight = chartHeight * 0.76;
+      const volHeight = chartHeight * 0.20;
       const volTop = margin.top + priceHeight + chartHeight * 0.04;
 
-      const numCandles = Math.min(candlesData.length, Math.floor(65 / zoomLevel));
+      // SHOW 110 CANDLES BY DEFAULT (SLENDER, ELEGANT, FULL-VIEW)
+      const numCandles = Math.min(candlesData.length, Math.max(35, Math.floor(defaultBaseCandles / zoomLevel)));
       const startIndex = Math.max(0, candlesData.length - numCandles);
       const visibleCandles = candlesData.slice(startIndex);
 
@@ -1916,7 +1935,7 @@
         if (c.low < minP) { minP = c.low; minIdx = i; }
         if (c.high > maxP) { maxP = c.high; maxIdx = i; }
       });
-      const pPad = (maxP - minP) * 0.08 || 2.0;
+      const pPad = (maxP - minP) * 0.07 || 2.0;
       minP -= pPad;
       maxP += pPad;
 
@@ -1925,7 +1944,7 @@
       maxV = maxV * 1.2 || 10;
 
       const candleWidth = chartWidth / visibleCandles.length;
-      const bodyWidth = Math.max(3, candleWidth * 0.72);
+      const bodyWidth = Math.max(2.5, candleWidth * 0.70);
 
       const getY = (val) => margin.top + (1 - (val - minP) / (maxP - minP)) * priceHeight;
       const getVolY = (vol) => volTop + volHeight - (vol / maxV) * volHeight;
@@ -1934,7 +1953,7 @@
       // 1. Grid lines
       ctx.strokeStyle = '#141824';
       ctx.lineWidth = 1;
-      const gridSteps = 5;
+      const gridSteps = 4;
       for (let i = 0; i <= gridSteps; i++) {
         const y = margin.top + (priceHeight / gridSteps) * i;
         ctx.beginPath();
@@ -1944,9 +1963,9 @@
 
         const pLabel = maxP - (i / gridSteps) * (maxP - minP);
         ctx.fillStyle = '#6e7681';
-        ctx.font = '11px JetBrains Mono';
+        ctx.font = '10.5px JetBrains Mono';
         ctx.textAlign = 'left';
-        ctx.fillText(pLabel.toFixed(1), width - margin.right + 6, y + 4);
+        ctx.fillText(pLabel.toFixed(1), width - margin.right + 5, y + 4);
       }
 
       // 2. Moving Averages
@@ -1957,7 +1976,7 @@
 
       function drawMALine(maArr, color) {
         ctx.strokeStyle = color;
-        ctx.lineWidth = 1.3;
+        ctx.lineWidth = 1.2;
         ctx.beginPath();
         let started = false;
         for (let i = 0; i < maArr.length; i++) {
@@ -1982,14 +2001,14 @@
       if (ma30.length > 0 && ma30[ma30.length - 1] && document.getElementById('ov-ma30')) document.getElementById('ov-ma30').innerText = ma30[ma30.length - 1].toFixed(1);
       if (ma60.length > 0 && ma60[ma60.length - 1] && document.getElementById('ov-ma60')) document.getElementById('ov-ma60').innerText = ma60[ma60.length - 1].toFixed(1);
 
-      // 3. Candlesticks & Volume
+      // 3. Candlesticks & Volume (Slim, sharp, and proportional)
       visibleCandles.forEach((c, i) => {
         const isBull = c.close >= c.open;
         const color = isBull ? '#0ecb81' : '#f6465d';
         const x = getX(i);
 
         ctx.strokeStyle = color;
-        ctx.lineWidth = 1.2;
+        ctx.lineWidth = 1.0;
         ctx.beginPath();
         ctx.moveTo(x, getY(c.high));
         ctx.lineTo(x, getY(c.low));
@@ -1997,23 +2016,24 @@
 
         const topY = getY(Math.max(c.open, c.close));
         const botY = getY(Math.min(c.open, c.close));
-        const bHeight = Math.max(1.5, botY - topY);
+        const bHeight = Math.max(1.2, botY - topY);
 
         ctx.fillStyle = color;
         ctx.fillRect(x - bodyWidth / 2, topY, bodyWidth, bHeight);
 
+        // Volume sub-panel
         const vY = getVolY(c.volume);
         const vHeight = (volTop + volHeight) - vY;
-        ctx.fillStyle = isBull ? 'rgba(14,203,129,0.35)' : 'rgba(246,70,93,0.35)';
+        ctx.fillStyle = isBull ? 'rgba(14,203,129,0.30)' : 'rgba(246,70,93,0.30)';
         ctx.fillRect(x - bodyWidth / 2, vY, bodyWidth, vHeight);
       });
 
-      // 4. Current Price Line
+      // 4. Current Price Line & Tag
       if (visibleCandles.length > 0) {
         const curC = visibleCandles[visibleCandles.length - 1];
         const curY = getY(curC.close);
         ctx.strokeStyle = curC.close >= curC.open ? '#0ecb81' : '#f6465d';
-        ctx.setLineDash([4, 4]);
+        ctx.setLineDash([3, 3]);
         ctx.beginPath();
         ctx.moveTo(margin.left, curY);
         ctx.lineTo(width - margin.right, curY);
@@ -2021,9 +2041,9 @@
         ctx.setLineDash([]);
 
         ctx.fillStyle = ctx.strokeStyle;
-        ctx.fillRect(width - margin.right, curY - 9, margin.right - 2, 18);
+        ctx.fillRect(width - margin.right, curY - 8, margin.right - 2, 16);
         ctx.fillStyle = '#fff';
-        ctx.font = 'bold 11px JetBrains Mono';
+        ctx.font = 'bold 10.5px JetBrains Mono';
         ctx.textAlign = 'left';
         ctx.fillText(curC.close.toFixed(1), width - margin.right + 4, curY + 4);
       }
@@ -2043,9 +2063,9 @@
             ctx.setLineDash([]);
 
             ctx.fillStyle = color;
-            ctx.font = 'bold 10px JetBrains Mono';
+            ctx.font = 'bold 9.5px JetBrains Mono';
             ctx.textAlign = 'left';
-            ctx.fillText(label + ' $' + price.toFixed(1), margin.left + 8, y - 4);
+            ctx.fillText(label + ' $' + price.toFixed(1), margin.left + 6, y - 3);
           }
         }
         drawLevel(activePosition.entry_price, 'ENTRY', '#2563eb');
@@ -2060,6 +2080,20 @@
       resizeCanvas();
       connectWS();
       loadKline('Min15');
+
+      // MOUSE WHEEL ZOOM ON CANVAS
+      const cvContainer = document.getElementById('canvas-container');
+      if (cvContainer) {
+        cvContainer.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          if (e.deltaY < 0) {
+            zoomLevel = Math.min(2.4, zoomLevel + 0.12);
+          } else {
+            zoomLevel = Math.max(0.65, zoomLevel - 0.12);
+          }
+          drawChart();
+        }, { passive: false });
+      }
       
       // Countdown simulation
       setInterval(() => {
