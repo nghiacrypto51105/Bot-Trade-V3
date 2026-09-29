@@ -392,7 +392,7 @@
     /* LOWER TERMINAL METRICS & TRADES */
     .lower-dashboard-grid {
       display: grid;
-      grid-template-columns: 320px 1fr 340px;
+      grid-template-columns: 360px 1fr;
       gap: 16px;
       padding: 16px;
     }
@@ -1004,20 +1004,6 @@
             </tr>
           </tbody>
         </table>
-      </div>
-    </div>
-
-    <!-- CARD 3: VỊ THẾ ĐANG CHẠY & TÍN HIỆU -->
-    <div class="card">
-      <div class="card-header">
-        <span><i class="fas fa-crosshairs" style="color:#f0ad4e;"></i> VỊ THẾ HIỆN TẠI (POSITION)</span>
-        <span id="pos-status-badge" class="pos-side-badge" style="background:#1c2230; color:var(--text-muted);">CHƯA VÀO LỆNH</span>
-      </div>
-      <div class="card-body" id="pos-card-body">
-        <div style="text-align: center; padding: 25px 10px; color: var(--text-muted);">
-          <i class="fas fa-crosshairs" style="font-size: 28px; margin-bottom: 8px; color: var(--text-sub);"></i>
-          <p>Bot đang theo dõi nến 15m tìm kiếm mô hình Rút râu nến & Quét thanh khoản...</p>
-        </div>
       </div>
     </div>
 
@@ -1700,6 +1686,7 @@
     function renderPositionCard(pos, curPrice, isLive) {
       const container = document.getElementById('pos-card-body');
       const badge = document.getElementById('pos-status-badge');
+      if (!container) return;
 
       if (!pos) {
         badge.className = 'pos-side-badge';
