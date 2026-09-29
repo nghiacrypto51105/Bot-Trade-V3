@@ -338,6 +338,88 @@ class BingXAPIClient:
             logger.error(f"[BINGX CLOSE ALL POSITIONS EXCEPTION] {e}")
             return False, {"error": str(e)}
 
+    def cancel_all_open_orders(self, symbol: str = "NCCOGOLD2USD-USDT") -> Tuple[bool, dict]:
+        """
+        Hủy tất cả các lệnh chờ / lệnh TP-SL cũ trên sàn BingX cho symbol.
+        """
+        if not self.api_key or not self.api_secret:
+            return False, {"error": "Chưa có API Key"}
+        try:
+            params = {"symbol": symbol}
+            q = self._sign(params)
+            url = f"{self.base_url}/openApi/swap/v2/trade/allOpenOrders?{q}"
+            headers = {"X-BX-APIKEY": self.api_key}
+            r = requests.delete(url, headers=headers, timeout=6)
+            res = r.json()
+            return (res.get("code") == 0), res
+        except Exception as e:
+            return False, {"error": str(e)}
+
+    def set_position_tp_sl(self, symbol: str, position_side: str, quantity: float, sl_price: float = 0.0, tp_price: float = 0.0) -> Tuple[bool, dict]:
+        """
+        Cài đặt trực tiếp lệnh Cắt Lỗ (Stop Loss) và Chốt Lời (Take Profit) lên sàn BingX.
+        Hiển thị tức thì trong cột 'C.Lãi/D.Lỗ' và tab 'Lệnh Mở' trên giao diện sàn BingX.
+        """
+        if not self.api_key or not self.api_secret:
+            return False, {"error": "Chưa có API Key"}
+        results = {}
+        qty_str = f"{max(0.0005, quantity):.4f}"
+        order_side = "SELL" if position_side == "LONG" else "BUY"
+
+        # 1. Đặt lệnh Stop Loss lên sàn BingX
+        if sl_price > 0:
+            try:
+                params_sl = {
+                    "symbol": symbol,
+                    "side": order_side,
+                    "positionSide": position_side,
+                    "type": "STOP_MARKET",
+                    "stopPrice": f"{sl_price:.2f}",
+                    "quantity": qty_str,
+                    "workingType": "MARK_PRICE"
+                }
+                q = self._sign(params_sl)
+                url = f"{self.base_url}/openApi/swap/v2/trade/order?{q}"
+                headers = {"X-BX-APIKEY": self.api_key}
+                r = requests.post(url, headers=headers, timeout=6)
+                res = r.json()
+                results["sl"] = res
+                if res.get("code") == 0:
+                    logger.info(f"[BINGX SL ATTACHED] Đã gắn SL ${sl_price:.2f} trực tiếp lên sàn BingX! OrderID: {res.get('data', {}).get('order', {}).get('orderId')}")
+                else:
+                    logger.warning(f"[BINGX SL FAILED] {res}")
+            except Exception as e:
+                logger.error(f"[BINGX SL EXCEPTION] {e}")
+                results["sl_error"] = str(e)
+
+        # 2. Đặt lệnh Take Profit lên sàn BingX
+        if tp_price > 0:
+            try:
+                params_tp = {
+                    "symbol": symbol,
+                    "side": order_side,
+                    "positionSide": position_side,
+                    "type": "TAKE_PROFIT_MARKET",
+                    "stopPrice": f"{tp_price:.2f}",
+                    "quantity": qty_str,
+                    "workingType": "MARK_PRICE"
+                }
+                q = self._sign(params_tp)
+                url = f"{self.base_url}/openApi/swap/v2/trade/order?{q}"
+                headers = {"X-BX-APIKEY": self.api_key}
+                r = requests.post(url, headers=headers, timeout=6)
+                res = r.json()
+                results["tp"] = res
+                if res.get("code") == 0:
+                    logger.info(f"[BINGX TP ATTACHED] Đã gắn TP ${tp_price:.2f} trực tiếp lên sàn BingX! OrderID: {res.get('data', {}).get('order', {}).get('orderId')}")
+                else:
+                    logger.warning(f"[BINGX TP FAILED] {res}")
+            except Exception as e:
+                logger.error(f"[BINGX TP EXCEPTION] {e}")
+                results["tp_error"] = str(e)
+
+        return True, results
+
 DEFAULT_BINGX_API_KEY = "npUSTPD0PKerLK8jZj3tFdSGxMozv6F8HqlEbuFrQDdWhYHsH84xZ5t6Isj4MLTi18jj3C2hvOX5fKqL4POEg"
 DEFAULT_BINGX_SECRET_KEY = "RUPkdl0HBF4m6e7Thk6VyunJdfc4swyn8Glso7fMwDScSC6KfVJCT3MnBO520Hmevc6DWbWo6VrQ37a7QXw"
 
@@ -696,16 +778,19 @@ def sync_live_positions_with_bingx():
             leverage = int(p.get("leverage", state.leverage))
             
             if state.active_position is None:
+                sl_calc = round(avg_price * 0.9975 if pos_side == "LONG" else avg_price * 1.0025, 2)
+                tp1_calc = round(avg_price * 1.0055 if pos_side == "LONG" else avg_price * 0.9945, 2)
+                tp2_calc = round(avg_price * 1.0110 if pos_side == "LONG" else avg_price * 0.9890, 2)
                 state.active_position = {
                     "side": pos_side,
                     "entry_price": avg_price,
                     "size": pos_amt,
                     "margin": margin,
                     "leverage": leverage,
-                    "sl": round(avg_price * 0.9975 if pos_side == "LONG" else avg_price * 1.0025, 2),
-                    "stop_loss": round(avg_price * 0.9975 if pos_side == "LONG" else avg_price * 1.0025, 2),
-                    "tp1": round(avg_price * 1.0055 if pos_side == "LONG" else avg_price * 0.9945, 2),
-                    "tp2": round(avg_price * 1.0110 if pos_side == "LONG" else avg_price * 0.9890, 2),
+                    "sl": sl_calc,
+                    "stop_loss": sl_calc,
+                    "tp1": tp1_calc,
+                    "tp2": tp2_calc,
                     "tp1_hit": False,
                     "open_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                     "strategy": "BINGX SYNCED",
@@ -713,7 +798,12 @@ def sync_live_positions_with_bingx():
                     "unrealized_pnl": unrealized,
                     "pnl_pct": (unrealized / margin) * 100 if margin > 0 else 0
                 }
-                logger.info(f"[LIVE SYNC] Phát hiện & đồng bộ vị thế từ BingX: {pos_side} {pos_amt} oz @ ${avg_price}")
+                # Tự động gắn Hard TP/SL trực tiếp lên sàn BingX
+                try:
+                    state.bingx_client.set_position_tp_sl("NCCOGOLD2USD-USDT", pos_side, pos_amt, sl_calc, tp1_calc)
+                except Exception as e:
+                    logger.warning(f"[SET TP/SL ERROR] {e}")
+                logger.info(f"[LIVE SYNC] Phát hiện & đồng bộ vị thế từ BingX: {pos_side} {pos_amt} oz @ ${avg_price} (Đã gắn Hard TP: ${tp1_calc} & SL: ${sl_calc})")
             else:
                 state.active_position["size"] = pos_amt
                 state.active_position["margin"] = margin
@@ -740,7 +830,8 @@ def check_and_manage_live_position():
         # 1. Chốt lời toàn phần TP2 (+1.10%)
         if cur_p >= tp2:
             if state.mode == "LIVE TRADING" and state.bingx_client:
-                state.bingx_client.place_market_order("NCCOGOLD2USD-USDT", "SELL", "LONG", size)
+                state.bingx_client.cancel_all_open_orders("NCCOGOLD2USD-USDT")
+                state.bingx_client.close_all_positions("NCCOGOLD2USD-USDT")
                 sync_live_balance()
             pnl = (cur_p - entry) * size
             fee = cur_p * size * state.fee_rate_maker
@@ -762,13 +853,6 @@ def check_and_manage_live_position():
         # 2. Chốt 50% ở TP1 (+0.55%) và Dời SL vào vùng LÃI DƯƠNG (+0.14%)
         elif not tp1_hit and cur_p >= tp1:
             close_size = size * 0.50
-            if state.mode == "LIVE TRADING" and state.bingx_client:
-                state.bingx_client.place_market_order("NCCOGOLD2USD-USDT", "SELL", "LONG", close_size)
-                sync_live_balance()
-            pnl = (cur_p - entry) * close_size
-            fee = cur_p * close_size * state.fee_rate_maker
-            net = pnl - fee
-            state.balance += net
             pos["size"] -= close_size
             pos["tp1_hit"] = True
             
@@ -777,6 +861,17 @@ def check_and_manage_live_position():
             new_sl = round(entry + lock_dist, 2)
             pos["sl"] = new_sl
             pos["stop_loss"] = new_sl
+
+            if state.mode == "LIVE TRADING" and state.bingx_client:
+                state.bingx_client.cancel_all_open_orders("NCCOGOLD2USD-USDT")
+                state.bingx_client.place_market_order("NCCOGOLD2USD-USDT", "SELL", "LONG", close_size)
+                state.bingx_client.set_position_tp_sl("NCCOGOLD2USD-USDT", "LONG", pos["size"], sl_price=new_sl, tp_price=tp2)
+                sync_live_balance()
+
+            pnl = (cur_p - entry) * close_size
+            fee = cur_p * close_size * state.fee_rate_maker
+            net = pnl - fee
+            state.balance += net
             
             state.trades.insert(0, {
                 "time": now_str,
@@ -788,12 +883,13 @@ def check_and_manage_live_position():
                 "type": "WIN"
             })
             record_closed_trade_to_pnl(net, fee, "WIN", "CHỐT LỜI TP1 (+0.55%)", cur_p, f"{close_size:.3f} oz", state.balance)
-            logger.info(f"[LIVE TP1 LONG] Hit @ {cur_p} | Dời SL vào LÃI DƯƠNG: {new_sl} (+0.14%)")
+            logger.info(f"[LIVE TP1 LONG] Hit @ {cur_p} | Dời SL vào LÃI DƯƠNG: {new_sl} (+0.14%) & gắn lên BingX")
 
         # 3. Chạm Cắt lỗ / Khóa lãi dương
         elif cur_p <= sl:
             if state.mode == "LIVE TRADING" and state.bingx_client:
-                state.bingx_client.place_market_order("NCCOGOLD2USD-USDT", "SELL", "LONG", size)
+                state.bingx_client.cancel_all_open_orders("NCCOGOLD2USD-USDT")
+                state.bingx_client.close_all_positions("NCCOGOLD2USD-USDT")
                 sync_live_balance()
             pnl = (cur_p - entry) * size
             fee = cur_p * size * state.fee_rate
@@ -829,7 +925,8 @@ def check_and_manage_live_position():
         # 1. Chốt lời toàn phần TP2 (+1.10%)
         if cur_p <= tp2:
             if state.mode == "LIVE TRADING" and state.bingx_client:
-                state.bingx_client.place_market_order("NCCOGOLD2USD-USDT", "BUY", "SHORT", size)
+                state.bingx_client.cancel_all_open_orders("NCCOGOLD2USD-USDT")
+                state.bingx_client.close_all_positions("NCCOGOLD2USD-USDT")
                 sync_live_balance()
             pnl = (entry - cur_p) * size
             fee = cur_p * size * state.fee_rate_maker
@@ -851,13 +948,6 @@ def check_and_manage_live_position():
         # 2. Chốt 50% ở TP1 (+0.55%) và Dời SL vào vùng LÃI DƯƠNG (+0.14%)
         elif not tp1_hit and cur_p <= tp1:
             close_size = size * 0.50
-            if state.mode == "LIVE TRADING" and state.bingx_client:
-                state.bingx_client.place_market_order("NCCOGOLD2USD-USDT", "BUY", "SHORT", close_size)
-                sync_live_balance()
-            pnl = (entry - cur_p) * close_size
-            fee = cur_p * close_size * state.fee_rate_maker
-            net = pnl - fee
-            state.balance += net
             pos["size"] -= close_size
             pos["tp1_hit"] = True
             
@@ -866,6 +956,17 @@ def check_and_manage_live_position():
             new_sl = round(entry - lock_dist, 2)
             pos["sl"] = new_sl
             pos["stop_loss"] = new_sl
+
+            if state.mode == "LIVE TRADING" and state.bingx_client:
+                state.bingx_client.cancel_all_open_orders("NCCOGOLD2USD-USDT")
+                state.bingx_client.place_market_order("NCCOGOLD2USD-USDT", "BUY", "SHORT", close_size)
+                state.bingx_client.set_position_tp_sl("NCCOGOLD2USD-USDT", "SHORT", pos["size"], sl_price=new_sl, tp_price=tp2)
+                sync_live_balance()
+
+            pnl = (entry - cur_p) * close_size
+            fee = cur_p * close_size * state.fee_rate_maker
+            net = pnl - fee
+            state.balance += net
             
             state.trades.insert(0, {
                 "time": now_str,
@@ -877,12 +978,13 @@ def check_and_manage_live_position():
                 "type": "WIN"
             })
             record_closed_trade_to_pnl(net, fee, "WIN", "CHỐT LỜI TP1 (+0.55%)", cur_p, f"{close_size:.3f} oz", state.balance)
-            logger.info(f"[LIVE TP1 SHORT] Hit @ {cur_p} | Dời SL vào LÃI DƯƠNG: {new_sl} (+0.14%)")
+            logger.info(f"[LIVE TP1 SHORT] Hit @ {cur_p} | Dời SL vào LÃI DƯƠNG: {new_sl} (+0.14%) & gắn lên BingX")
 
         # 3. Chạm Cắt lỗ / Khóa lãi dương
         elif cur_p >= sl:
             if state.mode == "LIVE TRADING" and state.bingx_client:
-                state.bingx_client.place_market_order("NCCOGOLD2USD-USDT", "BUY", "SHORT", size)
+                state.bingx_client.cancel_all_open_orders("NCCOGOLD2USD-USDT")
+                state.bingx_client.close_all_positions("NCCOGOLD2USD-USDT")
                 sync_live_balance()
             pnl = (entry - cur_p) * size
             fee = cur_p * size * state.fee_rate
@@ -1006,6 +1108,14 @@ def check_and_manage_pending_limit_order():
             "unrealized_pnl": 0.0,
             "pnl_pct": 0.0
         }
+
+        # Gắn Hard TP/SL trực tiếp lên sàn BingX
+        if state.mode == "LIVE TRADING" and state.bingx_client:
+            try:
+                state.bingx_client.set_position_tp_sl("NCCOGOLD2USD-USDT", side, size, sl, tp1)
+            except Exception as e:
+                logger.warning(f"[ATTACH LIVE TP/SL ERROR] {e}")
+
         state.pending_limit_order = None
         state.quant_agent.daily_trades_count += 1
         if state.quant_agent.daily_trades_count >= state.quant_agent.max_daily_trades:
@@ -1022,7 +1132,7 @@ def check_and_manage_pending_limit_order():
             "type": "OPEN"
         })
         state.trades = state.trades[:100]
-        logger.info(f"[LIMIT MAKER FILLED] {side} @ {limit_p:,.2f} | TP1: {tp1} | TP2: {tp2} | SL: {sl}")
+        logger.info(f"[LIMIT MAKER FILLED] {side} @ {limit_p:,.2f} | TP1: {tp1} | TP2: {tp2} | SL: {sl} (Đã gắn Hard TP/SL lên BingX)")
 
 def check_live_entry_signal():
     # 1. Luôn tính toán cập nhật các chỉ báo kỹ thuật theo giá tick mới nhất
@@ -1768,7 +1878,8 @@ async def api_close_position():
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
     if state.mode == "LIVE TRADING" and state.bingx_client:
-        # 1. Đóng trực tiếp toàn bộ vị thế trên sàn BingX
+        # 1. Hủy toàn bộ lệnh chờ/TP/SL cũ và Đóng trực tiếp toàn bộ vị thế trên sàn BingX
+        await asyncio.to_thread(state.bingx_client.cancel_all_open_orders, "NCCOGOLD2USD-USDT")
         ok_close, close_res = await asyncio.to_thread(state.bingx_client.close_all_positions, "NCCOGOLD2USD-USDT")
         if not ok_close:
             order_side = "SELL" if side == "LONG" else "BUY"
