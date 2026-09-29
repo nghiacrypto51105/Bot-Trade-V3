@@ -568,7 +568,7 @@ class TradingEngineState:
             tp1_pct=0.0055,
             tp2_pct=0.0110,
             lock_gain_ratio=0.25,
-            max_daily_trades=4,
+            max_daily_trades=8,
             max_daily_losses=2,
             filter_asia_morning=True
         )
@@ -1488,11 +1488,11 @@ def compute_wait_reason() -> Dict[str, Any]:
             "detail_text": f"Đã chạm ngưỡng dừng lỗ tối đa hôm nay ({state.quant_agent.daily_losses_count}/{state.quant_agent.max_daily_losses} SL). Khóa lệnh bảo vệ vốn đến ngày mai!"
         }
 
-    # 5. Hạn mức lệnh ngày (Daily trade limit - tối đa 4 lệnh)
+    # 5. Hạn mức lệnh ngày (Daily trade limit - tối đa 8 lệnh)
     if state.quant_agent.daily_trades_count >= state.quant_agent.max_daily_trades:
         return {
             "code": "DAILY_LIMIT_REACHED",
-            "status_text": "ĐẠT HẠN MỨC NGÀY (4/4 LỆNH)",
+            "status_text": "ĐẠT HẠN MỨC NGÀY (8/8 LỆNH)",
             "badge_color": "#f0ad4e",
             "icon": "fa-shield-halved",
             "detail_text": f"Đã hoàn tất {state.quant_agent.daily_trades_count}/{state.quant_agent.max_daily_trades} lệnh theo chiến lược Sniper. Nghỉ ngơi bảo toàn trọn vẹn lợi nhuận!"
@@ -1792,7 +1792,7 @@ async def api_reset_limits():
         await manager.broadcast(get_full_state_payload())
     except Exception:
         pass
-    return {"status": "success", "message": "Đã reset về 0 Giới hạn Sniper (0/4 Lệnh, 0/2 SL) & lưu trữ thành công!"}
+    return {"status": "success", "message": "Đã reset về 0 Giới hạn Sniper (0/8 Lệnh, 0/2 SL) & lưu trữ thành công!"}
 
 class TestTradeRequest(BaseModel):
     side: str                          # "LONG" hoặc "SHORT"

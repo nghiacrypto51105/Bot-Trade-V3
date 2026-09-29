@@ -908,7 +908,7 @@
                 <i class="fas fa-brain" style="color: #2563eb;"></i> Trạng Thái Phục Kích AI
               </div>
               <div class="radar-cond-status" id="radar-stat-verdict" style="color: #f0ad4e;">ĐANG RÌNH MỒI</div>
-              <div class="radar-cond-desc" id="radar-desc-verdict">Kỷ luật ngày: 0/4 lệnh | 0/2 SL</div>
+              <div class="radar-cond-desc" id="radar-desc-verdict">Kỷ luật ngày: 0/8 lệnh | 0/2 SL</div>
             </div>
           </div>
 
@@ -924,7 +924,7 @@
               </div>
             </div>
             <div style="display: flex; align-items: center; gap: 8px; font-size: 10.5px; color: #8b949e;">
-              <span><i class="fas fa-shield-alt" style="color: #2563eb;"></i> Giới hạn Sniper: <b id="wait-reason-trades" style="color: #e6edf3;">0/4</b> Lệnh | <b id="wait-reason-losses" style="color: #e6edf3;">0/2</b> SL</span>
+              <span><i class="fas fa-shield-alt" style="color: #2563eb;"></i> Giới hạn Sniper: <b id="wait-reason-trades" style="color: #e6edf3;">0/8</b> Lệnh | <b id="wait-reason-losses" style="color: #e6edf3;">0/2</b> SL</span>
               <button onclick="resetSniperLimits()" title="Reset về 0 Lệnh & SL, mở khóa bot ngay lập tức" style="background: rgba(246, 70, 93, 0.15); border: 1px solid rgba(246, 70, 93, 0.4); color: #f6465d; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s ease;">
                 <i class="fas fa-rotate-left"></i> Reset Về 0
               </button>
@@ -1130,7 +1130,7 @@
         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
           <div style="display: flex; align-items: center; gap: 6px;">
             <span><i class="fas fa-list-check" style="color:#2563eb;"></i> NHẬT KÝ KHỚP LỆNH REALTIME (F8 SNIPER)</span>
-            <span style="font-size: 10px; color: var(--text-muted);">(Tối đa 4 lệnh/ngày | 2 SL)</span>
+            <span style="font-size: 10px; color: var(--text-muted);">(Tối đa 8 lệnh/ngày | 2 SL)</span>
           </div>
           <button onclick="resetSniperLimits()" title="Reset giới hạn và xóa nhật ký lệnh" style="background: rgba(246, 70, 93, 0.15); border: 1px solid rgba(246, 70, 93, 0.4); color: #f6465d; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 3px; transition: all 0.2s ease;">
             <i class="fas fa-rotate-left"></i> Reset Về 0
@@ -1360,7 +1360,7 @@
           <div style="color: #f6465d; font-weight: 700; font-size: 11.5px; margin-bottom: 5px;">KỶ LUẬT & SINH MỆNH</div>
           <div style="font-size: 11px; color: var(--text-muted); line-height: 1.45;">
             • Cắt lỗ kỷ luật: <b>-0.25%</b><br>
-            • Tối đa <b>4 lệnh/ngày</b><br>
+            • Tối đa <b>8 lệnh/ngày</b><br>
             • Cầu dao tự ngắt: Dính <b>2 SL/ngày</b> là khóa
           </div>
         </div>
@@ -2480,7 +2480,7 @@
     }
 
     async function resetSniperLimits() {
-      if (!confirm('Bạn có chắc chắn muốn RESET VỀ 0 toàn bộ Giới hạn Sniper (0/4 Lệnh, 0/2 SL), mở khóa bot và làm mới danh sách lệnh không?')) return;
+      if (!confirm('Bạn có chắc chắn muốn RESET VỀ 0 toàn bộ Giới hạn Sniper (0/8 Lệnh, 0/2 SL), mở khóa bot và làm mới danh sách lệnh không?')) return;
       try {
         const resp = await fetch('/api/reset_limits', { method: 'POST' });
         const res = await resp.json();
@@ -2488,7 +2488,7 @@
           showToast(res.message, 'success');
           const elTrades = document.getElementById('wait-reason-trades');
           const elLosses = document.getElementById('wait-reason-losses');
-          if (elTrades) elTrades.innerText = '0/4';
+          if (elTrades) elTrades.innerText = '0/8';
           if (elLosses) elLosses.innerText = '0/2';
         } else {
           showToast(res.message || 'Lỗi reset giới hạn', 'error');

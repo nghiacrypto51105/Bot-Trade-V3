@@ -55,7 +55,7 @@ class QuantPricingAgent:
         tp1_pct: float = 0.0055,         # Chốt lời Tầng 1: 0.55%
         tp2_pct: float = 0.0110,         # Chốt lời Tầng 2: 1.10% (Ăn trọn sóng lớn)
         lock_gain_ratio: float = 0.25,    # Khóa 25% biên độ TP1 thành SL dương (+0.14% lãi)
-        max_daily_trades: int = 4,         # Tối đa 3 - 5 lệnh A+ mỗi ngày
+        max_daily_trades: int = 8,         # Tối đa 8 lệnh A+ mỗi ngày (Sniper Nâng Cao)
         max_daily_losses: int = 2,         # Cầu dao ngắt lỗ: tối đa 2 SL/ngày
         filter_asia_morning: bool = True,  # Triệt tiêu bẫy thanh khoản sáng phiên Á (06:00 - 08:59)
         use_golden_hours: bool = False,    # Tùy chọn chỉ giao dịch phiên London & NY

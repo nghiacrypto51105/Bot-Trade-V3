@@ -68,7 +68,7 @@ class SurvivalTradingSystem:
             tp1_pct=0.0055,
             tp2_pct=0.0110,
             lock_gain_ratio=0.25,
-            max_daily_trades=4,
+            max_daily_trades=8,
             max_daily_losses=2,
             filter_asia_morning=True,
             default_volume=1.0
