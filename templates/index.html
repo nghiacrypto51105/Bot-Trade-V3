@@ -6,15 +6,15 @@
   <title>BingX Futures Pro Terminal - GOLD (NCCOGOLD2USD) USDT Vĩnh cửu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
       --bg-root: #07090e;
       --bg-panel: #0d1017;
       --bg-header: #0a0d14;
-      --bg-card: #121620;
-      --border-color: #1e2433;
+      --bg-card: #11151f;
+      --border-color: #1c2230;
       --border-light: #283042;
       --text-main: #e6edf3;
       --text-muted: #8b949e;
@@ -26,7 +26,7 @@
       --color-ma10: #00d084;
       --color-ma30: #3498db;
       --color-ma60: #9b59b6;
-      --accent-blue: #2962ff;
+      --accent-blue: #2563eb;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,45 +38,95 @@
       font-size: 13px;
     }
 
-    /* TOP GLOBAL NAV */
+    /* TOP UNIFIED NAVBAR */
     .top-navbar {
-      height: 48px;
+      height: 52px;
       background: var(--bg-header);
       border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 16px;
+      gap: 12px;
     }
     .brand-group {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
     .brand-logo {
       display: flex;
       align-items: center;
       gap: 8px;
       font-weight: 800;
-      font-size: 15px;
+      font-size: 14px;
       letter-spacing: 0.5px;
+      white-space: nowrap;
     }
-    .mexc-badge {
-      background: #1e88e5;
+    .bingx-badge {
+      background: #0052ff;
       color: #fff;
-      padding: 2px 6px;
+      padding: 3px 8px;
       border-radius: 4px;
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 800;
+      letter-spacing: 0.5px;
     }
+
+    /* MASTER NAV TABS (ONLY 1 SINGLE CLEAN BAR) */
+    .nav-tab-switcher {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: #07090e;
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+    .nav-tab-btn {
+      padding: 7px 15px;
+      font-size: 12.5px;
+      font-weight: 700;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.2s ease;
+      background: transparent;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .nav-tab-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .nav-tab-btn.active-paper {
+      background: #2563eb;
+      color: #fff;
+      box-shadow: 0 0 12px rgba(37, 99, 235, 0.4);
+    }
+    .nav-tab-btn.active-live {
+      background: #f6465d;
+      color: #fff;
+      box-shadow: 0 0 12px rgba(246, 70, 93, 0.4);
+    }
+    .nav-tab-btn.active-overview {
+      background: #374151;
+      color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+    }
+
+    /* TOP ACTIONS BUTTONS */
     .top-actions {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
     .btn {
-      padding: 6px 14px;
-      border-radius: 4px;
+      padding: 6px 13px;
+      border-radius: 5px;
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
@@ -85,24 +135,27 @@
       align-items: center;
       gap: 6px;
       transition: all 0.2s;
+      white-space: nowrap;
     }
-    .btn-primary { background: #2962ff; color: #fff; }
-    .btn-primary:hover { background: #1e4bd8; }
-    .btn-dark { background: #1f2430; color: #c9d1d9; border: 1px solid var(--border-color); }
-    .btn-dark:hover { background: #272d3b; color: #fff; }
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-dark { background: #181d27; color: #c9d1d9; border: 1px solid var(--border-color); }
+    .btn-dark:hover { background: #222938; color: #fff; border-color: var(--border-light); }
     .btn-danger { background: rgba(246,70,93,0.15); color: #f6465d; border: 1px solid rgba(246,70,93,0.3); }
     .btn-danger:hover { background: rgba(246,70,93,0.25); }
+    .btn-success { background: linear-gradient(135deg, #0ecb81, #059669); color: #fff; font-weight: 700; border: none; box-shadow: 0 0 10px rgba(14,203,129,0.3); }
+    .btn-success:hover { filter: brightness(1.1); }
 
-    /* TICKER HEADER (IMAGE 1 REPLICA) */
+    /* TICKER HEADER */
     .mexc-ticker-header {
       background: #090c12;
       border-bottom: 1px solid var(--border-color);
-      padding: 10px 16px;
+      padding: 8px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 16px;
+      gap: 12px;
     }
     .pair-badge-group {
       display: flex;
@@ -112,36 +165,36 @@
     .coin-icon {
       width: 28px;
       height: 28px;
-      background: linear-gradient(135deg, #d4af37 0%, #f9d976 100%);
+      background: #0052ff;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #000;
+      color: #fff;
       font-weight: 900;
-      font-size: 13px;
-      box-shadow: 0 0 10px rgba(240, 185, 11, 0.4);
+      font-size: 12px;
+      box-shadow: 0 0 10px rgba(0, 82, 255, 0.4);
     }
     .pair-title {
-      font-size: 17px;
+      font-size: 15px;
       font-weight: 800;
       color: #fff;
       display: flex;
       align-items: center;
-      gap: 6px;
-      cursor: pointer;
+      gap: 8px;
     }
     .zero-fee-tag {
-      background: #253359;
-      color: #79a1ff;
+      background: rgba(14,203,129,0.15);
+      color: #0ecb81;
+      border: 1px solid rgba(14,203,129,0.3);
       font-size: 11px;
-      font-weight: 600;
-      padding: 2px 6px;
-      border-radius: 3px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
     }
     .large-price {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 800;
       color: var(--color-green);
       letter-spacing: -0.5px;
@@ -163,71 +216,21 @@
       color: var(--text-main);
     }
 
-    /* SUB TABS & PROMO BAR (IMAGE 1) */
-    .mexc-subtabs-row {
-      background: #0d1017;
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 16px;
-      height: 38px;
-    }
-    .mexc-tab-nav {
-      display: flex;
-      align-items: center;
-      height: 100%;
-      gap: 20px;
-    }
-    .mexc-tab-item {
-      height: 100%;
-      display: flex;
-      align-items: center;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-muted);
-      cursor: pointer;
-      position: relative;
-      transition: color 0.2s;
-    }
-    .mexc-tab-item.active {
-      color: #fff;
-    }
-    .mexc-tab-item.active::after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: #2962ff;
-      border-radius: 2px 2px 0 0;
-    }
-    .mexc-promo-link {
-      color: var(--text-muted);
-      font-size: 12px;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .mexc-promo-link:hover { color: #fff; }
-
-    /* TIMEFRAMES & TOOLBAR (IMAGE 1) */
+    /* CHART TOOLBAR */
     .mexc-chart-toolbar {
       background: #090c12;
       border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 6px 14px;
+      padding: 5px 14px;
       flex-wrap: wrap;
       gap: 8px;
     }
     .tf-group {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
     }
     .tf-btn {
       background: transparent;
@@ -236,19 +239,12 @@
       font-size: 12px;
       font-weight: 600;
       padding: 4px 8px;
-      border-radius: 3px;
+      border-radius: 4px;
       cursor: pointer;
       transition: all 0.15s;
     }
-    .tf-btn:hover {
-      background: #191f2c;
-      color: #fff;
-    }
-    .tf-btn.active {
-      background: #21293a;
-      color: #fff;
-      font-weight: 700;
-    }
+    .tf-btn:hover { background: #191f2c; color: #fff; }
+    .tf-btn.active { background: #21293a; color: #fff; font-weight: 700; }
     .toolbar-divider {
       width: 1px;
       height: 16px;
@@ -259,44 +255,39 @@
       background: transparent;
       border: none;
       color: var(--text-muted);
-      font-size: 13px;
+      font-size: 12px;
       padding: 5px 8px;
-      border-radius: 3px;
+      border-radius: 4px;
       cursor: pointer;
       transition: all 0.15s;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
     }
-    .tool-icon-btn:hover {
-      background: #191f2c;
-      color: #fff;
-    }
+    .tool-icon-btn:hover { background: #191f2c; color: #fff; }
 
-    /* CHART WRAPPER (SIDEBAR + CANVAS) */
+    /* CHART WRAPPER */
     .chart-layout-box {
       display: flex;
-      height: 520px;
+      height: 480px;
       position: relative;
       background: #0c0e15;
       border-bottom: 1px solid var(--border-color);
     }
-
-    /* LEFT DRAWING TOOLBAR (IMAGE 1) */
     .drawing-toolbar {
-      width: 42px;
+      width: 38px;
       background: #090c12;
       border-right: 1px solid var(--border-color);
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 8px 0;
-      gap: 12px;
+      gap: 10px;
       z-index: 5;
     }
     .draw-tool-btn {
-      width: 30px;
-      height: 30px;
+      width: 28px;
+      height: 28px;
       border-radius: 4px;
       background: transparent;
       border: none;
@@ -305,19 +296,12 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 12px;
       transition: all 0.15s;
     }
-    .draw-tool-btn:hover {
-      background: #1c2230;
-      color: #fff;
-    }
-    .draw-tool-btn.active {
-      background: #253359;
-      color: #79a1ff;
-    }
+    .draw-tool-btn:hover { background: #1c2230; color: #fff; }
+    .draw-tool-btn.active { background: #253359; color: #79a1ff; }
 
-    /* MAIN CANVAS CONTAINER */
     .canvas-viewport {
       flex: 1;
       position: relative;
@@ -325,7 +309,6 @@
       cursor: crosshair;
     }
 
-    /* OVERLAY OHLC & MA BAR (IMAGE 1 EXACT) */
     .ohlc-ma-overlay {
       position: absolute;
       top: 8px;
@@ -361,10 +344,9 @@
     .ma30-val { color: var(--color-ma30); }
     .ma60-val { color: var(--color-ma60); }
 
-    /* VOLUME OVERLAY */
     .vol-overlay {
       position: absolute;
-      bottom: 105px;
+      bottom: 95px;
       left: 12px;
       z-index: 10;
       font-family: 'JetBrains Mono', monospace;
@@ -377,195 +359,15 @@
       text-shadow: 0 1px 3px rgba(0,0,0,0.8);
     }
 
-    /* WATERMARK DEMO TRADING - HIDDEN */
-    .demo-trading-watermark {
-      display: none !important;
-    }
-
-    /* TRADINGVIEW IFRAME CONTAINER */
     #tradingview-container {
       width: 100%;
       height: 100%;
       display: none;
     }
 
-    /* LOWER TERMINAL METRICS & TRADES */
-    .lower-dashboard-grid {
-      display: grid;
-      grid-template-columns: 360px 1fr;
-      gap: 16px;
-      padding: 16px;
-    }
-    @media (max-width: 1200px) {
-      .lower-dashboard-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      overflow: hidden;
-    }
-    .card-header {
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #0f131c;
-      font-weight: 700;
-      font-size: 13px;
-    }
-    .card-body {
-      padding: 14px;
-    }
-
-    /* METRIC ROWS */
-    .metric-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-    }
-    .metric-row:last-child { border-bottom: none; }
-    .metric-label { color: var(--text-muted); font-size: 12px; }
-    .metric-value { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px; }
-
-    /* PERMADEATH METER */
-    .permadeath-meter-box {
-      background: #090c12;
-      border-radius: 6px;
-      padding: 12px;
-      border: 1px solid var(--border-color);
-      margin-top: 10px;
-    }
-    .meter-progress-track {
-      height: 8px;
-      background: #1c2230;
-      border-radius: 4px;
-      overflow: hidden;
-      margin: 8px 0 4px 0;
-      position: relative;
-    }
-    .meter-progress-bar {
-      height: 100%;
-      background: linear-gradient(90deg, #0ecb81 0%, #f0ad4e 60%, #f6465d 100%);
-      width: 0%;
-      transition: width 0.4s;
-    }
-
-    /* POSITION CARD */
-    .pos-side-badge {
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-weight: 800;
-      font-size: 11px;
-    }
-    .pos-long { background: rgba(14,203,129,0.15); color: var(--color-green); border: 1px solid var(--color-green); }
-    .pos-short { background: rgba(246,70,93,0.15); color: var(--color-red); border: 1px solid var(--color-red); }
-
-    /* TRADE HISTORY TABLE */
-    .trade-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-    }
-    .trade-table th {
-      text-align: left;
-      padding: 8px 10px;
-      color: var(--text-muted);
-      border-bottom: 1px solid var(--border-color);
-      font-weight: 600;
-    }
-    .trade-table td {
-      padding: 8px 10px;
-      border-bottom: 1px solid rgba(255,255,255,0.03);
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    /* MODAL */
-    .modal-backdrop {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(4px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-    }
-    .modal-content {
-      background: var(--bg-card);
-      border: 1px solid var(--border-light);
-      border-radius: 8px;
-      width: 460px;
-      padding: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-    }
-    .modal-title {
-      font-size: 16px;
-      font-weight: 800;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .form-group {
-      margin-bottom: 14px;
-    }
-    .form-group label {
-      display: block;
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-    }
-    .form-group input {
-      width: 100%;
-      background: #090c12;
-      border: 1px solid var(--border-color);
-      color: #fff;
-      padding: 8px 12px;
-      border-radius: 4px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-    }
-    .form-group input:focus {
-      outline: none;
-      border-color: #2962ff;
-    }
-
-    .badge-live {
-      background: rgba(14,203,129,0.15);
-      color: var(--color-green);
-      border: 1px solid rgba(14,203,129,0.3);
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .badge-live::before {
-      content: "";
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--color-green);
-      animation: pulse-dot 1.5s infinite;
-    }
-    @keyframes pulse-dot {
-      0% { transform: scale(0.9); opacity: 0.7; }
-      50% { transform: scale(1.4); opacity: 1; }
-      100% { transform: scale(0.9); opacity: 0.7; }
-    }
-  
     /* AI RADAR STYLES */
     .ai-radar-section {
-      padding: 0 16px 16px 16px;
+      padding: 12px 16px 0 16px;
     }
     .radar-tag-live {
       background: rgba(14,203,129,0.15);
@@ -591,8 +393,8 @@
     .radar-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-bottom: 12px;
+      gap: 10px;
+      margin-bottom: 10px;
     }
     @media (max-width: 900px) {
       .radar-grid { grid-template-columns: 1fr; }
@@ -601,11 +403,11 @@
       background: #0e121a;
       border: 1px solid #1a2233;
       border-radius: 6px;
-      padding: 10px 12px;
+      padding: 9px 12px;
       transition: all 0.2s;
     }
     .radar-condition-box:hover {
-      border-color: #2962ff;
+      border-color: #2563eb;
       background: #121722;
     }
     .radar-cond-header {
@@ -614,7 +416,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
     }
     .cond-step {
       width: 16px;
@@ -632,7 +434,7 @@
       font-family: 'JetBrains Mono', monospace;
       font-size: 12px;
       font-weight: 700;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
     .radar-cond-desc {
       font-size: 11px;
@@ -642,76 +444,230 @@
       background: #07090f;
       border: 1px solid #161b26;
       border-radius: 4px;
-      padding: 8px 12px;
+      padding: 7px 12px;
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
+    /* REASON BANNER */
+    .radar-reason-banner {
+      margin-top: 10px;
+      margin-bottom: 10px;
+      background: rgba(13, 17, 23, 0.95);
+      border: 1px solid rgba(240, 173, 78, 0.35);
+      border-left: 4px solid #f0ad4e;
+      border-radius: 6px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    /* SMART DYNAMIC POSITION BANNER */
+    #dynamic-position-container {
+      display: none;
+      padding: 12px 16px 0 16px;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .active-pos-card {
+      background: linear-gradient(135deg, rgba(14,203,129,0.08) 0%, rgba(9,12,18,0.98) 100%);
+      border: 1px solid rgba(14,203,129,0.4);
+      border-radius: 8px;
+      padding: 14px 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+    .active-pos-card.short {
+      background: linear-gradient(135deg, rgba(246,70,93,0.08) 0%, rgba(9,12,18,0.98) 100%);
+      border-color: rgba(246,70,93,0.4);
+    }
+
+    /* LOWER TERMINAL METRICS & TRADES */
+    .lower-dashboard-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 14px;
+      padding: 14px 16px 16px 16px;
+    }
+    @media (max-width: 1200px) {
+      .lower-dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 7px;
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #0f131c;
+      font-weight: 700;
+      font-size: 12.5px;
+    }
+    .card-body {
+      padding: 14px;
+    }
+
+    /* METRIC ROWS */
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .metric-row:last-child { border-bottom: none; }
+    .metric-label { color: var(--text-muted); font-size: 12px; }
+    .metric-value { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px; }
+
+    /* PERMADEATH METER */
+    .permadeath-meter-box {
+      background: #090c12;
+      border-radius: 6px;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      margin-top: 10px;
+    }
+    .meter-progress-track {
+      height: 7px;
+      background: #1c2230;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 6px 0 4px 0;
+      position: relative;
+    }
+    .meter-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #0ecb81 0%, #f0ad4e 60%, #f6465d 100%);
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    /* TRADE HISTORY TABLE */
+    .trade-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .trade-table th {
+      text-align: left;
+      padding: 8px 10px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+      font-weight: 600;
+    }
+    .trade-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* MODAL */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .modal-content {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 500px;
+      padding: 22px;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.7);
+    }
   </style>
 </head>
 <body>
 
-  <!-- TOP GLOBAL NAV -->
+  <!-- TOP UNIFIED NAVBAR (ONE AUTHORITATIVE BAR) -->
   <header class="top-navbar">
     <div class="brand-group">
       <div class="brand-logo">
-        <span class="mexc-badge" style="background: #0052ff; color: #fff;">BingX</span>
+        <span class="bingx-badge">BingX</span>
         <span>AI SNIPER PRO MAX</span>
       </div>
-      <div class="badge-live" id="status-badge" style="background: rgba(0, 82, 255, 0.15); color: #58a6ff; border: 1px solid rgba(56, 139, 253, 0.3); font-weight:700; display:flex; align-items:center; gap:6px;">
+      <div id="status-badge" style="background: rgba(37, 99, 235, 0.15); color: #58a6ff; border: 1px solid rgba(56, 139, 253, 0.3); font-weight:700; font-size:11px; padding:3px 8px; border-radius:12px; display:flex; align-items:center; gap:6px;">
         <i class="fas fa-flask"></i> <span>CHẾ ĐỘ THỬ NGHIỆM (PAPER TRADING)</span>
       </div>
     </div>
 
-    <!-- 2 MASTER TRADING TABS: PAPER TRADING & LIVE TRADING -->
-    <div class="nav-tab-switcher" style="display: flex; gap: 6px; background: #07090e; padding: 4px; border-radius: 8px; border: 1px solid #1e2433;">
-      <button class="nav-tab-btn active" id="master-tab-paper" onclick="selectTradingMode('DEMO')" style="padding: 7px 16px; font-size: 13px; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; background: #2563eb; color: #fff; box-shadow: 0 0 10px rgba(37,99,235,0.4);">
+    <!-- 3 MASTER TABS -->
+    <div class="nav-tab-switcher">
+      <button class="nav-tab-btn active-paper" id="master-tab-paper" onclick="selectTradingMode('DEMO')">
         <i class="fas fa-flask"></i> <span>🧪 Paper Trading (Chạy Thử Nghiệm)</span>
       </button>
-      <button class="nav-tab-btn" id="master-tab-live" onclick="selectTradingMode('LIVE')" style="padding: 7px 16px; font-size: 13px; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; background: transparent; color: var(--text-muted);">
+      <button class="nav-tab-btn" id="master-tab-live" onclick="selectTradingMode('LIVE')">
         <i class="fas fa-satellite-dish"></i> <span>🔴 Live Trading (Trade Thật BingX)</span>
+      </button>
+      <button class="nav-tab-btn" id="master-tab-overview" onclick="switchTab('overview')">
+        <i class="fas fa-gauge-high"></i> <span>📊 Cấu Hình F8 Sniper</span>
       </button>
     </div>
 
+    <!-- TOP ACTIONS -->
     <div class="top-actions">
-      <!-- NÚT HÀNH ĐỘNG CHÍNH DỰA THEO CHẾ ĐỘ -->
-      <button class="btn" id="btn-action-primary" onclick="selectTradingMode('LIVE')" style="background: linear-gradient(135deg, #f6465d, #dc2626); color: #fff; font-weight: 700; border: none; box-shadow: 0 0 10px rgba(246, 70, 93, 0.4); display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; cursor: pointer;">
+      <button class="btn btn-dark" id="btn-test-trade" onclick="openTestModal()" title="Thử mở vị thế Long/Short mô phỏng">
+        <i class="fas fa-play" style="color: #0ecb81;"></i> <span>Thử Lệnh</span>
+      </button>
+      <button class="btn btn-dark" onclick="openApiModal()" title="Cài đặt BingX API Keys">
+        <i class="fas fa-key"></i> <span>API Key</span>
+      </button>
+      <button class="btn btn-primary" id="btn-toggle-run" onclick="toggleBotRun()">
+        <i class="fas fa-pause"></i> <span>Tạm Dừng</span>
+      </button>
+      <button class="btn" id="btn-action-primary" onclick="selectTradingMode('LIVE')" style="background: linear-gradient(135deg, #f6465d, #dc2626); color: #fff; font-weight: 700; box-shadow: 0 0 10px rgba(246, 70, 93, 0.4);">
         <i class="fas fa-tower-broadcast"></i> <span id="btn-action-label">🔴 BẬT TRADE THẬT BINGX</span>
       </button>
-      <button class="btn btn-dark" onclick="openApiModal()"><i class="fas fa-key"></i> Cài Đặt API Key</button>
-      <button class="btn btn-primary" id="btn-toggle-run" onclick="toggleBotRun()"><i class="fas fa-pause"></i> Tạm Dừng Bot</button>
-      <button class="btn btn-dark" onclick="runBacktestModal()"><i class="fas fa-bolt"></i> Kiểm Thử 4 Cấu Hình</button>
     </div>
   </header>
 
   <!-- BINGX TICKER HEADER -->
   <section class="mexc-ticker-header">
     <div class="pair-badge-group">
-      <div class="coin-icon" style="background:#0052ff; color:#fff;">AU</div>
+      <div class="coin-icon">AU</div>
       <div class="pair-title">
-        <span>GOLD / USD (BingX Perpetual Futures)</span>
-        <i class="fas fa-caret-down" style="font-size: 12px; color: var(--text-muted);"></i>
-        <span class="zero-fee-tag" style="background: rgba(14,203,129,0.15); color: #0ecb81; border: 1px solid rgba(14,203,129,0.3); font-weight:700;">Phí Taker: 0.05% | Maker TP: 0.02%</span>
+        <span>GOLD / USD (BingX Perpetual Futures - NCCOGOLD2USD)</span>
+        <span class="zero-fee-tag">Taker: 0.05% | Maker TP: 0.02%</span>
       </div>
     </div>
 
-    <!-- LARGE REALTIME PRICE -->
+    <!-- REALTIME PRICE -->
     <div>
       <div class="large-price" id="header-price">4,284.8</div>
     </div>
 
-    <!-- 6 STAT COLUMNS (IMAGE 1) -->
+    <!-- 6 STAT COLUMNS -->
     <div class="ticker-stat-item">
-      <span class="ticker-stat-label">Biến động</span>
+      <span class="ticker-stat-label">Biến động 24h</span>
       <span class="ticker-stat-val" id="header-change" style="color: var(--color-green);">+0.00%</span>
     </div>
     <div class="ticker-stat-item">
-      <span class="ticker-stat-label">Giá chỉ số</span>
+      <span class="ticker-stat-label">Giá chỉ số (Index)</span>
       <span class="ticker-stat-val" id="header-index">4,284.5</span>
     </div>
     <div class="ticker-stat-item">
-      <span class="ticker-stat-label">Giá hợp lý</span>
+      <span class="ticker-stat-label">Giá hợp lý (Fair)</span>
       <span class="ticker-stat-val" id="header-fair">4,284.8</span>
     </div>
     <div class="ticker-stat-item">
@@ -719,308 +675,328 @@
       <span class="ticker-stat-val" style="color: #f0ad4e;">+0.0050% / <span id="header-countdown">00:26:53</span></span>
     </div>
     <div class="ticker-stat-item">
-      <span class="ticker-stat-label">Giá cao nhất 24h</span>
+      <span class="ticker-stat-label">Giá cao 24h</span>
       <span class="ticker-stat-val" id="header-high">4,288.9</span>
     </div>
     <div class="ticker-stat-item">
-      <span class="ticker-stat-label">Giá thấp nhất 24h</span>
+      <span class="ticker-stat-label">Giá thấp 24h</span>
       <span class="ticker-stat-val" id="header-low">4,283.6</span>
     </div>
   </section>
 
-  <!-- SUB TABS & PROMO BAR (IMAGE 1) -->
-  <section class="mexc-subtabs-row">
-    <div class="mexc-tab-nav">
-      <div class="mexc-tab-item active" id="subtab-paper" onclick="selectTradingMode('DEMO')">
-        <i class="fas fa-flask" style="color:#58a6ff; margin-right:6px;"></i> Tab 1: Paper Trading (Thử Nghiệm)
-      </div>
-      <div class="mexc-tab-item" id="subtab-live" onclick="selectTradingMode('LIVE')">
-        <i class="fas fa-satellite-dish" style="color:#0ecb81; margin-right:6px;"></i> Tab 2: Live Trading (Trade Thật BingX)
-      </div>
-      <div class="mexc-tab-item" id="tab-overview" onclick="switchTab('overview')">
-        <i class="fas fa-gauge-high" style="margin-right:6px; color:#f0ad4e;"></i> Cấu Hình F8 Sniper
-      </div>
-      <div class="mexc-tab-item" id="tab-data" onclick="openApiModal()">
-        <i class="fas fa-key" style="margin-right:6px;"></i> Cài Đặt BingX API
-      </div>
-    </div>
-    <a href="#" class="mexc-promo-link" id="banner-mode-link" onclick="handleBannerClick(); return false;">
-      <i class="fas fa-shield-halved" id="banner-icon" style="color: #58a6ff;"></i>
-      <span id="banner-text">Chế độ Paper Trading thử nghiệm an toàn (Vốn mô phỏng). Click vào tab <b>Live Trading</b> để đồng bộ vốn sàn BingX & bắt đầu trade thật &gt;</span>
-    </a>
-  </section>
-
-  <!-- TAB VIEW 1: CHART & AI TRADING TERMINAL -->
+  <!-- TAB VIEW 1: CHART & AI TERMINAL -->
   <div id="view-chart-container">
 
-  <!-- TIMEFRAME & TOOLBAR (IMAGE 1) -->
-  <section class="mexc-chart-toolbar">
-    <div class="tf-group">
-      <button class="tf-btn" onclick="changeTimeframe('Min1', this)">1 phút</button>
-      <button class="tf-btn" onclick="changeTimeframe('Min5', this)">5 phút</button>
-      <button class="tf-btn active" onclick="changeTimeframe('Min15', this)">15 phút</button>
-      <button class="tf-btn" onclick="changeTimeframe('Min60', this)">1 giờ</button>
-      <button class="tf-btn" onclick="changeTimeframe('Hour4', this)">4 giờ</button>
-      <button class="tf-btn" onclick="changeTimeframe('Day1', this)">1 ngày</button>
-      <div class="toolbar-divider"></div>
-      <button class="tool-icon-btn" title="Đổi kiểu nến"><i class="fas fa-chart-column"></i></button>
-      <button class="tool-icon-btn" title="Chỉ báo kỹ thuật (Indicators)"><span style="font-style: italic; font-weight: 800;">fx</span></button>
-      <button class="tool-icon-btn" title="Bố cục lưới"><i class="fas fa-table-cells-large"></i></button>
-      <button class="tool-icon-btn" title="Chụp ảnh màn hình"><i class="fas fa-camera"></i></button>
-      <div class="toolbar-divider"></div>
-      <button class="tool-icon-btn" id="view-mode-toggle" onclick="toggleChartView()">
-        <i class="fas fa-exchange-alt"></i> <span id="view-mode-label">Chuyển TradingView Gốc</span>
-      </button>
-    </div>
-    <div class="tf-group">
-      <button class="tool-icon-btn">Giá mới nhất <i class="fas fa-caret-down"></i></button>
-      <button class="tool-icon-btn">Bản thường <i class="fas fa-caret-down"></i></button>
-      <button class="tool-icon-btn" onclick="toggleFullscreen()"><i class="fas fa-expand"></i></button>
-    </div>
-  </section>
+    <!-- TIMEFRAME & TOOLBAR -->
+    <section class="mexc-chart-toolbar">
+      <div class="tf-group">
+        <button class="tf-btn" onclick="changeTimeframe('Min1', this)">1 phút</button>
+        <button class="tf-btn" onclick="changeTimeframe('Min5', this)">5 phút</button>
+        <button class="tf-btn active" onclick="changeTimeframe('Min15', this)">15 phút</button>
+        <button class="tf-btn" onclick="changeTimeframe('Min60', this)">1 giờ</button>
+        <button class="tf-btn" onclick="changeTimeframe('Hour4', this)">4 giờ</button>
+        <button class="tf-btn" onclick="changeTimeframe('Day1', this)">1 ngày</button>
+        <div class="toolbar-divider"></div>
+        <button class="tool-icon-btn" id="view-mode-toggle" onclick="toggleChartView()">
+          <i class="fas fa-exchange-alt"></i> <span id="view-mode-label">Chuyển TradingView Gốc</span>
+        </button>
+      </div>
+      <div class="tf-group">
+        <span style="font-size:11px; color:var(--text-muted); margin-right:8px;">Chỉ báo: MA(5, 10, 30, 60) | BB(20, 2) | RSI(14)</span>
+        <button class="tool-icon-btn" onclick="toggleFullscreen()" title="Toàn màn hình biểu đồ"><i class="fas fa-expand"></i></button>
+      </div>
+    </section>
 
-  <!-- CHART WRAPPER (SIDEBAR + CANVAS) -->
-  <section class="chart-layout-box" id="chart-box">
-    
-    <!-- LEFT DRAWING TOOLBAR (IMAGE 1) -->
-    <div class="drawing-toolbar" id="drawing-bar">
-      <button class="draw-tool-btn active" title="Con trỏ Crosshair"><i class="fas fa-plus"></i></button>
-      <button class="draw-tool-btn" title="Đường xu hướng (Trendline)"><i class="fas fa-slash"></i></button>
-      <button class="draw-tool-btn" title="Pitchfork / Fibonacci"><i class="fas fa-draw-polygon"></i></button>
-      <button class="draw-tool-btn" title="Bút vẽ / Cọ vẽ"><i class="fas fa-paint-brush"></i></button>
-      <button class="draw-tool-btn" title="Văn bản (Text)"><i class="fas fa-font"></i></button>
-      <button class="draw-tool-btn" title="Mô hình nến / Sóng"><i class="fas fa-shapes"></i></button>
-      <button class="draw-tool-btn" title="Thước đo giá / Thời gian"><i class="fas fa-ruler"></i></button>
-      <button class="draw-tool-btn" title="Phóng to vùng chọn"><i class="fas fa-magnifying-glass-plus"></i></button>
-      <button class="draw-tool-btn" title="Chế độ Hút Nam châm"><i class="fas fa-magnet"></i></button>
-      <button class="draw-tool-btn" title="Xóa tất cả hình vẽ"><i class="fas fa-trash"></i></button>
-    </div>
-
-    <!-- MAIN CANVAS VIEWPORT -->
-    <div class="canvas-viewport" id="canvas-container">
-      
-      <!-- TOP OHLC & MA OVERLAY (IMAGE 1) -->
-      <div class="ohlc-ma-overlay">
-        <div class="ohlc-row">
-          <span style="color: var(--text-sub);">▾</span>
-          <span id="overlay-datetime">2026/09/27 22:33</span>
-          <span>Mở: <span class="ohlc-val" id="ov-open">4,276.9</span></span>
-          <span>Đóng: <span class="ohlc-val" id="ov-close">4,276.8</span></span>
-          <span>Cao: <span class="ohlc-val" id="ov-high">4,276.9</span></span>
-          <span>Thấp: <span class="ohlc-val" id="ov-low">4,276.8</span></span>
-          <span>Biến động: <span class="ohlc-val" id="ov-diff">-0.1 (-0.00%)</span></span>
-          <span>Biên độ: <span class="ohlc-val" id="ov-amp">0.1 (0.00%)</span></span>
-        </div>
-        <div class="ma-row">
-          <span style="color: var(--text-sub);">▾ MA</span>
-          <span>MA5: <span class="ma5-val" id="ov-ma5">4,276.7</span></span>
-          <span>MA10: <span class="ma10-val" id="ov-ma10">4,276.81</span></span>
-          <span>MA30: <span class="ma30-val" id="ov-ma30">4,277.0</span></span>
-          <span>MA60: <span class="ma60-val" id="ov-ma60">4,277.7467</span></span>
-        </div>
+    <!-- CHART WRAPPER (SIDEBAR + CANVAS) -->
+    <section class="chart-layout-box" id="chart-box">
+      <!-- LEFT DRAWING TOOLBAR -->
+      <div class="drawing-toolbar" id="drawing-bar">
+        <button class="draw-tool-btn active" title="Con trỏ Crosshair"><i class="fas fa-plus"></i></button>
+        <button class="draw-tool-btn" title="Đường xu hướng (Trendline)"><i class="fas fa-slash"></i></button>
+        <button class="draw-tool-btn" title="Fibonacci Retracement"><i class="fas fa-draw-polygon"></i></button>
+        <button class="draw-tool-btn" title="Cọ vẽ"><i class="fas fa-paint-brush"></i></button>
+        <button class="draw-tool-btn" title="Thước đo giá"><i class="fas fa-ruler"></i></button>
+        <button class="draw-tool-btn" title="Phóng to"><i class="fas fa-magnifying-glass-plus"></i></button>
+        <button class="draw-tool-btn" title="Chế độ Nam châm"><i class="fas fa-magnet"></i></button>
       </div>
 
-      <!-- VOLUME OVERLAY -->
-      <div class="vol-overlay">
-        <span style="color: var(--text-sub);">▾ VOL</span>
-        <span>VOL(GOLD(XAUT)): <span style="color:#fff;" id="ov-vol">12.45</span></span>
-        <span>MA(5): <span style="color:var(--color-ma5);" id="ov-vol-ma5">45.2</span></span>
-        <span>MA(10): <span style="color:var(--color-ma10);" id="ov-vol-ma10">38.9</span></span>
+      <!-- MAIN CANVAS VIEWPORT -->
+      <div class="canvas-viewport" id="canvas-container">
+        <!-- TOP OHLC & MA OVERLAY -->
+        <div class="ohlc-ma-overlay">
+          <div class="ohlc-row">
+            <span style="color: var(--text-sub);">▾</span>
+            <span id="overlay-datetime">--</span>
+            <span>Mở: <span class="ohlc-val" id="ov-open">--</span></span>
+            <span>Đóng: <span class="ohlc-val" id="ov-close">--</span></span>
+            <span>Cao: <span class="ohlc-val" id="ov-high">--</span></span>
+            <span>Thấp: <span class="ohlc-val" id="ov-low">--</span></span>
+            <span>Biến động: <span class="ohlc-val" id="ov-diff">--</span></span>
+            <span>Biên độ: <span class="ohlc-val" id="ov-amp">--</span></span>
+          </div>
+          <div class="ma-row">
+            <span style="color: var(--text-sub);">▾ MA</span>
+            <span>MA5: <span class="ma5-val" id="ov-ma5">--</span></span>
+            <span>MA10: <span class="ma10-val" id="ov-ma10">--</span></span>
+            <span>MA30: <span class="ma30-val" id="ov-ma30">--</span></span>
+            <span>MA60: <span class="ma60-val" id="ov-ma60">--</span></span>
+          </div>
+        </div>
+
+        <!-- VOLUME OVERLAY -->
+        <div class="vol-overlay">
+          <span style="color: var(--text-sub);">▾ VOL</span>
+          <span>VOL(GOLD): <span style="color:#fff;" id="ov-vol">--</span></span>
+        </div>
+
+        <!-- CANVAS ELEMENT -->
+        <canvas id="mexcCanvas"></canvas>
+
+        <!-- OPTIONAL TRADINGVIEW EMBED IFRAME -->
+        <div id="tradingview-container"></div>
       </div>
-
-
-      <!-- CANVAS ELEMENT -->
-      <canvas id="mexcCanvas"></canvas>
-
-      <!-- OPTIONAL TRADINGVIEW EMBED IFRAME -->
-      <div id="tradingview-container"></div>
-    </div>
-  </section>
+    </section>
 
     <!-- LIVE AI RADAR & HEARTBEAT SECTION -->
-  <section class="ai-radar-section">
-    <div class="card">
-      <div class="card-header" style="background: #0b0f19; border-bottom: 1px solid #1a2233;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <span class="heartbeat-pulse"><i class="fas fa-heart-pulse"></i></span>
-          <span style="font-weight: 800; color: #fff; font-size: 13px;">RADAR TƯ DUY AI AGENT (LIVE SURVIVAL COGNITION)</span>
-          <span class="radar-tag-live">QUÉT 24/7 BINGX REALTIME</span>
+    <section class="ai-radar-section">
+      <div class="card">
+        <div class="card-header" style="background: #0b0f19;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="heartbeat-pulse"><i class="fas fa-heart-pulse"></i></span>
+            <span style="font-weight: 800; color: #fff; font-size: 13px;">RADAR TƯ DUY AI AGENT (LIVE SURVIVAL COGNITION)</span>
+            <span class="radar-tag-live">QUÉT 24/7 BINGX REALTIME</span>
+          </div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted);">
+            Nhịp đập cuối: <span id="radar-heartbeat" style="color: #0ecb81; font-weight: 700;">--:--:--</span> | Trạng thái: <span style="color: #0ecb81; font-weight: 700;">ĐANG SỐNG & HOẠT ĐỘNG</span>
+          </div>
         </div>
-        <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted);">
-          Nhịp đập cuối: <span id="radar-heartbeat" style="color: #0ecb81; font-weight: 700;">--:--:--</span> | Trạng thái: <span style="color: #0ecb81; font-weight: 700;">ĐANG SỐNG & HOẠT ĐỘNG</span>
+        <div class="card-body" style="background: #090c13; padding: 12px 14px;">
+          <div class="radar-grid">
+            <!-- Điều kiện 1 -->
+            <div class="radar-condition-box" id="radar-box-trend">
+              <div class="radar-cond-header">
+                <span class="cond-step">1</span> Sóng Xu Hướng Lớn (EMA 300)
+              </div>
+              <div class="radar-cond-status" id="radar-stat-trend">ĐANG PHÂN TÍCH...</div>
+              <div class="radar-cond-desc" id="radar-desc-trend">Giá vs EMA 1h (chu kỳ 300)</div>
+            </div>
+            <!-- Điều kiện 2 -->
+            <div class="radar-condition-box" id="radar-box-bb">
+              <div class="radar-cond-header">
+                <span class="cond-step">2</span> Điểm Tựa Giá Cực Trị (BB 20, 2)
+              </div>
+              <div class="radar-cond-status" id="radar-stat-bb">ĐANG QUÉT...</div>
+              <div class="radar-cond-desc" id="radar-desc-bb">Chạm Upper / Lower Band</div>
+            </div>
+            <!-- Điều kiện 3 -->
+            <div class="radar-condition-box" id="radar-box-rsi">
+              <div class="radar-cond-header">
+                <span class="cond-step">3</span> Động Lượng Đảo Chiều (RSI 14)
+              </div>
+              <div class="radar-cond-status" id="radar-stat-rsi">ĐANG ĐO...</div>
+              <div class="radar-cond-desc" id="radar-desc-rsi">Mục tiêu: &lt;= 45 (Long) hoặc &gt;= 55 (Short)</div>
+            </div>
+            <!-- Tổng kết tâm trí AI -->
+            <div class="radar-condition-box" id="radar-box-verdict" style="border-left: 2px solid #2563eb;">
+              <div class="radar-cond-header">
+                <i class="fas fa-brain" style="color: #2563eb;"></i> Trạng Thái Phục Kích AI
+              </div>
+              <div class="radar-cond-status" id="radar-stat-verdict" style="color: #f0ad4e;">ĐANG RÌNH MỒI</div>
+              <div class="radar-cond-desc" id="radar-desc-verdict">Kỷ luật ngày: 0/4 lệnh | 0/2 SL</div>
+            </div>
+          </div>
+
+          <!-- DEDICATED REASON FOR NOT TRADING BANNER -->
+          <div class="radar-reason-banner" id="radar-reason-banner">
+            <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 280px;">
+              <div id="wait-reason-badge" style="background: rgba(240, 173, 78, 0.15); color: #f0ad4e; font-weight: 700; font-size: 11px; padding: 5px 12px; border-radius: 4px; white-space: nowrap; border: 1px solid rgba(240, 173, 78, 0.3); display: flex; align-items: center; gap: 7px; text-transform: uppercase; letter-spacing: 0.5px;">
+                <i id="wait-reason-icon" class="fas fa-hourglass-half"></i>
+                <span id="wait-reason-title">LÝ DO CHƯA VÀO LỆNH</span>
+              </div>
+              <div id="wait-reason-detail" style="color: #e6edf3; font-size: 12.5px; line-height: 1.4; font-weight: 500;">
+                Đang phân tích điều kiện thị trường BingX...
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; font-size: 11px; color: #8b949e;">
+              <span><i class="fas fa-shield-alt" style="color: #2563eb;"></i> Giới hạn Sniper: <b id="wait-reason-trades" style="color: #e6edf3;">0/4</b> Lệnh | <b id="wait-reason-losses" style="color: #e6edf3;">0/2</b> SL</span>
+              <button onclick="resetSniperLimits()" title="Reset về 0 Lệnh & SL, mở khóa bot ngay lập tức" style="background: rgba(246, 70, 93, 0.15); border: 1px solid rgba(246, 70, 93, 0.4); color: #f6465d; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all 0.2s ease;">
+                <i class="fas fa-rotate-left"></i> Reset Về 0
+              </button>
+            </div>
+          </div>
+
+          <!-- LIVE TELEMETRY LOG -->
+          <div class="radar-log-ticker">
+            <i class="fas fa-terminal" style="color: #0ecb81; font-size: 11px;"></i>
+            <span style="color: #8b949e; font-size: 11px;">Nhật ký suy nghĩ AI:</span>
+            <span id="radar-log-text" style="color: #e6edf3; font-family: 'JetBrains Mono', monospace; font-size: 11px;">Đang lắng nghe K-Line BingX 15m... Chờ thiết lập hội tụ A+ hoàn chỉnh.</span>
+          </div>
         </div>
       </div>
-      <div class="card-body" style="background: #090c13; padding: 14px 16px;">
-        <div class="radar-grid">
-          <!-- Điều kiện 1 -->
-          <div class="radar-condition-box" id="radar-box-trend">
-            <div class="radar-cond-header">
-              <span class="cond-step">1</span> Sóng Xu Hướng Lớn (EMA 300)
-            </div>
-            <div class="radar-cond-status" id="radar-stat-trend">ĐANG PHÂN TÍCH...</div>
-            <div class="radar-cond-desc" id="radar-desc-trend">Giá vs EMA 1h (chu kỳ 300)</div>
-          </div>
-          <!-- Điều kiện 2 -->
-          <div class="radar-condition-box" id="radar-box-bb">
-            <div class="radar-cond-header">
-              <span class="cond-step">2</span> Điểm Tựa Giá Cực Trị (BB 20, 2)
-            </div>
-            <div class="radar-cond-status" id="radar-stat-bb">ĐANG QUÉT...</div>
-            <div class="radar-cond-desc" id="radar-desc-bb">Chạm Upper / Lower Band</div>
-          </div>
-          <!-- Điều kiện 3 -->
-          <div class="radar-condition-box" id="radar-box-rsi">
-            <div class="radar-cond-header">
-              <span class="cond-step">3</span> Động Lượng Đảo Chiều (RSI 14)
-            </div>
-            <div class="radar-cond-status" id="radar-stat-rsi">ĐANG ĐO...</div>
-            <div class="radar-cond-desc" id="radar-desc-rsi">Mục tiêu: <= 45 (Long) hoặc >= 55 (Short)</div>
-          </div>
-          <!-- Tổng kết tâm trí AI -->
-          <div class="radar-condition-box" id="radar-box-verdict" style="border-left: 2px solid #2962ff;">
-            <div class="radar-cond-header">
-              <i class="fas fa-brain" style="color: #2962ff;"></i> Trạng Thái Phục Kích AI
-            </div>
-            <div class="radar-cond-status" id="radar-stat-verdict" style="color: #f0ad4e;">ĐANG RÌNH MỒI</div>
-            <div class="radar-cond-desc" id="radar-desc-verdict">Kỷ luật ngày: 0/4 lệnh | 0/2 SL</div>
-          </div>
-        </div>
+    </section>
 
-        <!-- DEDICATED REASON FOR NOT TRADING BANNER -->
-        <div class="radar-reason-banner" id="radar-reason-banner" style="margin-top: 12px; margin-bottom: 10px; background: rgba(13, 17, 23, 0.95); border: 1px solid rgba(240, 173, 78, 0.35); border-left: 4px solid #f0ad4e; border-radius: 6px; padding: 11px 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);">
-          <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 280px;">
-            <div id="wait-reason-badge" style="background: rgba(240, 173, 78, 0.15); color: #f0ad4e; font-weight: 700; font-size: 11px; padding: 5px 12px; border-radius: 4px; white-space: nowrap; border: 1px solid rgba(240, 173, 78, 0.3); display: flex; align-items: center; gap: 7px; text-transform: uppercase; letter-spacing: 0.5px;">
-              <i id="wait-reason-icon" class="fas fa-hourglass-half"></i>
-              <span id="wait-reason-title">LÝ DO CHƯA VÀO LỆNH</span>
-            </div>
-            <div id="wait-reason-detail" style="color: #e6edf3; font-size: 12.5px; line-height: 1.4; font-weight: 500;">
-              Đang phân tích điều kiện thị trường BingX...
-            </div>
+    <!-- SMART DYNAMIC POSITION BANNER (EXPANDS ONLY WHEN TRADE IS ACTIVE) -->
+    <div id="dynamic-position-container">
+      <div class="active-pos-card" id="active-pos-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span id="active-pos-badge" style="padding: 4px 12px; border-radius: 6px; font-weight: 800; font-size: 12px; background: rgba(14,203,129,0.2); color: #0ecb81; border: 1px solid #0ecb81;">
+              🔴 VỊ THẾ LONG 16x ĐANG CHẠY
+            </span>
+            <span style="font-size: 12px; color: var(--text-muted);">
+              Khối lượng: <b id="active-pos-size" style="color:#fff;">0.000 oz</b> | Ký quỹ: <b id="active-pos-margin" style="color:#fff;">$0.00</b>
+            </span>
           </div>
-          <div style="display: flex; align-items: center; gap: 10px; font-size: 11px; color: #8b949e;">
-            <span><i class="fas fa-shield-alt" style="color: #2962ff;"></i> Giới hạn Sniper: <b id="wait-reason-trades" style="color: #e6edf3;">0/4</b> Lệnh | <b id="wait-reason-losses" style="color: #e6edf3;">0/2</b> SL</span>
-            <button onclick="resetSniperLimits()" title="Reset về 0 Lệnh & SL, mở khóa bot ngay lập tức" style="background: rgba(246, 70, 93, 0.15); border: 1px solid rgba(246, 70, 93, 0.4); color: #f6465d; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all 0.2s ease;">
-              <i class="fas fa-rotate-left"></i> Reset Về 0
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div>
+              <span style="font-size: 11px; color: var(--text-muted);">LÃI / LỖ THẢ NỔI: </span>
+              <span id="active-pos-pnl" style="font-family: 'JetBrains Mono'; font-size: 18px; font-weight: 800; color: #0ecb81;">+$0.00 (+0.00%)</span>
+            </div>
+            <button onclick="closeActivePosition()" class="btn btn-danger" style="padding: 7px 14px; font-weight: 700; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+              <i class="fas fa-hand-holding-dollar"></i> ĐÓNG LỆNH NGAY
             </button>
           </div>
         </div>
 
-        <!-- LIVE TELEMETRY LOG -->
-        <div class="radar-log-ticker">
-          <i class="fas fa-terminal" style="color: #0ecb81; font-size: 11px;"></i>
-          <span style="color: #8b949e; font-size: 11px;">Nhật ký suy nghĩ AI:</span>
-          <span id="radar-log-text" style="color: #e6edf3; font-family: 'JetBrains Mono', monospace; font-size: 11px;">Đang lắng nghe K-Line BingX 15m... Chờ thiết lập hội tụ A+ hoàn chỉnh.</span>
+        <!-- POSITION TARGET MILESTONES -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; background: rgba(0,0,0,0.4); border-radius: 6px; padding: 10px 14px; border: 1px solid rgba(255,255,255,0.06);">
+          <div>
+            <span style="font-size: 11px; color: var(--text-muted); display:block;">Giá vào lệnh (Entry)</span>
+            <span id="active-pos-entry" style="font-family: 'JetBrains Mono'; font-weight: 700; font-size: 13px;">$0.00</span>
+          </div>
+          <div>
+            <span style="font-size: 11px; color: var(--color-red); display:block;">Cắt lỗ (SL -0.25%)</span>
+            <span id="active-pos-sl" style="font-family: 'JetBrains Mono'; font-weight: 700; font-size: 13px; color: var(--color-red);">$0.00</span>
+          </div>
+          <div>
+            <span style="font-size: 11px; color: #f0ad4e; display:block;">Chốt lời 1 (TP1 +0.55%)</span>
+            <span id="active-pos-tp1" style="font-family: 'JetBrains Mono'; font-weight: 700; font-size: 13px; color: #f0ad4e;">$0.00</span>
+          </div>
+          <div>
+            <span style="font-size: 11px; color: var(--color-green); display:block;">Chốt lời 2 (TP2 +1.10%)</span>
+            <span id="active-pos-tp2" style="font-family: 'JetBrains Mono'; font-weight: 700; font-size: 13px; color: var(--color-green);">$0.00</span>
+          </div>
+          <div>
+            <span style="font-size: 11px; color: var(--text-muted); display:block;">Khóa lãi an toàn</span>
+            <span id="active-pos-lock" style="font-family: 'JetBrains Mono'; font-weight: 700; font-size: 12px; color: var(--text-muted);">CHƯA KÍCH HOẠT</span>
+          </div>
         </div>
       </div>
     </div>
-  </section>
 
-  <!-- LOWER METRICS & TRADES SECTION -->
-  <section class="lower-dashboard-grid">
-    
-    <!-- CARD 1: TÀI KHOẢN & PERMADEATH -->
-    <div class="card">
-      <div class="card-header">
-        <span><i class="fas fa-shield-halved" style="color: #0ecb81;"></i> QUẢN TRỊ SINH MỆNH</span>
-        <span style="font-size: 11px;" id="lbl-mode">
-          <span style="color:#58a6ff; font-weight:700;"><i class="fas fa-flask"></i> VỐN GIẢ LẬP (PAPER TRADING)</span>
-        </span>
-      </div>
-      <div class="card-body">
-        <div class="metric-row">
-          <span class="metric-label">Số dư khả dụng (Balance)</span>
-          <span class="metric-value">
-            <span id="val-balance">$1,000.00</span>
-            <button id="btn-quick-sync" onclick="syncLiveBalance()" style="display:inline-block; background:none; border:none; color:#0ecb81; cursor:pointer; font-size:12px; margin-left:6px;" title="Cập nhật số dư BingX"><i class="fas fa-arrows-rotate"></i></button>
+    <!-- LOWER METRICS & TRADES SECTION -->
+    <section class="lower-dashboard-grid">
+      <!-- CARD 1: TÀI KHOẢN & PERMADEATH -->
+      <div class="card">
+        <div class="card-header">
+          <span><i class="fas fa-shield-halved" style="color: #0ecb81;"></i> QUẢN TRỊ SINH MỆNH</span>
+          <span style="font-size: 11px;" id="lbl-mode">
+            <span style="color:#58a6ff; font-weight:700;"><i class="fas fa-flask"></i> VỐN GIẢ LẬP (PAPER TRADING)</span>
           </span>
         </div>
-        <div class="metric-row">
-          <span class="metric-label">Tổng tài sản thực (Equity)</span>
-          <span class="metric-value" id="val-equity" style="color: #0ecb81;">$1,000.00</span>
-        </div>
-        <div class="metric-row">
-          <span class="metric-label">Lợi nhuận ròng (Net PnL)</span>
-          <span class="metric-value" id="val-net-pnl">+$0.00 (+0.00%)</span>
-        </div>
-        <div class="metric-row">
-          <span class="metric-label">Đòn bẩy & Ký quỹ</span>
-          <span class="metric-value">16x | 50% Vốn</span>
-        </div>
+        <div class="card-body">
+          <div class="metric-row">
+            <span class="metric-label" id="lbl-balance-type">Số dư mô phỏng (Demo Balance)</span>
+            <span class="metric-value">
+              <span id="val-balance">$1,000.00</span>
+              <button id="btn-quick-sync" onclick="syncLiveBalance()" style="display:none; background:none; border:none; color:#0ecb81; cursor:pointer; font-size:12px; margin-left:6px;" title="Cập nhật số dư BingX"><i class="fas fa-arrows-rotate"></i></button>
+            </span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Tổng tài sản thực (Equity)</span>
+            <span class="metric-value" id="val-equity" style="color: #0ecb81;">$1,000.00</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Lợi nhuận ròng (Net PnL)</span>
+            <span class="metric-value" id="val-net-pnl">+$0.00 (+0.00%)</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Đòn bẩy & Ký quỹ</span>
+            <span class="metric-value">16x | 50% Vốn</span>
+          </div>
 
-        <!-- MỤC TIÊU NGÀY -->
-        <div style="margin-top: 12px;">
-          <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
-            <span style="color:var(--text-muted);">Tiến Độ Chỉ Tiêu Ngày (1.5% - 2.0%)</span>
-            <span id="val-target-text" style="color:#f0ad4e; font-weight:700;">0.0% / 1.5%</span>
+          <!-- MỤC TIÊU NGÀY -->
+          <div style="margin-top: 12px;">
+            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
+              <span style="color:var(--text-muted);">Tiến Độ Chỉ Tiêu Ngày (1.5% - 2.0%)</span>
+              <span id="val-target-text" style="color:#f0ad4e; font-weight:700;">0.0% / 1.5%</span>
+            </div>
+            <div class="meter-progress-track">
+              <div class="meter-progress-bar" id="bar-target" style="width: 0%;"></div>
+            </div>
           </div>
-          <div class="meter-progress-track">
-            <div class="meter-progress-bar" id="bar-target" style="width: 0%;"></div>
-          </div>
-        </div>
 
-        <!-- PERMADEATH GAUGE -->
-        <div class="permadeath-meter-box">
-          <div style="display:flex; justify-content:space-between; font-size:11px;">
-            <span style="color: var(--color-red); font-weight:700;"><i class="fas fa-skull"></i> Ngưỡng Chết Permadeath (10%)</span>
-            <span id="val-dd" style="font-weight:700;">Sụt giảm: 0.00%</span>
+          <!-- PERMADEATH GAUGE -->
+          <div class="permadeath-meter-box">
+            <div style="display:flex; justify-content:space-between; font-size:11px;">
+              <span style="color: var(--color-red); font-weight:700;"><i class="fas fa-skull"></i> Ngưỡng Chết Permadeath (10%)</span>
+              <span id="val-dd" style="font-weight:700;">Sụt giảm: 0.00%</span>
+            </div>
+            <div class="meter-progress-track">
+              <div class="meter-progress-bar" id="bar-dd" style="width: 0%; background: #f6465d;"></div>
+            </div>
+            <div style="font-size:10px; color:var(--text-muted); margin-top:4px;">
+              Tối đa từng bị: <span id="val-max-dd">0.00%</span> (Kỷ luật tuyệt đối dưới 10%)
+            </div>
           </div>
-          <div class="meter-progress-track">
-            <div class="meter-progress-bar" id="bar-dd" style="width: 0%; background: #f6465d;"></div>
-          </div>
-          <div style="font-size:10px; color:var(--text-muted); margin-top:4px;">
-            Tối đa từng bị: <span id="val-max-dd">0.00%</span> (Kỷ luật tuyệt đối dưới 10%)
+
+          <!-- QUICK RESETS FOR PAPER TRADING -->
+          <div id="paper-quick-resets" style="display: flex; gap: 8px; margin-top: 12px; align-items: center;">
+            <span style="font-size: 11px; color: var(--text-muted);">Đổi vốn demo:</span>
+            <button onclick="quickResetBalance(1000)" class="btn btn-dark" style="padding: 3px 8px; font-size: 11px;">$1,000</button>
+            <button onclick="quickResetBalance(5000)" class="btn btn-dark" style="padding: 3px 8px; font-size: 11px;">$5,000</button>
+            <button onclick="quickResetBalance(10000)" class="btn btn-dark" style="padding: 3px 8px; font-size: 11px;">$10,000</button>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- CARD 2: LỊCH SỬ KHỚP LỆNH -->
-    <div class="card">
-      <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span><i class="fas fa-list-check" style="color:#2962ff;"></i> NHẬT KÝ KHỚP LỆNH REALTIME (F8 SNIPER PRO MAX)</span>
-          <span style="font-size: 11px; color: var(--text-muted);">(Tối đa 4 lệnh/ngày | 2 SL)</span>
+      <!-- CARD 2: LỊCH SỬ KHỚP LỆNH -->
+      <div class="card">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span><i class="fas fa-list-check" style="color:#2563eb;"></i> NHẬT KÝ KHỚP LỆNH REALTIME (F8 SNIPER PRO MAX)</span>
+            <span style="font-size: 11px; color: var(--text-muted);">(Tối đa 4 lệnh/ngày | 2 SL)</span>
+          </div>
+          <button onclick="resetSniperLimits()" title="Reset giới hạn và xóa nhật ký lệnh" style="background: rgba(246, 70, 93, 0.15); border: 1px solid rgba(246, 70, 93, 0.4); color: #f6465d; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all 0.2s ease;">
+            <i class="fas fa-rotate-left"></i> Reset Giới Hạn & Lệnh
+          </button>
         </div>
-        <button onclick="resetSniperLimits()" title="Reset giới hạn và xóa nhật ký lệnh" style="background: rgba(246, 70, 93, 0.15); border: 1px solid rgba(246, 70, 93, 0.4); color: #f6465d; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all 0.2s ease;">
-          <i class="fas fa-rotate-left"></i> Reset Giới Hạn & Lệnh
-        </button>
+        <div class="card-body" style="padding: 0; max-height: 280px; overflow-y: auto;">
+          <table class="trade-table">
+            <thead>
+              <tr>
+                <th>Thời gian</th>
+                <th>Hành động</th>
+                <th>Giá khớp</th>
+                <th>Khối lượng</th>
+                <th>Lãi/Lỗ ròng</th>
+                <th>Số dư sau lệnh</th>
+              </tr>
+            </thead>
+            <tbody id="trades-table-body">
+              <tr>
+                <td colspan="6" style="text-align:center; color:var(--text-sub); padding:30px;">
+                  Đang chờ tín hiệu A+ hội tụ Bollinger Bands & RSI & EMA...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div class="card-body" style="padding: 0; max-height: 280px; overflow-y: auto;">
-        <table class="trade-table">
-          <thead>
-            <tr>
-              <th>Thời gian</th>
-              <th>Hành động</th>
-              <th>Giá khớp</th>
-              <th>Khối lượng</th>
-              <th>Lãi/Lỗ ròng</th>
-              <th>Số dư sau lệnh</th>
-            </tr>
-          </thead>
-          <tbody id="trades-table-body">
-            <tr>
-              <td colspan="6" style="text-align:center; color:var(--text-sub); padding:30px;">
-                Đang chờ tín hiệu A+ hội tụ Bollinger Bands & RSI & EMA...
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    </section>
 
-  </section>
   </div><!-- /view-chart-container -->
 
-  <!-- TAB VIEW 3: OVERVIEW & BACKTEST -->
+  <!-- TAB VIEW 2: OVERVIEW & BACKTEST -->
   <div id="view-overview-container" style="display: none; padding: 16px; max-width: 1440px; margin: 0 auto;">
-    <div class="card" style="margin-bottom: 16px; padding: 18px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap:wrap; gap:10px;">
+    <div class="card" style="padding: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap:wrap; gap:10px;">
         <div>
-          <h2 style="font-size: 16px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px;">
+          <h2 style="font-size: 17px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px;">
             <i class="fas fa-gauge-high" style="color: #f0ad4e;"></i> TỔNG QUAN CHIẾN LƯỢC F8 SNIPER PRO MAX
           </h2>
           <p style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">
-            Mô hình giao dịch phục kích sóng Vàng BingX với cơ chế Permadeath & quản trị vốn phân đoạn.
+            Mô hình phục kích sóng Vàng BingX Perpetual Futures với cơ chế Permadeath & quản trị vốn phân đoạn.
           </p>
         </div>
         <button onclick="runBacktestModal()" class="btn btn-primary" style="padding: 8px 16px; font-weight: 700;">
@@ -1069,9 +1045,9 @@
   </div>
 
   <!-- MODAL API KEY & BẬT LIVE -->
-  <div class="modal-backdrop" id="apiModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); z-index:9999; backdrop-filter:blur(4px); align-items:center; justify-content:center;">
-    <div class="modal-content" style="background:#0d1117; border:1px solid #30363d; border-radius:12px; width:90%; max-width:520px; box-shadow:0 12px 36px rgba(0,0,0,0.6); overflow:hidden; padding:22px;">
-      <div class="modal-title" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+  <div class="modal-backdrop" id="apiModal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
         <span style="font-weight:700; font-size:15px; color:#e6edf3; display:flex; align-items:center; gap:8px;">
           <i class="fas fa-tower-broadcast" style="color:#f6465d;"></i> KẾT NỐI BINGX & BẬT CHẾ ĐỘ LIVE
         </span>
@@ -1080,19 +1056,19 @@
       <div style="background:rgba(56,139,253,0.1); border:1px solid rgba(56,139,253,0.3); border-radius:6px; padding:10px 14px; margin-bottom:16px; font-size:12px; color:#58a6ff; line-height:1.5;">
         <i class="fas fa-shield-halved"></i> <b>Bảo Mật An Toàn:</b> API Key được lưu trực tiếp vào file <code>.env</code> trên máy của bạn. Chỉ bật quyền <b>"Hợp đồng vĩnh viễn" (Perpetual Futures)</b>, <u>tuyệt đối KHÔNG cấp quyền Rút tiền (Withdrawal)</u>!
       </div>
-      <div class="form-group" style="margin-bottom:14px;">
+      <div style="margin-bottom:14px;">
         <label style="display:block; font-size:12px; color:#8b949e; margin-bottom:6px; font-weight:600;">BINGX API KEY (Access Key)</label>
         <input type="text" id="input-api-key" placeholder="Nhập API Key BingX của bạn..." style="width:100%; background:#090c13; border:1px solid #30363d; border-radius:6px; padding:10px 12px; color:#e6edf3; font-family:'JetBrains Mono',monospace; font-size:12px; box-sizing:border-box;">
       </div>
-      <div class="form-group" style="margin-bottom:16px;">
+      <div style="margin-bottom:16px;">
         <label style="display:block; font-size:12px; color:#8b949e; margin-bottom:6px; font-weight:600;">BINGX SECRET KEY</label>
         <input type="password" id="input-api-secret" placeholder="Nhập Secret Key BingX..." style="width:100%; background:#090c13; border:1px solid #30363d; border-radius:6px; padding:10px 12px; color:#e6edf3; font-family:'JetBrains Mono',monospace; font-size:12px; box-sizing:border-box;">
       </div>
       <div id="modal-api-alert" style="display:none; padding:10px 12px; border-radius:6px; margin-bottom:14px; font-size:12px; font-weight:500;"></div>
       <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px; flex-wrap:wrap;">
-        <button class="btn btn-dark" onclick="closeApiModal()" style="padding:8px 14px;">Hủy</button>
-        <button class="btn btn-dark" onclick="saveApiKeys()" style="padding:8px 14px;"><i class="fas fa-floppy-disk"></i> Chỉ Lưu Keys</button>
-        <button class="btn" id="btn-save-and-live" onclick="submitLiveConnect()" style="background:linear-gradient(135deg, #0ecb81, #059669); color:#fff; font-weight:700; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+        <button class="btn btn-dark" onclick="closeApiModal()">Hủy</button>
+        <button class="btn btn-dark" onclick="saveApiKeys()"><i class="fas fa-floppy-disk"></i> Chỉ Lưu Keys</button>
+        <button class="btn btn-success" id="btn-save-and-live" onclick="submitLiveConnect()">
           <i class="fas fa-arrows-rotate"></i> Đồng Bộ Vốn & Bật Live
         </button>
       </div>
@@ -1100,26 +1076,26 @@
   </div>
 
   <!-- MODAL VÀO LỆNH THỬ NGHIỆM (DEMO) -->
-  <div class="modal-backdrop" id="testTradeModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); z-index:9999; backdrop-filter:blur(4px); align-items:center; justify-content:center;">
-    <div class="modal-content" style="background:#0d1117; border:1px solid #30363d; border-radius:12px; width:90%; max-width:480px; box-shadow:0 12px 36px rgba(0,0,0,0.6); overflow:hidden; padding:22px;">
-      <div class="modal-title" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+  <div class="modal-backdrop" id="testTradeModal">
+    <div class="modal-content" style="max-width: 460px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
         <span style="font-weight:700; font-size:15px; color:#e6edf3; display:flex; align-items:center; gap:8px;">
           <i class="fas fa-flask" style="color:#58a6ff;"></i> MỞ VỊ THẾ THỬ NGHIỆM (DEMO)
         </span>
         <i class="fas fa-xmark" style="cursor:pointer; color:var(--text-muted); font-size:18px;" onclick="closeTestModal()"></i>
       </div>
       <div style="background:rgba(56,139,253,0.1); border:1px solid rgba(56,139,253,0.3); border-radius:6px; padding:12px 14px; margin-bottom:16px; font-size:12px; color:#58a6ff; line-height:1.5;">
-        <i class="fas fa-shield-halved"></i> <b>Lưu ý An Toàn:</b> Lệnh thử nghiệm sử dụng vốn mô phỏng (không mất tiền thật) để bạn theo dõi trực tiếp cách bot quản trị lệnh đang chạy, nhảy lãi lỗ theo tick BingX, tự động chốt lời TP1 (+0.55%), dời SL bảo toàn vốn (+0.14%) và chốt hết TP2 (+1.10%).
+        <i class="fas fa-shield-halved"></i> <b>Lưu ý An Toàn:</b> Lệnh thử nghiệm sử dụng vốn mô phỏng (không mất tiền thật) để bạn theo dõi trực tiếp cách bot quản trị lệnh đang chạy, tự động chốt lời TP1 (+0.55%), dời SL bảo toàn vốn (+0.14%) và chốt hết TP2 (+1.10%).
       </div>
       <div style="margin-bottom:16px;">
         <label style="display:block; font-size:12px; color:#8b949e; margin-bottom:8px; font-weight:600;">Chọn Hướng Lệnh Bạn Muốn Thử Nghiệm:</label>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
           <button onclick="executeTestTrade('LONG')" class="btn" style="background: linear-gradient(135deg, #0ecb81, #059669); color: #fff; font-weight: 700; padding: 14px 10px; border-radius: 8px; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; box-shadow: 0 4px 12px rgba(14,203,129,0.3);">
-            <span style="font-size:15px;"><i class="fas fa-arrow-trend-up"></i> THỬ LỆNH LONG</span>
+            <span style="font-size:14px;"><i class="fas fa-arrow-trend-up"></i> THỬ LỆNH LONG</span>
             <span style="font-size:11px; opacity:0.85;">Kỳ vọng giá Vàng tăng</span>
           </button>
           <button onclick="executeTestTrade('SHORT')" class="btn" style="background: linear-gradient(135deg, #f6465d, #dc2626); color: #fff; font-weight: 700; padding: 14px 10px; border-radius: 8px; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; box-shadow: 0 4px 12px rgba(246,70,93,0.3);">
-            <span style="font-size:15px;"><i class="fas fa-arrow-trend-down"></i> THỬ LỆNH SHORT</span>
+            <span style="font-size:14px;"><i class="fas fa-arrow-trend-down"></i> THỬ LỆNH SHORT</span>
             <span style="font-size:11px; opacity:0.85;">Kỳ vọng giá Vàng giảm</span>
           </button>
         </div>
@@ -1127,11 +1103,11 @@
       <div style="background:#161b22; border-radius:6px; padding:10px 14px; font-size:11.5px; color:#8b949e; line-height:1.6;">
         <div>• <b>Đòn bẩy:</b> 16x (Chuẩn BingX Futures)</div>
         <div>• <b>Ký quỹ:</b> 50% số dư Demo</div>
-        <div>• <b>Cắt lỗ kỷ luật:</b> -0.25% (bảo vệ tuyệt đối Permadeath)</div>
-        <div>• <b>Chốt lời thông minh:</b> TP1 +0.55% (khóa 50% & kéo SL lên +0.14%), TP2 +1.10%</div>
+        <div>• <b>Cắt lỗ kỷ luật:</b> -0.25% (Bảo vệ tuyệt đối Permadeath)</div>
+        <div>• <b>Chốt lời thông minh:</b> TP1 +0.55% (Khóa lãi dương +0.14%), TP2 +1.10%</div>
       </div>
       <div style="display:flex; justify-content:flex-end; margin-top:16px;">
-        <button class="btn btn-dark" onclick="closeTestModal()" style="padding:8px 16px;">Đóng</button>
+        <button class="btn btn-dark" onclick="closeTestModal()">Đóng</button>
       </div>
     </div>
   </div>
@@ -1142,19 +1118,10 @@
     let activePosition = null;
     let currentInterval = 'Min15';
     let isTvView = false;
-    let hoveredIndex = -1;
     let canvas = document.getElementById('mexcCanvas');
     let ctx = canvas.getContext('2d');
     let zoomLevel = 1.0;
-
-    // PAPER TRADING GLOBAL STATE
-    let currentTickPrice = 4133.0;
-    let currentBalance = 1000.0;
-    let currentEquity = 1000.0;
-    let paperOrderSide = 'LONG';
-    let paperOrderLev = 16.0;
-    let paperOrderMarginPct = 0.50;
-    let paperOrderCustomMargin = null;
+    let activeTradingMode = 'DEMO';
     let currentTab = 'chart';
 
     // INIT WEBSOCKET
@@ -1169,12 +1136,16 @@
       };
 
       ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        renderState(data);
+        try {
+          const data = JSON.parse(event.data);
+          renderState(data);
+        } catch (e) {
+          console.error('Error parsing WS message', e);
+        }
       };
 
       ws.onclose = () => {
-        console.log('[WS] Disconnected, reconnecting...');
+        console.log('[WS] Disconnected, reconnecting in 2s...');
         setTimeout(connectWS, 2000);
       };
     }
@@ -1195,7 +1166,6 @@
       }
     }
 
-    // TIMEFRAME SELECTOR
     function changeTimeframe(interval, btn) {
       document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
@@ -1206,45 +1176,58 @@
     function renderState(d) {
       // 0. RADAR UPDATE
       if (d.radar) {
-        document.getElementById('radar-heartbeat').innerText = d.radar.heartbeat;
+        const elHb = document.getElementById('radar-heartbeat');
+        if (elHb) elHb.innerText = d.radar.heartbeat || '--:--:--';
         
         // 1. Trend
         const isLongTrend = d.latest_price > (d.indicators.ema_1h || 0);
         const elTrendStat = document.getElementById('radar-stat-trend');
         const elTrendDesc = document.getElementById('radar-desc-trend');
-        elTrendStat.innerHTML = isLongTrend 
-          ? '<span style="color:#0ecb81;"><i class="fas fa-arrow-trend-up"></i> THUẬN LONG (ƯU TIÊN MUA)</span>'
-          : '<span style="color:#f6465d;"><i class="fas fa-arrow-trend-down"></i> THUẬN SHORT (ƯU TIÊN BÁN)</span>';
-        elTrendDesc.innerText = 'Giá ($' + d.latest_price.toFixed(1) + ') ' + (isLongTrend ? '>' : '<') + ' EMA 1h ($' + (d.indicators.ema_1h||0).toFixed(1) + ')';
+        if (elTrendStat) {
+          elTrendStat.innerHTML = isLongTrend 
+            ? '<span style="color:#0ecb81;"><i class="fas fa-arrow-trend-up"></i> THUẬN LONG (ƯU TIÊN MUA)</span>'
+            : '<span style="color:#f6465d;"><i class="fas fa-arrow-trend-down"></i> THUẬN SHORT (ƯU TIÊN BÁN)</span>';
+        }
+        if (elTrendDesc) {
+          elTrendDesc.innerText = 'Giá ($' + d.latest_price.toFixed(1) + ') ' + (isLongTrend ? '>' : '<') + ' EMA 1h ($' + (d.indicators.ema_1h||0).toFixed(1) + ')';
+        }
 
         // 2. Bollinger Bands
         const elBBStat = document.getElementById('radar-stat-bb');
         const elBBDesc = document.getElementById('radar-desc-bb');
-        if (d.radar.cond_bb_long) {
-          elBBStat.innerHTML = '<span style="color:#0ecb81;"><i class="fas fa-check-circle"></i> ĐÃ CHẠM DẢI DƯỚI BB (A+)</span>';
-        } else if (d.radar.cond_bb_short) {
-          elBBStat.innerHTML = '<span style="color:#f6465d;"><i class="fas fa-check-circle"></i> ĐÃ CHẠM DẢI TRÊN BB (A+)</span>';
-        } else {
-          elBBStat.innerHTML = '<span style="color:#8b949e;"><i class="fas fa-hourglass-half"></i> ĐANG RÌNH MỒI (CHƯA CHẠM)</span>';
+        if (elBBStat) {
+          if (d.radar.cond_bb_long) {
+            elBBStat.innerHTML = '<span style="color:#0ecb81;"><i class="fas fa-check-circle"></i> ĐÃ CHẠM DẢI DƯỚI BB (A+)</span>';
+          } else if (d.radar.cond_bb_short) {
+            elBBStat.innerHTML = '<span style="color:#f6465d;"><i class="fas fa-check-circle"></i> ĐÃ CHẠM DẢI TRÊN BB (A+)</span>';
+          } else {
+            elBBStat.innerHTML = '<span style="color:#8b949e;"><i class="fas fa-hourglass-half"></i> ĐANG RÌNH MỒI (CHƯA CHẠM)</span>';
+          }
         }
-        const distLow = Math.abs(d.latest_price - (d.indicators.lower_bb || 0)).toFixed(1);
-        const distHigh = Math.abs(d.latest_price - (d.indicators.upper_bb || 0)).toFixed(1);
-        elBBDesc.innerText = 'Cách BB Dưới: ' + distLow + '$ | Cách BB Trên: ' + distHigh + '$';
+        if (elBBDesc) {
+          const distLow = Math.abs(d.latest_price - (d.indicators.lower_bb || 0)).toFixed(1);
+          const distHigh = Math.abs(d.latest_price - (d.indicators.upper_bb || 0)).toFixed(1);
+          elBBDesc.innerText = 'Cách BB Dưới: ' + distLow + '$ | Cách BB Trên: ' + distHigh + '$';
+        }
 
         // 3. RSI
         const elRSIStat = document.getElementById('radar-stat-rsi');
         const elRSIDesc = document.getElementById('radar-desc-rsi');
         const rsi = d.indicators.rsi || 50.0;
-        if (d.radar.cond_rsi_long) {
-          elRSIStat.innerHTML = '<span style="color:#0ecb81;"><i class="fas fa-check-circle"></i> QUÁ BÁN (' + rsi.toFixed(1) + ' <= 45.0)</span>';
-        } else if (d.radar.cond_rsi_short) {
-          elRSIStat.innerHTML = '<span style="color:#f6465d;"><i class="fas fa-check-circle"></i> QUÁ MUA (' + rsi.toFixed(1) + ' >= 55.0)</span>';
-        } else {
-          elRSIStat.innerHTML = '<span style="color:#8b949e;"><i class="fas fa-hourglass-half"></i> TRUNG TÍNH (RSI: ' + rsi.toFixed(1) + ')</span>';
+        if (elRSIStat) {
+          if (d.radar.cond_rsi_long) {
+            elRSIStat.innerHTML = '<span style="color:#0ecb81;"><i class="fas fa-check-circle"></i> QUÁ BÁN (' + rsi.toFixed(1) + ' <= 45.0)</span>';
+          } else if (d.radar.cond_rsi_short) {
+            elRSIStat.innerHTML = '<span style="color:#f6465d;"><i class="fas fa-check-circle"></i> QUÁ MUA (' + rsi.toFixed(1) + ' >= 55.0)</span>';
+          } else {
+            elRSIStat.innerHTML = '<span style="color:#8b949e;"><i class="fas fa-hourglass-half"></i> TRUNG TÍNH (RSI: ' + rsi.toFixed(1) + ')</span>';
+          }
         }
-        elRSIDesc.innerText = 'Chờ RSI <= 45 (để Long) hoặc >= 55 (để Short)';
+        if (elRSIDesc) {
+          elRSIDesc.innerText = 'Chờ RSI <= 45 (để Long) hoặc >= 55 (để Short)';
+        }
 
-        // 4. Verdict & Detailed Reason for Not Trading
+        // 4. Verdict & Detailed Wait Reason
         const elVerStat = document.getElementById('radar-stat-verdict');
         const elVerDesc = document.getElementById('radar-desc-verdict');
         const elLog = document.getElementById('radar-log-text');
@@ -1268,98 +1251,85 @@
           if (detail) detail.innerText = wr.detail_text || '';
           if (icon && wr.icon) icon.className = 'fas ' + wr.icon;
 
-          // Cập nhật card thứ 4 (Trạng thái phục kích)
-          elVerStat.innerHTML = '<span style="color:' + c + '; font-weight:700;"><i class="fas ' + (wr.icon || 'fa-crosshairs') + '"></i> ' + wr.status_text + '</span>';
-          elVerDesc.innerText = wr.detail_text;
-          elLog.innerText = '[' + (d.radar ? d.radar.heartbeat : '') + '] ' + wr.status_text + ' ➔ ' + wr.detail_text;
+          if (elVerStat) elVerStat.innerHTML = '<span style="color:' + c + '; font-weight:700;"><i class="fas ' + (wr.icon || 'fa-crosshairs') + '"></i> ' + wr.status_text + '</span>';
+          if (elVerDesc) elVerDesc.innerText = wr.detail_text;
+          if (elLog) elLog.innerText = '[' + (d.radar ? d.radar.heartbeat : '') + '] ' + wr.status_text + ' ➔ ' + wr.detail_text;
         } else if (d.active_position) {
-          elVerStat.innerHTML = '<span style="color:#0ecb81;"><i class="fas fa-crosshairs"></i> ĐANG THỰC CHIẾN (' + d.active_position.side + ')</span>';
-          elVerDesc.innerText = 'Đang gồng vị thế: ' + (d.active_position.unrealized_pnl >= 0 ? '+' : '') + d.active_position.unrealized_pnl.toFixed(2) + '$';
-          elLog.innerText = '[' + d.radar.heartbeat + '] Vị thế ' + d.active_position.side + ' đang chạy. Canh chốt TP1 (+0.55%) & Dời SL bảo toàn vốn (+0.14%).';
+          if (elVerStat) elVerStat.innerHTML = '<span style="color:#0ecb81;"><i class="fas fa-crosshairs"></i> ĐANG THỰC CHIẾN (' + d.active_position.side + ')</span>';
+          if (elVerDesc) elVerDesc.innerText = 'Đang gồng vị thế: ' + (d.active_position.unrealized_pnl >= 0 ? '+' : '') + d.active_position.unrealized_pnl.toFixed(2) + '$';
+          if (elLog) elLog.innerText = '[' + d.radar.heartbeat + '] Vị thế ' + d.active_position.side + ' đang chạy. Canh chốt TP1 (+0.55%) & Dời SL bảo toàn vốn (+0.14%).';
         } else {
           const lScore = (d.radar.cond_trend_long?1:0) + (d.radar.cond_bb_long?1:0) + (d.radar.cond_rsi_long?1:0);
           const sScore = (d.radar.cond_trend_short?1:0) + (d.radar.cond_bb_short?1:0) + (d.radar.cond_rsi_short?1:0);
           const maxScore = Math.max(lScore, sScore);
           
           if (maxScore === 3) {
-            elVerStat.innerHTML = '<span style="color:#f0ad4e; font-weight:800;"><i class="fas fa-bolt"></i> HỘI TỤ 3/3 - KHAI HỎA!</span>';
-            elLog.innerText = '[' + d.radar.heartbeat + '] Tín hiệu Hạng A+ hội tụ đầy đủ 3 điều kiện! Đang kích hoạt lệnh...';
+            if (elVerStat) elVerStat.innerHTML = '<span style="color:#f0ad4e; font-weight:800;"><i class="fas fa-bolt"></i> HỘI TỤ 3/3 - KHAI HỎA!</span>';
+            if (elLog) elLog.innerText = '[' + d.radar.heartbeat + '] Tín hiệu Hạng A+ hội tụ đầy đủ 3 điều kiện! Đang kích hoạt lệnh...';
           } else {
-            elVerStat.innerHTML = '<span style="color:#f0ad4e;"><i class="fas fa-crosshairs"></i> PHỤC KÍCH (' + maxScore + '/3 ĐIỀU KIỆN)</span>';
-            elVerDesc.innerText = 'Lệnh ngày: ' + d.radar.daily_trades + '/' + d.radar.max_trades + ' | Thua ngày: ' + d.radar.daily_losses + '/' + d.radar.max_losses;
-            elLog.innerText = '[' + d.radar.heartbeat + '] Quét K-Line BingX: Đã thỏa mãn ' + maxScore + '/3 điều kiện A+. AI đang kiên nhẫn rình mồi không hấp tấp.';
+            if (elVerStat) elVerStat.innerHTML = '<span style="color:#f0ad4e;"><i class="fas fa-crosshairs"></i> PHỤC KÍCH (' + maxScore + '/3 ĐIỀU KIỆN)</span>';
+            if (elVerDesc) elVerDesc.innerText = 'Lệnh ngày: ' + d.radar.daily_trades + '/' + d.radar.max_trades + ' | Thua ngày: ' + d.radar.daily_losses + '/' + d.radar.max_losses;
+            if (elLog) elLog.innerText = '[' + d.radar.heartbeat + '] Quét K-Line BingX: Đã thỏa mãn ' + maxScore + '/3 điều kiện A+. AI đang kiên nhẫn rình mồi không hấp tấp.';
           }
         }
 
         const elTrades = document.getElementById('wait-reason-trades');
         const elLosses = document.getElementById('wait-reason-losses');
-        if (elTrades && d.radar) elTrades.innerText = (d.radar.daily_trades || 0) + '/' + (d.radar.max_trades || 4);
-        if (elLosses && d.radar) elLosses.innerText = (d.radar.daily_losses || 0) + '/' + (d.radar.max_losses || 2);
+        if (elTrades) elTrades.innerText = (d.radar.daily_trades || 0) + '/' + (d.radar.max_trades || 4);
+        if (elLosses) elLosses.innerText = (d.radar.daily_losses || 0) + '/' + (d.radar.max_losses || 2);
       }
 
       // 1. Ticker Header
       const p = d.latest_price || 0;
       const elPrice = document.getElementById('header-price');
-      elPrice.innerText = p.toFixed(1);
+      if (elPrice) elPrice.innerText = p.toFixed(1);
       
       const change = d.price_change_24h || 0;
       const elChange = document.getElementById('header-change');
-      elChange.innerText = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
-      elChange.style.color = change >= 0 ? 'var(--color-green)' : 'var(--color-red)';
+      if (elChange) {
+        elChange.innerText = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
+        elChange.style.color = change >= 0 ? 'var(--color-green)' : 'var(--color-red)';
+      }
 
-      if (d.index_price) document.getElementById('header-index').innerText = d.index_price.toFixed(1);
-      if (d.fair_price) document.getElementById('header-fair').innerText = d.fair_price.toFixed(1);
-      if (d.high_24h) document.getElementById('header-high').innerText = d.high_24h.toFixed(1);
-      if (d.low_24h) document.getElementById('header-low').innerText = d.low_24h.toFixed(1);
+      if (d.index_price && document.getElementById('header-index')) document.getElementById('header-index').innerText = d.index_price.toFixed(1);
+      if (d.fair_price && document.getElementById('header-fair')) document.getElementById('header-fair').innerText = d.fair_price.toFixed(1);
+      if (d.high_24h && document.getElementById('header-high')) document.getElementById('header-high').innerText = d.high_24h.toFixed(1);
+      if (d.low_24h && document.getElementById('header-low')) document.getElementById('header-low').innerText = d.low_24h.toFixed(1);
 
-      // 2. Financial Metrics & Mode UI sync
-      document.getElementById('val-balance').innerText = '$' + (d.balance || 1000).toFixed(2);
-      document.getElementById('val-equity').innerText = '$' + (d.equity || 1000).toFixed(2);
+      // 2. Financial Metrics & Mode Sync
+      if (document.getElementById('val-balance')) document.getElementById('val-balance').innerText = '$' + (d.balance || 1000).toFixed(2);
+      if (document.getElementById('val-equity')) document.getElementById('val-equity').innerText = '$' + (d.equity || 1000).toFixed(2);
 
       const isLive = d.is_live || (d.mode === "LIVE TRADING");
+      activeTradingMode = isLive ? 'LIVE' : 'DEMO';
+
       const statusBadge = document.getElementById('status-badge');
       const lblMode = document.getElementById('lbl-mode');
       const lblBalanceType = document.getElementById('lbl-balance-type');
       const btnQuickSync = document.getElementById('btn-quick-sync');
       const paperQuickResets = document.getElementById('paper-quick-resets');
+      const btnTestTrade = document.getElementById('btn-test-trade');
       
       const tabPaper = document.getElementById('master-tab-paper');
       const tabLive = document.getElementById('master-tab-live');
-      const subtabPaper = document.getElementById('subtab-paper');
-      const subtabLive = document.getElementById('subtab-live');
       const btnAction = document.getElementById('btn-action-primary');
       const btnActionLabel = document.getElementById('btn-action-label');
-      const bannerText = document.getElementById('banner-text');
-      const bannerIcon = document.getElementById('banner-icon');
 
       if (isLive) {
-        if (tabLive) {
-          tabLive.className = 'nav-tab-btn active';
-          tabLive.style.background = '#f6465d';
-          tabLive.style.color = '#fff';
-          tabLive.style.boxShadow = '0 0 10px rgba(246, 70, 93, 0.4)';
-        }
-        if (tabPaper) {
-          tabPaper.className = 'nav-tab-btn';
-          tabPaper.style.background = 'transparent';
-          tabPaper.style.color = 'var(--text-muted)';
-          tabPaper.style.boxShadow = 'none';
-        }
-        if (subtabLive) subtabLive.classList.add('active');
-        if (subtabPaper) subtabPaper.classList.remove('active');
+        if (tabLive) tabLive.className = 'nav-tab-btn active-live';
+        if (tabPaper) tabPaper.className = 'nav-tab-btn';
 
         if (statusBadge) {
-          statusBadge.innerHTML = '<span class="live-dot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#0ecb81; margin-right:5px; animation:pulse 1.2s infinite;"></span> BINGX LIVE TRADING (TIỀN THẬT)';
+          statusBadge.innerHTML = '<span class="live-dot" style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#0ecb81; margin-right:4px;"></span> BINGX LIVE TRADING (TIỀN THẬT)';
           statusBadge.style.background = 'rgba(14, 203, 129, 0.15)';
           statusBadge.style.color = '#0ecb81';
           statusBadge.style.border = '1px solid rgba(14, 203, 129, 0.3)';
         }
-        if (lblMode) {
-          lblMode.innerHTML = '<span style="color:#0ecb81; font-weight:700;"><i class="fas fa-satellite-dish"></i> BINGX LIVE TRADING</span>';
-        }
+        if (lblMode) lblMode.innerHTML = '<span style="color:#0ecb81; font-weight:700;"><i class="fas fa-satellite-dish"></i> BINGX LIVE TRADING</span>';
         if (lblBalanceType) lblBalanceType.innerText = 'Số dư ví BingX thực (Live Balance)';
         if (btnQuickSync) btnQuickSync.style.display = 'inline-block';
         if (paperQuickResets) paperQuickResets.style.display = 'none';
+        if (btnTestTrade) btnTestTrade.style.display = 'none';
 
         if (btnAction && btnActionLabel) {
           btnAction.style.background = 'linear-gradient(135deg, #0ecb81, #059669)';
@@ -1367,39 +1337,21 @@
           btnActionLabel.innerText = '⚡ Đồng Bộ Vốn BingX';
           btnAction.onclick = syncLiveBalance;
         }
-        if (bannerText && bannerIcon) {
-          bannerIcon.className = 'fas fa-satellite-dish';
-          bannerIcon.style.color = '#0ecb81';
-          bannerText.innerHTML = 'ĐANG KẾT NỐI BINGX LIVE TRADING — Đã đồng bộ số dư ví thực tế, sẵn sàng tự động vào lệnh tiền thật &gt;';
-        }
       } else {
-        if (tabPaper) {
-          tabPaper.className = 'nav-tab-btn active';
-          tabPaper.style.background = '#2563eb';
-          tabPaper.style.color = '#fff';
-          tabPaper.style.boxShadow = '0 0 10px rgba(37, 99, 235, 0.4)';
-        }
-        if (tabLive) {
-          tabLive.className = 'nav-tab-btn';
-          tabLive.style.background = 'transparent';
-          tabLive.style.color = 'var(--text-muted)';
-          tabLive.style.boxShadow = 'none';
-        }
-        if (subtabPaper) subtabPaper.classList.add('active');
-        if (subtabLive) subtabLive.classList.remove('active');
+        if (tabPaper) tabPaper.className = 'nav-tab-btn active-paper';
+        if (tabLive) tabLive.className = 'nav-tab-btn';
 
         if (statusBadge) {
-          statusBadge.innerHTML = '<i class="fas fa-flask" style="color:#58a6ff; margin-right:5px;"></i> CHẾ ĐỘ THỬ NGHIỆM (PAPER TRADING)';
-          statusBadge.style.background = 'rgba(0, 82, 255, 0.15)';
+          statusBadge.innerHTML = '<i class="fas fa-flask" style="color:#58a6ff; margin-right:4px;"></i> CHẾ ĐỘ THỬ NGHIỆM (PAPER TRADING)';
+          statusBadge.style.background = 'rgba(37, 99, 235, 0.15)';
           statusBadge.style.color = '#58a6ff';
           statusBadge.style.border = '1px solid rgba(56, 139, 253, 0.3)';
         }
-        if (lblMode) {
-          lblMode.innerHTML = '<span style="color:#58a6ff; font-weight:700;"><i class="fas fa-flask"></i> VỐN GIẢ LẬP (PAPER TRADING)</span>';
-        }
+        if (lblMode) lblMode.innerHTML = '<span style="color:#58a6ff; font-weight:700;"><i class="fas fa-flask"></i> VỐN GIẢ LẬP (PAPER TRADING)</span>';
         if (lblBalanceType) lblBalanceType.innerText = 'Số dư mô phỏng (Demo Balance)';
         if (btnQuickSync) btnQuickSync.style.display = 'none';
         if (paperQuickResets) paperQuickResets.style.display = 'flex';
+        if (btnTestTrade) btnTestTrade.style.display = 'inline-flex';
 
         if (btnAction && btnActionLabel) {
           btnAction.style.background = 'linear-gradient(135deg, #f6465d, #dc2626)';
@@ -1407,41 +1359,33 @@
           btnActionLabel.innerText = '🔴 BẬT TRADE THẬT BINGX';
           btnAction.onclick = () => selectTradingMode('LIVE');
         }
-        if (bannerText && bannerIcon) {
-          bannerIcon.className = 'fas fa-shield-halved';
-          bannerIcon.style.color = '#58a6ff';
-          bannerText.innerHTML = 'Chế độ <b>Paper Trading</b> thử nghiệm an toàn (Vốn mô phỏng). Click vào tab <b>Live Trading</b> để đồng bộ vốn sàn BingX & bắt đầu trade thật &gt;';
-        }
       }
       
       const pnl = d.net_pnl || 0;
       const roi = d.roi_pct || 0;
       const elPnl = document.getElementById('val-net-pnl');
-      elPnl.innerText = (pnl >= 0 ? '+$' : '-$') + Math.abs(pnl).toFixed(2) + ' (' + (roi >= 0 ? '+' : '') + roi.toFixed(2) + '%)';
-      elPnl.style.color = pnl >= 0 ? 'var(--color-green)' : 'var(--color-red)';
+      if (elPnl) {
+        elPnl.innerText = (pnl >= 0 ? '+$' : '-$') + Math.abs(pnl).toFixed(2) + ' (' + (roi >= 0 ? '+' : '') + roi.toFixed(2) + '%)';
+        elPnl.style.color = pnl >= 0 ? 'var(--color-green)' : 'var(--color-red)';
+      }
 
       // Target Progress
       const targetPct = Math.min(100, Math.max(0, (roi / 1.5) * 100));
-      document.getElementById('bar-target').style.width = targetPct.toFixed(1) + '%';
-      document.getElementById('val-target-text').innerText = roi.toFixed(2) + '% / 1.5%';
+      if (document.getElementById('bar-target')) document.getElementById('bar-target').style.width = targetPct.toFixed(1) + '%';
+      if (document.getElementById('val-target-text')) document.getElementById('val-target-text').innerText = roi.toFixed(2) + '% / 1.5%';
 
       // Permadeath Drawdown
       const dd = d.current_drawdown || 0;
-      document.getElementById('val-dd').innerText = 'Sụt giảm: ' + dd.toFixed(2) + '%';
-      document.getElementById('bar-dd').style.width = Math.min(100, (dd / 10) * 100) + '%';
-      document.getElementById('val-max-dd').innerText = (d.max_drawdown || 0).toFixed(2) + '%';
+      if (document.getElementById('val-dd')) document.getElementById('val-dd').innerText = 'Sụt giảm: ' + dd.toFixed(2) + '%';
+      if (document.getElementById('bar-dd')) document.getElementById('bar-dd').style.width = Math.min(100, (dd / 10) * 100) + '%';
+      if (document.getElementById('val-max-dd')) document.getElementById('val-max-dd').innerText = (d.max_drawdown || 0).toFixed(2) + '%';
 
-      // 3. Active Position Card
+      // 3. Dynamic Position Banner Update
       activePosition = d.active_position;
-      renderPositionCard(activePosition, p, isLive);
+      renderDynamicPosition(activePosition, p, isLive);
 
       // 4. Trades Table
       renderTradesTable(d.trades || []);
-
-      // 5. Paper Studio Telemetry Sync
-      currentTickPrice = p;
-      currentBalance = d.balance || 1000.0;
-      currentEquity = d.equity || 1000.0;
 
       // 5. Update Candles if provided
       if (d.candles && d.candles.length > 0) {
@@ -1450,421 +1394,97 @@
       }
     }
 
-    function renderPositionCard(pos, curPrice, isLive) {
-      const container = document.getElementById('pos-card-body');
-      const badge = document.getElementById('pos-status-badge');
+    // SMART DYNAMIC POSITION BANNER
+    function renderDynamicPosition(pos, curPrice, isLive) {
+      const container = document.getElementById('dynamic-position-container');
       if (!container) return;
 
       if (!pos) {
-        badge.className = 'pos-side-badge';
-        badge.style.background = '#1c2230';
-        badge.style.color = 'var(--text-muted)';
-        badge.innerText = 'CHƯA VÀO LỆNH';
-
-        if (isLive) {
-          container.innerHTML = `
-            <div style="text-align: center; padding: 32px 16px; color: var(--text-muted);">
-              <div style="width: 52px; height: 52px; margin: 0 auto 14px; border-radius: 50%; background: rgba(14, 203, 129, 0.08); border: 1px solid rgba(14, 203, 129, 0.2); display: flex; align-items: center; justify-content: center;">
-                <i class="fas fa-crosshairs" style="font-size: 22px; color: #0ecb81;"></i>
-              </div>
-              <div style="font-size: 13px; font-weight: 700; color: #e6edf3; margin-bottom: 6px;">
-                CHƯA CÓ LỆNH ĐANG CHẠY (BINGX LIVE)
-              </div>
-              <p style="font-size: 12px; color: #8b949e; line-height: 1.6; max-width: 320px; margin: 0 auto;">
-                Bot AI đang quét nến BingX 15m realtime, phục kích tìm kiếm điểm vào lệnh A+ chuẩn xác để gửi lệnh tiền thật lên sàn BingX.
-              </p>
-            </div>
-          `;
-        } else {
-          container.innerHTML = `
-            <div style="padding: 14px 8px; text-align: center;">
-              <div style="margin-bottom: 8px;">
-                <span style="font-size: 11px; font-weight: 700; color: #58a6ff; background: rgba(56, 139, 253, 0.15); border: 1px solid rgba(56, 139, 253, 0.3); padding: 3px 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 5px;">
-                  <i class="fas fa-flask"></i> TAB THỬ NGHIỆM (PAPER TRADING)
-                </span>
-              </div>
-              <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
-                Bot đang chạy thử nghiệm chiến lược F8 Sniper. Bạn có thể <b>thử mở vị thế ngay</b> để theo dõi bot tự động chốt lời TP1 & dời SL bảo vệ vốn:
-              </p>
-              <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 10px;">
-                <button onclick="executeTestTrade('LONG')" class="btn" style="flex: 1; max-width: 145px; background: linear-gradient(135deg, #0ecb81, #059669); color: #fff; font-weight: 700; padding: 9px 8px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; box-shadow: 0 4px 10px rgba(14,203,129,0.3);">
-                  <i class="fas fa-arrow-trend-up"></i> Thử Lệnh LONG
-                </button>
-                <button onclick="executeTestTrade('SHORT')" class="btn" style="flex: 1; max-width: 145px; background: linear-gradient(135deg, #f6465d, #dc2626); color: #fff; font-weight: 700; padding: 9px 8px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; box-shadow: 0 4px 10px rgba(246,70,93,0.3);">
-                  <i class="fas fa-arrow-trend-down"></i> Thử Lệnh SHORT
-                </button>
-              </div>
-              <div style="font-size: 11px; color: #6e7681;">
-                <i>* Mô phỏng 100% an toàn. Khi muốn trade thật, hãy click vào tab Live Trading!</i>
-              </div>
-            </div>
-          `;
-        }
+        container.style.display = 'none';
         return;
       }
 
-      badge.className = 'pos-side-badge ' + (pos.side === 'LONG' ? 'pos-long' : 'pos-short');
-      badge.innerText = (isLive ? '🔴 LIVE: ' : '🧪 THỬ NGHIỆM: ') + pos.side + ' 16x';
+      container.style.display = 'block';
+      const card = document.getElementById('active-pos-card');
+      const badge = document.getElementById('active-pos-badge');
+      const sizeEl = document.getElementById('active-pos-size');
+      const marginEl = document.getElementById('active-pos-margin');
+      const pnlEl = document.getElementById('active-pos-pnl');
+      const entryEl = document.getElementById('active-pos-entry');
+      const slEl = document.getElementById('active-pos-sl');
+      const tp1El = document.getElementById('active-pos-tp1');
+      const tp2El = document.getElementById('active-pos-tp2');
+      const lockEl = document.getElementById('active-pos-lock');
 
-      const unPnl = pos.unrealized_pnl || 0;
-      const pnlPct = pos.pnl_pct || 0;
-      const isWin = unPnl >= 0;
-
-      container.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-          <div>
-            <div style="font-size:11px; color:var(--text-muted); display:flex; align-items:center; gap:5px;">
-              <span class="live-dot" style="display:inline-block; width:7px; height:7px; border-radius:50%; background:` + (isWin ? 'var(--color-green)' : 'var(--color-red)') + `; animation:pulse 1.2s infinite;"></span>
-              LÃI / LỖ THẢ NỔI (REALTIME)
-            </div>
-            <div style="font-family:'JetBrains Mono'; font-size:22px; font-weight:800; color:` + (isWin ? 'var(--color-green)' : 'var(--color-red)') + `;">
-              ` + (isWin ? '+' : '') + unPnl.toFixed(2) + ` USDT (` + (isWin ? '+' : '') + pnlPct.toFixed(2) + `%)
-            </div>
-          </div>
-          <div style="text-align:right;">
-            <div style="font-size:11px; color:var(--text-muted);">Khối lượng</div>
-            <div style="font-family:'JetBrains Mono'; font-size:13px; font-weight:700;">` + (pos.size || 0).toFixed(3) + ` oz</div>
-          </div>
-        </div>
-
-        <div class="metric-row">
-          <span class="metric-label">Giá vào lệnh (Entry)</span>
-          <span class="metric-value">$` + (pos.entry_price || 0).toFixed(2) + `</span>
-        </div>
-        <div class="metric-row">
-          <span class="metric-label">Cắt lỗ (SL -0.25%)</span>
-          <span class="metric-value" style="color:var(--color-red);">$` + (pos.stop_loss || pos.sl || 0).toFixed(2) + `</span>
-        </div>
-        <div class="metric-row">
-          <span class="metric-label">Chốt lời 1 (TP1 +0.55%)</span>
-          <span class="metric-value" style="color:#f0ad4e;">$` + (pos.tp1 || 0).toFixed(2) + ` ` + (pos.tp1_hit ? '<span style="color:var(--color-green); font-size:11px;">✓ ĐÃ CHỐT 50%</span>' : '') + `</span>
-        </div>
-        <div class="metric-row">
-          <span class="metric-label">Chốt lời 2 (TP2 +1.10%)</span>
-          <span class="metric-value" style="color:var(--color-green);">$` + (pos.tp2 || 0).toFixed(2) + `</span>
-        </div>
-        <div class="metric-row">
-          <span class="metric-label">Khóa lãi dương</span>
-          <span class="metric-value" style="color:` + (pos.tp1_hit ? 'var(--color-green)' : 'var(--text-muted)') + `;">
-            ` + (pos.tp1_hit ? '✓ ĐÃ DỜI SL VÀO +0.14%' : 'CHƯA KÍCH HOẠT') + `
-          </span>
-        </div>
-
-        <div style="margin-top: 14px;">
-          <button onclick="closeActivePosition()" class="btn btn-danger" style="width: 100%; justify-content: center; padding: 9px; font-weight: 700; border-radius: 6px; cursor: pointer; font-size: 12px; display:flex; align-items:center; gap:6px;">
-            <i class="fas fa-hand-holding-dollar"></i> Đóng Lệnh Thị Trường Ngay (Chốt PnL)
-          </button>
-        </div>
-      `;
-    }
-
-    function renderTradesTable(trades) {
-      const tb = document.getElementById('trades-table-body');
-      if (!trades || trades.length === 0) return;
-
-      let html = '';
-      trades.forEach(t => {
-        const isWin = t.type === 'WIN' || t.type === 'PROFIT_LOCK' || (t.pnl && t.pnl.includes('+'));
-        html += `
-          <tr>
-            <td style="color:var(--text-muted);">` + (t.time.split(' ')[1] || t.time) + `</td>
-            <td style="font-weight:700; color:` + (isWin ? 'var(--color-green)' : 'var(--color-red)') + `;">` + t.action + `</td>
-            <td>$` + (typeof t.price === 'number' ? t.price.toFixed(1) : t.price) + `</td>
-            <td>` + t.size + `</td>
-            <td style="font-weight:700; color:` + (isWin ? 'var(--color-green)' : 'var(--color-red)') + `;">` + t.pnl + `</td>
-            <td>` + t.balance + `</td>
-          </tr>
-        `;
-      });
-      tb.innerHTML = html;
-    }
-
-    function renderPaperPositionCard(pos, curPrice) {
-      const container = document.getElementById('paper-pos-card-body');
-      const badge = document.getElementById('paper-pos-badge');
-      if (!container) return;
-
-      if (!pos) {
-        if (badge) {
-          badge.className = 'pos-side-badge';
-          badge.style.background = '#1c2230';
-          badge.style.color = 'var(--text-muted)';
-          badge.innerText = 'CHƯA MỞ VỊ THẾ';
+      const isLong = pos.side === 'LONG';
+      if (card) {
+        if (isLong) {
+          card.className = 'active-pos-card';
+        } else {
+          card.className = 'active-pos-card short';
         }
-        container.innerHTML = `
-          <div style="text-align:center; padding:35px 10px; color:var(--text-muted);">
-            <i class="fas fa-radar" style="font-size:32px; margin-bottom:10px; color:var(--text-sub);"></i>
-            <p style="font-size:13px; margin-bottom:14px;">Chưa có lệnh nào đang chạy. Bạn có thể chỉnh đòn bẩy & ký quỹ ở bảng bên trái rồi bấm Vào Lệnh, hoặc mở nhanh:</p>
-            <div style="display:flex; gap:10px; justify-content:center;">
-              <button onclick="executeTestTrade('LONG')" class="btn" style="background: linear-gradient(135deg, #0ecb81, #059669); color:#fff; font-weight:700; padding:9px 16px; border-radius:6px; border:none; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 4px 10px rgba(14,203,129,0.3);">
-                <i class="fas fa-arrow-trend-up"></i> Mở Nhanh LONG
-              </button>
-              <button onclick="executeTestTrade('SHORT')" class="btn" style="background: linear-gradient(135deg, #f6465d, #dc2626); color:#fff; font-weight:700; padding:9px 16px; border-radius:6px; border:none; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 4px 10px rgba(246,70,93,0.3);">
-                <i class="fas fa-arrow-trend-down"></i> Mở Nhanh SHORT
-              </button>
-            </div>
-          </div>
-        `;
-        return;
       }
 
       if (badge) {
-        badge.className = 'pos-side-badge ' + (pos.side === 'LONG' ? 'pos-long' : 'pos-short');
-        badge.innerText = (pos.side) + ' ' + (pos.leverage || 16) + 'x [ĐANG CHẠY]';
+        const modePrefix = isLive ? '🔴 LIVE: ' : '🧪 THỬ NGHIỆM: ';
+        badge.innerText = modePrefix + pos.side + ' ' + (pos.leverage || 16) + 'x ĐANG CHẠY';
+        badge.style.color = isLong ? 'var(--color-green)' : 'var(--color-red)';
+        badge.style.borderColor = isLong ? 'var(--color-green)' : 'var(--color-red)';
       }
+
+      if (sizeEl) sizeEl.innerText = (pos.size || 0).toFixed(3) + ' oz';
+      if (marginEl) marginEl.innerText = '$' + (pos.margin || 0).toFixed(2);
 
       const unPnl = pos.unrealized_pnl || 0;
       const pnlPct = pos.pnl_pct || 0;
       const isWin = unPnl >= 0;
+      if (pnlEl) {
+        pnlEl.innerText = (isWin ? '+$' : '-$') + Math.abs(unPnl).toFixed(2) + ' (' + (isWin ? '+' : '') + pnlPct.toFixed(2) + '%)';
+        pnlEl.style.color = isWin ? 'var(--color-green)' : 'var(--color-red)';
+      }
 
-      container.innerHTML = `
-        <div style="background:#090c12; border:1px solid var(--border-color); border-radius:8px; padding:16px; margin-bottom:16px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <div>
-              <span style="font-size:11px; color:var(--text-muted); font-weight:600;">LÃI / LỖ THẢ NỔI REALTIME</span>
-              <div style="font-family:'JetBrains Mono'; font-size:26px; font-weight:800; color:` + (isWin ? 'var(--color-green)' : 'var(--color-red)') + `;">
-                ` + (isWin ? '+' : '') + unPnl.toFixed(2) + ` USDT (` + (isWin ? '+' : '') + pnlPct.toFixed(2) + `%)
-              </div>
-            </div>
-            <div style="text-align:right;">
-              <span class="pos-side-badge ` + (pos.side === 'LONG' ? 'pos-long' : 'pos-short') + `" style="font-size:13px; padding:5px 12px;">` + pos.side + ` ` + (pos.leverage || 16) + `x</span>
-              <div style="font-family:'JetBrains Mono'; font-size:12px; color:var(--text-muted); margin-top:4px;">Khối lượng: <b>` + (pos.size || 0).toFixed(3) + ` oz</b></div>
-            </div>
-          </div>
-
-          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:14px; border-top:1px solid rgba(255,255,255,0.06); padding-top:12px;">
-            <div>
-              <div style="font-size:11px; color:var(--text-muted);">Giá vào (Entry)</div>
-              <div style="font-family:'JetBrains Mono'; font-weight:700; font-size:14px;">$` + (pos.entry_price || 0).toFixed(2) + `</div>
-            </div>
-            <div>
-              <div style="font-size:11px; color:var(--text-muted);">Giá thị trường</div>
-              <div style="font-family:'JetBrains Mono'; font-weight:700; font-size:14px; color:#f0b90b;">$` + (curPrice || pos.entry_price || 0).toFixed(2) + `</div>
-            </div>
-            <div>
-              <div style="font-size:11px; color:var(--text-muted);">Ký quỹ Margin</div>
-              <div style="font-family:'JetBrains Mono'; font-weight:700; font-size:14px;">$` + (pos.margin || 0).toFixed(2) + `</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="metric-row">
-          <span class="metric-label">Cắt lỗ (SL -0.25%)</span>
-          <span class="metric-value" style="color:var(--color-red);">$` + (pos.stop_loss || pos.sl || 0).toFixed(2) + `</span>
-        </div>
-        <div class="metric-row">
-          <span class="metric-label">Chốt lời 1 (TP1 +0.55%)</span>
-          <span class="metric-value" style="color:#f0ad4e;">$` + (pos.tp1 || 0).toFixed(2) + ` ` + (pos.tp1_hit ? '<span style="color:var(--color-green); font-size:11px;">✓ ĐÃ CHỐT 50%</span>' : '') + `</span>
-        </div>
-        <div class="metric-row">
-          <span class="metric-label">Chốt lời 2 (TP2 +1.10%)</span>
-          <span class="metric-value" style="color:var(--color-green);">$` + (pos.tp2 || 0).toFixed(2) + `</span>
-        </div>
-        <div class="metric-row">
-          <span class="metric-label">Khóa lãi an toàn</span>
-          <span class="metric-value" style="color:` + (pos.tp1_hit ? 'var(--color-green)' : 'var(--text-muted)') + `;">
-            ` + (pos.tp1_hit ? '✓ ĐÃ DỜI SL VÀO +0.14%' : 'CHƯA KÍCH HOẠT') + `
-          </span>
-        </div>
-
-        <div style="margin-top: 16px;">
-          <button onclick="closeActivePosition()" class="btn btn-danger" style="width: 100%; justify-content: center; padding: 10px; font-weight: 800; border-radius: 6px; cursor: pointer; font-size: 13px; display:flex; align-items:center; gap:8px;">
-            <i class="fas fa-hand-holding-dollar"></i> ĐÓNG VỊ THẾ THỊ TRƯỜNG NGAY (CHỐT PNL)
-          </button>
-        </div>
-      `;
+      if (entryEl) entryEl.innerText = '$' + (pos.entry_price || 0).toFixed(2);
+      if (slEl) slEl.innerText = '$' + (pos.stop_loss || pos.sl || 0).toFixed(2);
+      if (tp1El) tp1El.innerHTML = '$' + (pos.tp1 || 0).toFixed(2) + (pos.tp1_hit ? ' <span style="color:#0ecb81; font-size:10px;">(✓ ĐÃ CHỐT 50%)</span>' : '');
+      if (tp2El) tp2El.innerText = '$' + (pos.tp2 || 0).toFixed(2);
+      
+      if (lockEl) {
+        if (pos.tp1_hit) {
+          lockEl.innerHTML = '<span style="color:#0ecb81;"><i class="fas fa-check"></i> ĐÃ DỜI SL VÀO +0.14% LÃI</span>';
+        } else {
+          lockEl.innerText = 'CHƯA KÍCH HOẠT (Chờ TP1)';
+          lockEl.style.color = 'var(--text-muted)';
+        }
+      }
     }
 
-    function renderPaperTradesTable(trades) {
-      const tb = document.getElementById('paper-trades-table-body');
+    // RENDER TRADES TABLE
+    function renderTradesTable(trades) {
+      const tb = document.getElementById('trades-table-body');
       if (!tb) return;
       if (!trades || trades.length === 0) {
-        tb.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-sub); padding:30px;">Chưa có lệnh nào được khớp. Hãy mở lệnh thử nghiệm ở bảng trên!</td></tr>';
+        tb.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-sub); padding:30px;">Đang chờ tín hiệu A+ hội tụ Bollinger Bands & RSI & EMA...</td></tr>';
         return;
       }
+
       let html = '';
       trades.forEach(t => {
         const isWin = t.type === 'WIN' || t.type === 'PROFIT_LOCK' || (t.pnl && t.pnl.includes('+'));
         html += `
           <tr>
-            <td style="color:var(--text-muted); font-family:'JetBrains Mono'; font-size:11px;">` + (t.time.split(' ')[1] || t.time) + `</td>
-            <td style="font-weight:700; color:` + (isWin ? 'var(--color-green)' : 'var(--color-red)') + `;">` + t.action + `</td>
-            <td style="font-family:'JetBrains Mono';">$` + (typeof t.price === 'number' ? t.price.toFixed(1) : t.price) + `</td>
-            <td style="font-family:'JetBrains Mono';">` + t.size + `</td>
-            <td style="font-weight:700; font-family:'JetBrains Mono'; color:` + (isWin ? 'var(--color-green)' : 'var(--color-red)') + `;">` + t.pnl + `</td>
-            <td style="font-family:'JetBrains Mono'; font-weight:600;">` + t.balance + `</td>
+            <td style="color:var(--text-muted); font-size:11px;">${t.time.split(' ')[1] || t.time}</td>
+            <td style="font-weight:700; color:${isWin ? 'var(--color-green)' : 'var(--color-red)'};">${t.action}</td>
+            <td>$${typeof t.price === 'number' ? t.price.toFixed(1) : t.price}</td>
+            <td>${t.size}</td>
+            <td style="font-weight:700; color:${isWin ? 'var(--color-green)' : 'var(--color-red)'};">${t.pnl}</td>
+            <td style="color:#e6edf3;">${t.balance}</td>
           </tr>
         `;
       });
       tb.innerHTML = html;
     }
 
-    function selectPaperSide(side) {
-      paperOrderSide = side;
-      const btnLong = document.getElementById('paper-btn-side-long');
-      const btnShort = document.getElementById('paper-btn-side-short');
-      const submitBtn = document.getElementById('paper-btn-submit-order');
-      const submitLbl = document.getElementById('paper-submit-label');
-      if (!btnLong || !btnShort) return;
-
-      if (side === 'LONG') {
-        btnLong.style.border = '2px solid #0ecb81';
-        btnLong.style.background = 'rgba(14,203,129,0.2)';
-        btnLong.style.color = '#0ecb81';
-        btnShort.style.border = '1px solid var(--border-color)';
-        btnShort.style.background = '#161b26';
-        btnShort.style.color = 'var(--text-muted)';
-        if (submitBtn) {
-          submitBtn.style.background = 'linear-gradient(135deg, #0ecb81, #059669)';
-          submitBtn.style.boxShadow = '0 4px 14px rgba(14,203,129,0.35)';
-        }
-        if (submitLbl) submitLbl.innerText = 'VÀO LỆNH PAPER TRADING (LONG)';
-      } else {
-        btnShort.style.border = '2px solid #f6465d';
-        btnShort.style.background = 'rgba(246,70,93,0.2)';
-        btnShort.style.color = '#f6465d';
-        btnLong.style.border = '1px solid var(--border-color)';
-        btnLong.style.background = '#161b26';
-        btnLong.style.color = 'var(--text-muted)';
-        if (submitBtn) {
-          submitBtn.style.background = 'linear-gradient(135deg, #f6465d, #dc2626)';
-          submitBtn.style.boxShadow = '0 4px 14px rgba(246,70,93,0.35)';
-        }
-        if (submitLbl) submitLbl.innerText = 'VÀO LỆNH PAPER TRADING (SHORT)';
-      }
-      updatePaperPreview();
-    }
-
-    function selectPaperLev(lev, el) {
-      paperOrderLev = lev;
-      document.querySelectorAll('.paper-lev-btn').forEach(b => {
-        b.classList.remove('active');
-        b.style.background = '#1f2430';
-        b.style.color = '#c9d1d9';
-      });
-      if (el) {
-        el.classList.add('active');
-        el.style.background = '#2962ff';
-        el.style.color = '#fff';
-      }
-      const disp = document.getElementById('paper-display-lev');
-      if (disp) disp.innerText = lev + 'x' + (lev === 16 ? ' (Chuẩn F8 Sniper)' : '');
-      updatePaperPreview();
-    }
-
-    function selectPaperMarginPct(pct, el) {
-      paperOrderMarginPct = pct;
-      paperOrderCustomMargin = null;
-      const input = document.getElementById('paper-input-custom-margin');
-      if (input) input.value = '';
-      document.querySelectorAll('.paper-margin-btn').forEach(b => {
-        b.classList.remove('active');
-        b.style.background = '#1f2430';
-        b.style.color = '#c9d1d9';
-      });
-      if (el) {
-        el.classList.add('active');
-        el.style.background = '#2962ff';
-        el.style.color = '#fff';
-      }
-      updatePaperPreview();
-    }
-
-    function onCustomMarginInput(val) {
-      const num = parseFloat(val);
-      if (!isNaN(num) && num > 0) {
-        paperOrderCustomMargin = num;
-        document.querySelectorAll('.paper-margin-btn').forEach(b => {
-          b.classList.remove('active');
-          b.style.background = '#1f2430';
-          b.style.color = '#c9d1d9';
-        });
-      } else {
-        paperOrderCustomMargin = null;
-      }
-      updatePaperPreview();
-    }
-
-    function updatePaperPreview() {
-      const curP = currentTickPrice || 4133.0;
-      const bal = currentBalance || 1000.0;
-      let margin = paperOrderCustomMargin ? paperOrderCustomMargin : (bal * paperOrderMarginPct);
-      margin = Math.max(1.0, Math.min(bal, margin));
-
-      const displayMarginEl = document.getElementById('paper-display-margin-val');
-      if (displayMarginEl) {
-        const pct = ((margin / bal) * 100).toFixed(0);
-        displayMarginEl.innerText = '$' + margin.toFixed(2) + ' (' + pct + '%)';
-      }
-
-      const notional = margin * paperOrderLev;
-      const size = notional / curP;
-      const fee = notional * 0.0005;
-
-      let sl, tp1, tp2;
-      if (paperOrderSide === 'LONG') {
-        sl = curP * (1.0 - 0.0025);
-        tp1 = curP * (1.0 + 0.0055);
-        tp2 = curP * (1.0 + 0.0110);
-      } else {
-        sl = curP * (1.0 + 0.0025);
-        tp1 = curP * (1.0 - 0.0055);
-        tp2 = curP * (1.0 - 0.0110);
-      }
-
-      if (document.getElementById('paper-prev-notional')) document.getElementById('paper-prev-notional').innerText = '$' + notional.toFixed(2);
-      if (document.getElementById('paper-prev-size')) document.getElementById('paper-prev-size').innerText = size.toFixed(3) + ' oz';
-      if (document.getElementById('paper-prev-sl')) document.getElementById('paper-prev-sl').innerText = '$' + sl.toFixed(2);
-      if (document.getElementById('paper-prev-tp1')) document.getElementById('paper-prev-tp1').innerText = '$' + tp1.toFixed(2) + ' (Chốt 50% & kéo SL)';
-      if (document.getElementById('paper-prev-tp2')) document.getElementById('paper-prev-tp2').innerText = '$' + tp2.toFixed(2) + ' (Chốt 50% còn lại)';
-      if (document.getElementById('paper-prev-fee')) document.getElementById('paper-prev-fee').innerText = '$' + fee.toFixed(2) + ' USDT';
-    }
-
-    async function submitPaperOrder() {
-      const curP = currentTickPrice || 4133.0;
-      const bal = currentBalance || 1000.0;
-      let margin = paperOrderCustomMargin ? paperOrderCustomMargin : (bal * paperOrderMarginPct);
-      margin = Math.max(1.0, Math.min(bal, margin));
-
-      showToast('Đang đặt lệnh Paper Trading ' + paperOrderSide + '...', 'info');
-      try {
-        const resp = await fetch('/api/test_trade', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            side: paperOrderSide,
-            leverage: paperOrderLev,
-            margin_usdt: margin
-          })
-        });
-        const data = await resp.json();
-        if (data.status === 'success') {
-          showToast(data.message, 'success');
-        } else {
-          showToast(data.message, 'error');
-        }
-      } catch (err) {
-        showToast('Lỗi đặt lệnh: ' + err, 'error');
-      }
-    }
-
-    async function quickResetBalance(amt) {
-      if (!confirm('Bạn có muốn đặt lại số dư Demo về $' + amt.toLocaleString() + ' không?')) return;
-      try {
-        const r = await fetch('/api/reset_account', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({balance: amt})
-        });
-        const d = await r.json();
-        showToast(d.message, 'success');
-      } catch (err) {
-        showToast('Lỗi: ' + err, 'error');
-      }
-    }
-
-    let activeTradingMode = 'DEMO';
-
+    // NAVIGATION MODES
     async function selectTradingMode(targetMode) {
       if (targetMode === 'LIVE') {
         try {
@@ -1893,7 +1513,7 @@
         } catch (err) {
           showToast('Lỗi kết nối: ' + err, 'error');
         }
-      } else { // DEMO / Paper Trading
+      } else { // DEMO
         try {
           const r = await fetch('/api/set_mode', {
             method: 'POST',
@@ -1910,424 +1530,45 @@
       }
     }
 
-    function handleBannerClick() {
-      if (activeTradingMode === 'LIVE') {
-        openApiModal();
-      } else {
-        selectTradingMode('LIVE');
-      }
-    }
-
     function switchTab(tabId) {
       currentTab = tabId;
-      const views = ['chart', 'overview'];
-      views.forEach(v => {
-        const el = document.getElementById('view-' + v + '-container');
-        if (el) el.style.display = (v === tabId) ? 'block' : 'none';
-      });
+      const tabPaper = document.getElementById('master-tab-paper');
+      const tabLive = document.getElementById('master-tab-live');
+      const tabOverview = document.getElementById('master-tab-overview');
 
-      if (tabId === 'chart') {
-        setTimeout(() => {
-          resizeCanvas();
-        }, 60);
-      }
-    }
+      const chartView = document.getElementById('view-chart-container');
+      const overviewView = document.getElementById('view-overview-container');
 
-    // CANVAS RESIZE & DRAWING ENGINE
-    function resizeCanvas() {
-      const container = document.getElementById('canvas-container');
-      if (!container || !container.offsetParent) return;
-      const rect = container.getBoundingClientRect();
-      if (rect.width <= 0 || rect.height <= 0) return;
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
-      drawChart();
-    }
-
-    window.addEventListener('resize', resizeCanvas);
-
-    // MOVING AVERAGE CALCULATOR
-    function calcMA(candles, period) {
-      let ma = [];
-      for (let i = 0; i < candles.length; i++) {
-        if (i < period - 1) {
-          ma.push(null);
+      if (tabId === 'overview') {
+        if (chartView) chartView.style.display = 'none';
+        if (overviewView) overviewView.style.display = 'block';
+        if (tabOverview) tabOverview.className = 'nav-tab-btn active-overview';
+        if (tabPaper) tabPaper.className = 'nav-tab-btn';
+        if (tabLive) tabLive.className = 'nav-tab-btn';
+      } else {
+        if (chartView) chartView.style.display = 'block';
+        if (overviewView) overviewView.style.display = 'none';
+        if (tabOverview) tabOverview.className = 'nav-tab-btn';
+        if (activeTradingMode === 'LIVE') {
+          if (tabLive) tabLive.className = 'nav-tab-btn active-live';
+          if (tabPaper) tabPaper.className = 'nav-tab-btn';
         } else {
-          let sum = 0;
-          for (let j = i - period + 1; j <= i; j++) {
-            sum += candles[j].close;
-          }
-          ma.push(sum / period);
+          if (tabPaper) tabPaper.className = 'nav-tab-btn active-paper';
+          if (tabLive) tabLive.className = 'nav-tab-btn';
         }
-      }
-      return ma;
-    }
-
-    // DRAW CHART ENGINE (REPLICA OF MEXC IMAGE 1)
-    function drawChart() {
-      if (!canvas.offsetParent || !candlesData || candlesData.length === 0) return;
-
-      const dpr = window.devicePixelRatio || 1;
-      const width = canvas.width / dpr;
-      const height = canvas.height / dpr;
-
-      ctx.clearRect(0, 0, width, height);
-
-      // MARGINS
-      const margin = { top: 38, right: 68, bottom: 25, left: 10 };
-      const chartWidth = width - margin.left - margin.right;
-      const chartHeight = height - margin.top - margin.bottom;
-
-      const priceHeight = chartHeight * 0.74;
-      const volHeight = chartHeight * 0.22;
-      const volTop = margin.top + priceHeight + chartHeight * 0.04;
-
-      // CANDLES SLICE & ZOOM
-      const numCandles = Math.min(candlesData.length, Math.floor(65 / zoomLevel));
-      const startIndex = Math.max(0, candlesData.length - numCandles);
-      const visibleCandles = candlesData.slice(startIndex);
-
-      // PRICE RANGE
-      let minP = Infinity, maxP = -Infinity;
-      let minIdx = 0, maxIdx = 0;
-      visibleCandles.forEach((c, i) => {
-        if (c.low < minP) { minP = c.low; minIdx = i; }
-        if (c.high > maxP) { maxP = c.high; maxIdx = i; }
-      });
-      const pPad = (maxP - minP) * 0.08 || 2.0;
-      minP -= pPad;
-      maxP += pPad;
-
-      // VOLUME RANGE
-      let maxV = 0;
-      visibleCandles.forEach(c => { if (c.volume > maxV) maxV = c.volume; });
-      maxV = maxV * 1.2 || 10;
-
-      // SCALES
-      const candleWidth = chartWidth / visibleCandles.length;
-      const bodyWidth = Math.max(3, candleWidth * 0.72);
-
-      const getY = (val) => margin.top + (1 - (val - minP) / (maxP - minP)) * priceHeight;
-      const getVolY = (vol) => volTop + volHeight - (vol / maxV) * volHeight;
-      const getX = (idx) => margin.left + idx * candleWidth + candleWidth / 2;
-
-      // 1. DRAW SUBTLE GRID LINES
-      ctx.strokeStyle = '#141824';
-      ctx.lineWidth = 1;
-      const gridSteps = 5;
-      for (let i = 0; i <= gridSteps; i++) {
-        const y = margin.top + (priceHeight / gridSteps) * i;
-        ctx.beginPath();
-        ctx.moveTo(margin.left, y);
-        ctx.lineTo(width - margin.right, y);
-        ctx.stroke();
-
-        // Right axis labels
-        const pLabel = maxP - (i / gridSteps) * (maxP - minP);
-        ctx.fillStyle = '#6e7681';
-        ctx.font = '11px JetBrains Mono';
-        ctx.textAlign = 'left';
-        ctx.fillText(pLabel.toFixed(1), width - margin.right + 6, y + 4);
-      }
-
-      // 2. DRAW MOVING AVERAGES (MA5, MA10, MA30, MA60)
-      const ma5 = calcMA(candlesData, 5).slice(startIndex);
-      const ma10 = calcMA(candlesData, 10).slice(startIndex);
-      const ma30 = calcMA(candlesData, 30).slice(startIndex);
-      const ma60 = calcMA(candlesData, 60).slice(startIndex);
-
-      function drawMALine(maArr, color) {
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1.3;
-        ctx.beginPath();
-        let started = false;
-        for (let i = 0; i < maArr.length; i++) {
-          if (maArr[i] !== null) {
-            const x = getX(i);
-            const y = getY(maArr[i]);
-            if (!started) { ctx.moveTo(x, y); started = true; }
-            else { ctx.lineTo(x, y); }
-          }
-        }
-        ctx.stroke();
-      }
-
-      drawMALine(ma60, '#9b59b6'); // Purple
-      drawMALine(ma30, '#3498db'); // Cyan
-      drawMALine(ma10, '#00d084'); // Teal
-      drawMALine(ma5, '#f0ad4e');  // Orange
-
-      // 3. DRAW CANDLESTICKS & VOLUME BARS
-      visibleCandles.forEach((c, i) => {
-        const isBull = c.close >= c.open;
-        const color = isBull ? '#0ecb81' : '#f6465d';
-        const x = getX(i);
-
-        // High-low wick
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        ctx.moveTo(x, getY(c.high));
-        ctx.lineTo(x, getY(c.low));
-        ctx.stroke();
-
-        // Candle Body
-        const topY = getY(Math.max(c.open, c.close));
-        const botY = getY(Math.min(c.open, c.close));
-        const bHeight = Math.max(1.5, botY - topY);
-
-        ctx.fillStyle = color;
-        ctx.fillRect(x - bodyWidth / 2, topY, bodyWidth, bHeight);
-
-        // VOLUME BARS (BOTTOM SUB-PANEL)
-        const vY = getVolY(c.volume);
-        const vHeight = (volTop + volHeight) - vY;
-        ctx.fillStyle = isBull ? 'rgba(14,203,129,0.35)' : 'rgba(246,70,93,0.35)';
-        ctx.fillRect(x - bodyWidth / 2, vY, bodyWidth, vHeight);
-      });
-
-      // 4. DRAW EXTRACTED CALLOUTS (HIGHEST / LOWEST WICK LABELS LIKE IMAGE 1)
-      if (visibleCandles.length > 0) {
-        const lowX = getX(minIdx);
-        const lowY = getY(minP + pPad);
-        ctx.fillStyle = '#8b949e';
-        ctx.font = '10px JetBrains Mono';
-        ctx.textAlign = 'center';
-        ctx.fillText((minP + pPad).toFixed(1) + ' ⤶', lowX, lowY + 12);
-
-        const highX = getX(maxIdx);
-        const highY = getY(maxP - pPad);
-        ctx.fillText((maxP - pPad).toFixed(1) + ' ⤷', highX, highY - 6);
-      }
-
-      // 5. CURRENT REALTIME PRICE LINE (DASHED + BADGE + TIMER)
-      const lastCandle = visibleCandles[visibleCandles.length - 1];
-      if (lastCandle) {
-        const curY = getY(lastCandle.close);
-        const isUp = lastCandle.close >= lastCandle.open;
-        const badgeColor = isUp ? '#0ecb81' : '#f6465d';
-
-        ctx.save();
-        ctx.strokeStyle = badgeColor;
-        ctx.setLineDash([3, 3]);
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(margin.left, curY);
-        ctx.lineTo(width - margin.right, curY);
-        ctx.stroke();
-        ctx.restore();
-
-        // Right Price Tag
-        ctx.fillStyle = badgeColor;
-        ctx.fillRect(width - margin.right, curY - 10, margin.right, 20);
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 11px JetBrains Mono';
-        ctx.textAlign = 'left';
-        ctx.fillText(lastCandle.close.toFixed(1), width - margin.right + 4, curY + 4);
-
-        // Timer subtag (like 00:58 in Image 1)
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '9px JetBrains Mono';
-        ctx.fillText('00:58', width - margin.right + 4, curY + 16);
-      }
-
-      // 6. DRAW BOT OVERLAYS IF POSITION ACTIVE
-      if (activePosition) {
-        function drawTradeLevel(price, label, col, dashed) {
-          const y = getY(price);
-          ctx.save();
-          ctx.strokeStyle = col;
-          if (dashed) ctx.setLineDash([4, 4]);
-          ctx.lineWidth = 1.2;
-          ctx.beginPath();
-          ctx.moveTo(margin.left, y);
-          ctx.lineTo(width - margin.right, y);
-          ctx.stroke();
-
-          ctx.fillStyle = col;
-          ctx.font = 'bold 10px JetBrains Mono';
-          ctx.fillText(label + ' ' + price.toFixed(1), margin.left + 8, y - 4);
-          ctx.restore();
-        }
-
-        drawTradeLevel(activePosition.entry_price, 'ENTRY', '#f0b90b', false);
-        drawTradeLevel(activePosition.stop_loss, 'SL (-0.25%)', '#f6465d', true);
-        drawTradeLevel(activePosition.tp1, 'TP1 (+0.55%)', '#f0ad4e', true);
-        drawTradeLevel(activePosition.tp2, 'TP2 (+1.10%)', '#0ecb81', true);
-      }
-
-      // 7. CROSSHAIR DRAWING
-      if (hoveredIndex >= 0 && hoveredIndex < visibleCandles.length) {
-        const hc = visibleCandles[hoveredIndex];
-        const hx = getX(hoveredIndex);
-        const hy = getY(hc.close);
-
-        ctx.save();
-        ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-        ctx.setLineDash([2, 2]);
-        ctx.lineWidth = 1;
-
-        // Vertical
-        ctx.beginPath();
-        ctx.moveTo(hx, margin.top);
-        ctx.lineTo(hx, height - margin.bottom);
-        ctx.stroke();
-
-        // Horizontal
-        ctx.beginPath();
-        ctx.moveTo(margin.left, hy);
-        ctx.lineTo(width - margin.right, hy);
-        ctx.stroke();
-        ctx.restore();
-
-        updateOverlayWithCandle(hc, ma5[hoveredIndex], ma10[hoveredIndex], ma30[hoveredIndex], ma60[hoveredIndex]);
+        setTimeout(resizeCanvas, 60);
       }
     }
 
-    function updateOverlayWithCandle(c, m5, m10, m30, m60) {
-      if (!c) return;
-      const d = new Date(c.time > 1e11 ? c.time : c.time * 1000);
-      const timeStr = d.toLocaleDateString('vi-VN') + ' ' + d.toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
-      document.getElementById('overlay-datetime').innerText = timeStr;
-
-      document.getElementById('ov-open').innerText = c.open.toFixed(1);
-      document.getElementById('ov-close').innerText = c.close.toFixed(1);
-      document.getElementById('ov-high').innerText = c.high.toFixed(1);
-      document.getElementById('ov-low').innerText = c.low.toFixed(1);
-
-      const diff = c.close - c.open;
-      const pct = (diff / c.open) * 100;
-      const elDiff = document.getElementById('ov-diff');
-      elDiff.innerText = (diff >= 0 ? '+' : '') + diff.toFixed(1) + ' (' + (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%)';
-      elDiff.className = 'ohlc-val ' + (diff >= 0 ? 'up' : 'down');
-
-      const amp = c.high - c.low;
-      const ampPct = (amp / c.low) * 100;
-      document.getElementById('ov-amp').innerText = amp.toFixed(1) + ' (' + ampPct.toFixed(2) + '%)';
-
-      if (m5) document.getElementById('ov-ma5').innerText = m5.toFixed(1);
-      if (m10) document.getElementById('ov-ma10').innerText = m10.toFixed(2);
-      if (m30) document.getElementById('ov-ma30').innerText = m30.toFixed(1);
-      if (m60) document.getElementById('ov-ma60').innerText = m60.toFixed(4);
-
-      if (c.volume) document.getElementById('ov-vol').innerText = c.volume.toFixed(2);
-    }
-
-    // CANVAS MOUSE EVENTS
-    canvas.addEventListener('mousemove', (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const numCandles = Math.min(candlesData.length, Math.floor(65 / zoomLevel));
-      const chartWidth = rect.width - 75;
-      const candleWidth = chartWidth / numCandles;
-      const idx = Math.floor((x - 10) / candleWidth);
-      if (idx >= 0 && idx < numCandles) {
-        hoveredIndex = idx;
-        drawChart();
-      }
-    });
-
-    canvas.addEventListener('mouseleave', () => {
-      hoveredIndex = -1;
-      drawChart();
-      if (candlesData.length > 0) {
-        updateOverlayWithCandle(candlesData[candlesData.length - 1]);
-      }
-    });
-
-    canvas.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      if (e.deltaY < 0) {
-        zoomLevel = Math.min(2.5, zoomLevel + 0.1);
-      } else {
-        zoomLevel = Math.max(0.6, zoomLevel - 0.1);
-      }
-      drawChart();
-    });
-
-    // SWITCH TO TRADINGVIEW EMBED OR MEXC NATIVE
-    function toggleChartView() {
-      const tvBox = document.getElementById('tradingview-container');
-      const cvBox = document.getElementById('mexcCanvas');
-      const drawBar = document.getElementById('drawing-bar');
-      const ohlc = document.querySelector('.ohlc-ma-overlay');
-      const vol = document.querySelector('.vol-overlay');
-      const wm = document.querySelector('.demo-trading-watermark');
-      const lbl = document.getElementById('view-mode-label');
-
-      isTvView = !isTvView;
-      if (isTvView) {
-        cvBox.style.display = 'none';
-        ohlc.style.display = 'none';
-        vol.style.display = 'none';
-        wm.style.display = 'none';
-        drawBar.style.display = 'none';
-        tvBox.style.display = 'block';
-        lbl.innerText = 'Chuyển Bản BingX Live';
-
-        if (!tvBox.hasChildNodes()) {
-          tvBox.innerHTML = `
-            <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_7918&symbol=BINGX%3AXAUTUSDT&interval=15&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&theme=dark&style=1&timezone=Asia%2FHo_Chi_Minh"
-                    style="width: 100%; height: 100%; border: none;"></iframe>
-          `;
-        }
-      } else {
-        tvBox.style.display = 'none';
-        cvBox.style.display = 'block';
-        ohlc.style.display = 'flex';
-        vol.style.display = 'flex';
-        wm.style.display = 'block';
-        drawBar.style.display = 'flex';
-        lbl.innerText = 'Chuyển TradingView Gốc';
-        resizeCanvas();
-      }
-    }
-
-    // BOT CONTROLS
-    async function toggleBotRun() {
-      const btn = document.getElementById('btn-toggle-run');
-      const isPause = btn.innerText.includes('Tạm Dừng');
-      const action = isPause ? 'pause' : 'resume';
-      await fetch('/api/control', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({action: action})
-      });
-      btn.innerHTML = isPause ? '<i class="fas fa-play"></i> Tiếp Tục Bot' : '<i class="fas fa-pause"></i> Tạm Dừng Bot';
-    }
-
-    function openApiModal() { 
-      const modal = document.getElementById('apiModal');
-      if (modal) modal.style.display = 'flex'; 
-    }
-
-    function closeApiModal() { 
-      const modal = document.getElementById('apiModal');
-      if (modal) modal.style.display = 'none'; 
-      const alertBox = document.getElementById('modal-api-alert');
-      if (alertBox) alertBox.style.display = 'none';
-    }
-
-    function openTestModal() {
-      const modal = document.getElementById('testTradeModal');
-      if (modal) modal.style.display = 'flex';
-    }
-
-    function closeTestModal() {
-      const modal = document.getElementById('testTradeModal');
-      if (modal) modal.style.display = 'none';
-    }
-
+    // ACTIONS
     async function executeTestTrade(side) {
       closeTestModal();
-      showToast('Đang mở lệnh thử nghiệm ' + side + '...', 'info');
+      showToast('Đang mở vị thế thử nghiệm ' + side + '...', 'info');
       try {
         const resp = await fetch('/api/test_trade', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({side: side})
+          body: JSON.stringify({side: side, leverage: 16.0, margin_pct: 0.50})
         });
         const data = await resp.json();
         if (data.status === 'success') {
@@ -2336,73 +1577,101 @@
           showToast(data.message, 'error');
         }
       } catch (err) {
-        showToast('Lỗi mở lệnh thử nghiệm: ' + err, 'error');
+        showToast('Lỗi đặt lệnh: ' + err, 'error');
       }
     }
 
     async function closeActivePosition() {
-      if (!confirm('Bạn có chắc chắn muốn đóng lệnh thị trường ngay lúc này để chốt PnL không?')) return;
-      showToast('Đang gửi lệnh đóng vị thế thị trường...', 'info');
+      if (!confirm('Bạn có chắc chắn muốn ĐÓNG VỊ THẾ HIỆN TẠI ngay theo giá thị trường để chốt PnL không?')) return;
       try {
-        const resp = await fetch('/api/close_position', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'}
-        });
-        const data = await resp.json();
-        if (data.status === 'success') {
-          showToast(data.message, 'success');
+        const resp = await fetch('/api/close_position', { method: 'POST' });
+        const res = await resp.json();
+        if (res.status === 'success') {
+          showToast(res.message, 'success');
         } else {
-          showToast(data.message, 'error');
+          showToast(res.message, 'error');
         }
       } catch (err) {
-        showToast('Lỗi đóng vị thế: ' + err, 'error');
+        showToast('Lỗi đóng lệnh: ' + err, 'error');
       }
     }
 
-    async function toggleTradingMode() {
+    async function quickResetBalance(amt) {
+      if (!confirm('Bạn có muốn đặt lại số dư Demo về $' + amt.toLocaleString() + ' không?')) return;
       try {
-        const resp = await fetch('/api/account_info');
-        const info = await resp.json();
-        
-        if (info.is_live) {
-          if (!confirm('Bạn có chắc chắn muốn rời chế độ LIVE và quay về chế độ THỬ NGHIỆM (Demo) an toàn không?')) return;
-          const r = await fetch('/api/set_mode', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({mode: 'DEMO'})
-          });
-          const res = await r.json();
-          showToast(res.message, 'info');
-        } else {
-          const confirmLive = confirm(
-            "⚠️ BẬT CHẾ ĐỘ LIVE (GIAO DỊCH TIỀN THẬT TRÊN BINGX)?\\n\\n" +
-            "• Chế độ này sẽ kết nối ví BingX và tự động đặt lệnh bằng TIỀN THẬT.\\n" +
-            "• Nếu chỉ muốn THỬ NGHIỆM không rủi ro, vui lòng bấm 'HỦY' để tiếp tục ở chế độ DEMO.\\n\\n" +
-            "Bạn có chắc chắn muốn kích hoạt giao dịch LIVE thật không?"
-          );
-          if (!confirmLive) return;
+        const r = await fetch('/api/reset_account', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({balance: amt})
+        });
+        const d = await r.json();
+        showToast(d.message, 'success');
+      } catch (err) {
+        showToast('Lỗi: ' + err, 'error');
+      }
+    }
 
-          if (info.has_keys) {
-            showToast('Đang kết nối sàn BingX và đồng bộ số dư...', 'info');
-            const r = await fetch('/api/set_mode', {
-              method: 'POST',
-              headers: {'Content-Type': 'application/json'},
-              body: JSON.stringify({mode: 'LIVE'})
-            });
-            const res = await r.json();
-            if (res.status === 'success') {
-              showToast(res.message, 'success');
-            } else {
-              alert(res.message);
-              openApiModal();
-            }
-          } else {
-            openApiModal();
-          }
+    async function resetSniperLimits() {
+      if (!confirm('Bạn có chắc chắn muốn RESET VỀ 0 toàn bộ Giới hạn Sniper (0/4 Lệnh, 0/2 SL), mở khóa bot và làm mới danh sách lệnh không?')) return;
+      try {
+        const resp = await fetch('/api/reset_limits', { method: 'POST' });
+        const res = await resp.json();
+        if (res.status === 'success') {
+          showToast(res.message, 'success');
+          const elTrades = document.getElementById('wait-reason-trades');
+          const elLosses = document.getElementById('wait-reason-losses');
+          if (elTrades) elTrades.innerText = '0/4';
+          if (elLosses) elLosses.innerText = '0/2';
+        } else {
+          showToast(res.message || 'Lỗi reset giới hạn', 'error');
         }
       } catch (err) {
-        openApiModal();
+        showToast('Lỗi gửi yêu cầu reset: ' + err, 'error');
       }
+    }
+
+    async function toggleBotRun() {
+      const btn = document.getElementById('btn-toggle-run');
+      const isCurrentlyRunning = btn.innerText.includes('Tạm Dừng');
+      const action = isCurrentlyRunning ? 'PAUSE' : 'RESUME';
+      try {
+        const resp = await fetch('/api/control', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({action: action})
+        });
+        const data = await resp.json();
+        if (data.status === 'success') {
+          if (action === 'PAUSE') {
+            btn.className = 'btn btn-danger';
+            btn.innerHTML = '<i class="fas fa-play"></i> <span>Tiếp Tục</span>';
+            showToast('Đã tạm dừng bot giao dịch!', 'info');
+          } else {
+            btn.className = 'btn btn-primary';
+            btn.innerHTML = '<i class="fas fa-pause"></i> <span>Tạm Dừng</span>';
+            showToast('Bot đã tiếp tục hoạt động rình mồi!', 'success');
+          }
+        }
+      } catch (e) {
+        showToast('Lỗi đổi trạng thái bot: ' + e, 'error');
+      }
+    }
+
+    // MODAL HANDLERS
+    function openApiModal() {
+      document.getElementById('apiModal').style.display = 'flex';
+    }
+    function closeApiModal() {
+      document.getElementById('apiModal').style.display = 'none';
+      const a = document.getElementById('modal-api-alert');
+      if (a) a.style.display = 'none';
+    }
+
+    function openTestModal() {
+      document.getElementById('testTradeModal').style.display = 'flex';
+    }
+    function closeTestModal() {
+      document.getElementById('testTradeModal').style.display = 'none';
     }
 
     async function submitLiveConnect() {
@@ -2501,7 +1770,7 @@
         toast.style.fontFamily = "'Inter', sans-serif";
         document.body.appendChild(toast);
       }
-      toast.style.background = type === 'success' ? '#0ecb81' : (type === 'error' ? '#f6465d' : '#2962ff');
+      toast.style.background = type === 'success' ? '#0ecb81' : (type === 'error' ? '#f6465d' : '#2563eb');
       toast.style.color = '#fff';
       toast.innerHTML = (type === 'success' ? '<i class="fas fa-check-circle"></i> ' : '<i class="fas fa-info-circle"></i> ') + msg;
       toast.style.display = 'block';
@@ -2514,11 +1783,11 @@
     }
 
     async function runBacktestModal() {
-      alert('Đang chạy kiểm thử 4 cấu hình F8 Sniper trên 2,000 nến Vàng MEXC. Vui lòng chờ 3-5 giây...');
+      alert('Đang chạy kiểm thử 4 cấu hình F8 Sniper trên 2,000 nến Vàng BingX. Vui lòng chờ 3-5 giây...');
       const r = await fetch('/api/run_backtest', {method: 'POST'});
       const data = await r.json();
       if (data.status === 'success') {
-        let msg = 'KẾT QUẢ KIỂM THỬ THỰC TẾ TRÊN 2,000 NẾN MEXC:\n\n';
+        let msg = 'KẾT QUẢ KIỂM THỬ THỰC TẾ TRÊN 2,000 NẾN BINGX:\n\n';
         data.results.forEach(res => {
           msg += `• ${res.name}: ROI +${res.roi_pct}% (+${res.daily_roi}%/ngày) | Max DD ${res.max_drawdown}% | Winrate ${res.win_rate}%\n`;
         });
@@ -2535,34 +1804,254 @@
       }
     }
 
-    async function resetSniperLimits() {
-      if (!confirm('Bạn có chắc chắn muốn RESET VỀ 0 toàn bộ Giới hạn Sniper (0/4 Lệnh, 0/2 SL), mở khóa bot và làm mới danh sách lệnh không?')) return;
-      try {
-        const resp = await fetch('/api/reset_limits', { method: 'POST' });
-        const res = await resp.json();
-        if (res.status === 'success') {
-          showToast(res.message, 'success');
-          const elTrades = document.getElementById('wait-reason-trades');
-          const elLosses = document.getElementById('wait-reason-losses');
-          if (elTrades) elTrades.innerText = '0/4';
-          if (elLosses) elLosses.innerText = '0/2';
-        } else {
-          showToast(res.message || 'Lỗi reset giới hạn', 'error');
+    function toggleChartView() {
+      isTvView = !isTvView;
+      const cvContainer = document.getElementById('mexcCanvas');
+      const tvContainer = document.getElementById('tradingview-container');
+      const drawingBar = document.getElementById('drawing-bar');
+      const lbl = document.getElementById('view-mode-label');
+
+      if (isTvView) {
+        if (cvContainer) cvContainer.style.display = 'none';
+        if (drawingBar) drawingBar.style.display = 'none';
+        if (tvContainer) {
+          tvContainer.style.display = 'block';
+          tvContainer.innerHTML = '<iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_widget&symbol=OANDA%3AXAUUSD&interval=15&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&theme=dark&style=1&timezone=Asia%2FHo_Chi_Minh" style="width:100%; height:100%; border:none;"></iframe>';
         }
-      } catch (err) {
-        showToast('Lỗi gửi yêu cầu reset: ' + err, 'error');
+        if (lbl) lbl.innerText = 'Quay Lại Canvas AI';
+      } else {
+        if (cvContainer) cvContainer.style.display = 'block';
+        if (drawingBar) drawingBar.style.display = 'flex';
+        if (tvContainer) {
+          tvContainer.style.display = 'none';
+          tvContainer.innerHTML = '';
+        }
+        if (lbl) lbl.innerText = 'Chuyển TradingView Gốc';
+        resizeCanvas();
       }
     }
 
-    async function resetDemoAccount() {
-      if (!confirm('Bạn có muốn đặt lại số dư Demo về $1,000 ban đầu và xóa nhật ký các lệnh vừa rồi không?')) return;
-      try {
-        const r = await fetch('/api/reset_account', {method: 'POST'});
-        const d = await r.json();
-        alert(d.message);
-        location.reload();
-      } catch (err) {
-        alert('Lỗi đặt lại tài khoản: ' + err);
+    // CANVAS RESIZE & DRAWING ENGINE
+    function resizeCanvas() {
+      const container = document.getElementById('canvas-container');
+      if (!container || !container.offsetParent) return;
+      const rect = container.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      drawChart();
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+
+    function calcMA(candles, period) {
+      let ma = [];
+      for (let i = 0; i < candles.length; i++) {
+        if (i < period - 1) {
+          ma.push(null);
+        } else {
+          let sum = 0;
+          for (let j = i - period + 1; j <= i; j++) {
+            sum += candles[j].close;
+          }
+          ma.push(sum / period);
+        }
+      }
+      return ma;
+    }
+
+    function updateOverlayWithCandle(c) {
+      if (!c) return;
+      const dt = new Date(c.time * 1000);
+      const dtStr = dt.getFullYear() + '/' + (dt.getMonth()+1).toString().padStart(2,'0') + '/' + dt.getDate().toString().padStart(2,'0') + ' ' + dt.getHours().toString().padStart(2,'0') + ':' + dt.getMinutes().toString().padStart(2,'0');
+      
+      const elDt = document.getElementById('overlay-datetime');
+      if (elDt) elDt.innerText = dtStr;
+
+      if (document.getElementById('ov-open')) document.getElementById('ov-open').innerText = c.open.toFixed(1);
+      if (document.getElementById('ov-close')) document.getElementById('ov-close').innerText = c.close.toFixed(1);
+      if (document.getElementById('ov-high')) document.getElementById('ov-high').innerText = c.high.toFixed(1);
+      if (document.getElementById('ov-low')) document.getElementById('ov-low').innerText = c.low.toFixed(1);
+
+      const diff = c.close - c.open;
+      const pct = (diff / c.open) * 100;
+      const elDiff = document.getElementById('ov-diff');
+      if (elDiff) {
+        elDiff.innerText = (diff >= 0 ? '+' : '') + diff.toFixed(1) + ' (' + (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%)';
+        elDiff.className = 'ohlc-val ' + (diff >= 0 ? 'up' : 'down');
+      }
+
+      const amp = c.high - c.low;
+      const ampPct = (amp / c.low) * 100;
+      if (document.getElementById('ov-amp')) document.getElementById('ov-amp').innerText = amp.toFixed(1) + ' (' + ampPct.toFixed(2) + '%)';
+      if (document.getElementById('ov-vol')) document.getElementById('ov-vol').innerText = (c.volume || 0).toFixed(1);
+    }
+
+    function drawChart() {
+      if (!canvas.offsetParent || !candlesData || candlesData.length === 0) return;
+
+      const dpr = window.devicePixelRatio || 1;
+      const width = canvas.width / dpr;
+      const height = canvas.height / dpr;
+
+      ctx.clearRect(0, 0, width, height);
+
+      const margin = { top: 38, right: 68, bottom: 25, left: 10 };
+      const chartWidth = width - margin.left - margin.right;
+      const chartHeight = height - margin.top - margin.bottom;
+
+      const priceHeight = chartHeight * 0.74;
+      const volHeight = chartHeight * 0.22;
+      const volTop = margin.top + priceHeight + chartHeight * 0.04;
+
+      const numCandles = Math.min(candlesData.length, Math.floor(65 / zoomLevel));
+      const startIndex = Math.max(0, candlesData.length - numCandles);
+      const visibleCandles = candlesData.slice(startIndex);
+
+      let minP = Infinity, maxP = -Infinity;
+      let minIdx = 0, maxIdx = 0;
+      visibleCandles.forEach((c, i) => {
+        if (c.low < minP) { minP = c.low; minIdx = i; }
+        if (c.high > maxP) { maxP = c.high; maxIdx = i; }
+      });
+      const pPad = (maxP - minP) * 0.08 || 2.0;
+      minP -= pPad;
+      maxP += pPad;
+
+      let maxV = 0;
+      visibleCandles.forEach(c => { if (c.volume > maxV) maxV = c.volume; });
+      maxV = maxV * 1.2 || 10;
+
+      const candleWidth = chartWidth / visibleCandles.length;
+      const bodyWidth = Math.max(3, candleWidth * 0.72);
+
+      const getY = (val) => margin.top + (1 - (val - minP) / (maxP - minP)) * priceHeight;
+      const getVolY = (vol) => volTop + volHeight - (vol / maxV) * volHeight;
+      const getX = (idx) => margin.left + idx * candleWidth + candleWidth / 2;
+
+      // 1. Grid lines
+      ctx.strokeStyle = '#141824';
+      ctx.lineWidth = 1;
+      const gridSteps = 5;
+      for (let i = 0; i <= gridSteps; i++) {
+        const y = margin.top + (priceHeight / gridSteps) * i;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, y);
+        ctx.lineTo(width - margin.right, y);
+        ctx.stroke();
+
+        const pLabel = maxP - (i / gridSteps) * (maxP - minP);
+        ctx.fillStyle = '#6e7681';
+        ctx.font = '11px JetBrains Mono';
+        ctx.textAlign = 'left';
+        ctx.fillText(pLabel.toFixed(1), width - margin.right + 6, y + 4);
+      }
+
+      // 2. Moving Averages
+      const ma5 = calcMA(candlesData, 5).slice(startIndex);
+      const ma10 = calcMA(candlesData, 10).slice(startIndex);
+      const ma30 = calcMA(candlesData, 30).slice(startIndex);
+      const ma60 = calcMA(candlesData, 60).slice(startIndex);
+
+      function drawMALine(maArr, color) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        let started = false;
+        for (let i = 0; i < maArr.length; i++) {
+          if (maArr[i] !== null) {
+            const x = getX(i);
+            const y = getY(maArr[i]);
+            if (!started) { ctx.moveTo(x, y); started = true; }
+            else { ctx.lineTo(x, y); }
+          }
+        }
+        ctx.stroke();
+      }
+
+      drawMALine(ma60, '#9b59b6');
+      drawMALine(ma30, '#3498db');
+      drawMALine(ma10, '#00d084');
+      drawMALine(ma5, '#f0ad4e');
+
+      // Update MA top overlay
+      if (ma5.length > 0 && ma5[ma5.length - 1] && document.getElementById('ov-ma5')) document.getElementById('ov-ma5').innerText = ma5[ma5.length - 1].toFixed(1);
+      if (ma10.length > 0 && ma10[ma10.length - 1] && document.getElementById('ov-ma10')) document.getElementById('ov-ma10').innerText = ma10[ma10.length - 1].toFixed(1);
+      if (ma30.length > 0 && ma30[ma30.length - 1] && document.getElementById('ov-ma30')) document.getElementById('ov-ma30').innerText = ma30[ma30.length - 1].toFixed(1);
+      if (ma60.length > 0 && ma60[ma60.length - 1] && document.getElementById('ov-ma60')) document.getElementById('ov-ma60').innerText = ma60[ma60.length - 1].toFixed(1);
+
+      // 3. Candlesticks & Volume
+      visibleCandles.forEach((c, i) => {
+        const isBull = c.close >= c.open;
+        const color = isBull ? '#0ecb81' : '#f6465d';
+        const x = getX(i);
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(x, getY(c.high));
+        ctx.lineTo(x, getY(c.low));
+        ctx.stroke();
+
+        const topY = getY(Math.max(c.open, c.close));
+        const botY = getY(Math.min(c.open, c.close));
+        const bHeight = Math.max(1.5, botY - topY);
+
+        ctx.fillStyle = color;
+        ctx.fillRect(x - bodyWidth / 2, topY, bodyWidth, bHeight);
+
+        const vY = getVolY(c.volume);
+        const vHeight = (volTop + volHeight) - vY;
+        ctx.fillStyle = isBull ? 'rgba(14,203,129,0.35)' : 'rgba(246,70,93,0.35)';
+        ctx.fillRect(x - bodyWidth / 2, vY, bodyWidth, vHeight);
+      });
+
+      // 4. Current Price Line
+      if (visibleCandles.length > 0) {
+        const curC = visibleCandles[visibleCandles.length - 1];
+        const curY = getY(curC.close);
+        ctx.strokeStyle = curC.close >= curC.open ? '#0ecb81' : '#f6465d';
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(margin.left, curY);
+        ctx.lineTo(width - margin.right, curY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = ctx.strokeStyle;
+        ctx.fillRect(width - margin.right, curY - 9, margin.right - 2, 18);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 11px JetBrains Mono';
+        ctx.textAlign = 'left';
+        ctx.fillText(curC.close.toFixed(1), width - margin.right + 4, curY + 4);
+      }
+
+      // 5. Active Position Levels on Chart
+      if (activePosition && activePosition.entry_price) {
+        function drawLevel(price, label, color) {
+          const y = getY(price);
+          if (y >= margin.top && y <= margin.top + priceHeight) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.2;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(margin.left, y);
+            ctx.lineTo(width - margin.right, y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = color;
+            ctx.font = 'bold 10px JetBrains Mono';
+            ctx.textAlign = 'left';
+            ctx.fillText(label + ' $' + price.toFixed(1), margin.left + 8, y - 4);
+          }
+        }
+        drawLevel(activePosition.entry_price, 'ENTRY', '#2563eb');
+        if (activePosition.sl || activePosition.stop_loss) drawLevel(activePosition.sl || activePosition.stop_loss, 'SL (-0.25%)', '#f6465d');
+        if (activePosition.tp1) drawLevel(activePosition.tp1, 'TP1 (+0.55%)', '#f0ad4e');
+        if (activePosition.tp2) drawLevel(activePosition.tp2, 'TP2 (+1.10%)', '#0ecb81');
       }
     }
 
@@ -2582,16 +2071,18 @@
         if (el) el.innerText = '00:' + s;
       }, 1000);
 
-      // FALLBACK POLLING MỖI 400ms KẾT HỢP WEBSOCKET STREAM TỨC THÌ
+      // SMART FALLBACK POLLING: Only runs when WebSocket is NOT connected!
       setInterval(async () => {
-        try {
-          const resp = await fetch('/api/state');
-          if (resp.ok) {
-            const data = await resp.json();
-            renderState(data);
-          }
-        } catch (e) {}
-      }, 400);
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+          try {
+            const resp = await fetch('/api/state');
+            if (resp.ok) {
+              const data = await resp.json();
+              renderState(data);
+            }
+          } catch (e) {}
+        }
+      }, 3000);
     };
   </script>
 </body>

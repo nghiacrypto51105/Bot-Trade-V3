@@ -982,8 +982,9 @@ def compute_wait_reason() -> Dict[str, Any]:
         }
 
 def get_full_state_payload() -> Dict[str, Any]:
-    pnl_net = state.equity - state.initial_balance
-    roi_pct = (pnl_net / state.initial_balance) * 100
+    init_bal = state.initial_balance if (state.initial_balance and state.initial_balance > 0) else 1000.0
+    pnl_net = state.equity - init_bal
+    roi_pct = (pnl_net / init_bal) * 100
     wait_reason = compute_wait_reason()
     
     return {
@@ -1059,7 +1060,7 @@ class ControlRequest(BaseModel):
     action: str
 
 @app.post("/api/control")
-def api_control(req: ControlRequest):
+async def api_control(req: ControlRequest):
     if req.action == "PAUSE":
         state.is_running = False
     elif req.action == "RESUME":
@@ -1074,13 +1075,17 @@ def api_control(req: ControlRequest):
         state.trades = []
         state.is_alive = True
         state.death_reason = None
+    try:
+        await manager.broadcast(get_full_state_payload())
+    except Exception:
+        pass
     return {"status": "success", "action": req.action}
 
 class ResetAccountRequest(BaseModel):
     balance: Optional[float] = 1000.0
 
 @app.post("/api/reset_account")
-def api_reset_account(req: Optional[ResetAccountRequest] = None):
+async def api_reset_account(req: Optional[ResetAccountRequest] = None):
     initial = 1000.0
     if req and req.balance and req.balance > 0:
         initial = float(req.balance)
@@ -1098,6 +1103,10 @@ def api_reset_account(req: Optional[ResetAccountRequest] = None):
     state.quant_agent.daily_losses_count = 0
     state.quant_agent.day_locked = False
     state.last_trade_candle_time = 0
+    try:
+        await manager.broadcast(get_full_state_payload())
+    except Exception:
+        pass
     return {"status": "success", "message": f"Đã đặt lại tài khoản Demo về ${initial:,.2f}"}
 
 @app.post("/api/reset_limits")
@@ -1121,7 +1130,7 @@ class TestTradeRequest(BaseModel):
     margin_usdt: Optional[float] = None# Ký quỹ USDT cố định
 
 @app.post("/api/test_trade")
-def api_test_trade(req: TestTradeRequest):
+async def api_test_trade(req: TestTradeRequest):
     if state.mode == "LIVE TRADING":
         return JSONResponse({
             "status": "error",
@@ -1195,6 +1204,11 @@ def api_test_trade(req: TestTradeRequest):
     state.trades = state.trades[:100]
     logger.info(f"[TEST TRADE OPENED] {side} @ {close_p:.2f} | TP1: {tp1} | TP2: {tp2} | SL: {sl}")
     
+    try:
+        await manager.broadcast(get_full_state_payload())
+    except Exception:
+        pass
+
     return JSONResponse({
         "status": "success",
         "message": f"Đã mở thành công lệnh THỬ NGHIỆM {side} tại giá ${close_p:,.2f}! Quan sát lệnh đang chạy ngay tại khung Vị Thế.",
@@ -1202,7 +1216,7 @@ def api_test_trade(req: TestTradeRequest):
     })
 
 @app.post("/api/close_position")
-def api_close_position():
+async def api_close_position():
     if not state.active_position:
         return JSONResponse({
             "status": "error",
@@ -1249,6 +1263,11 @@ def api_close_position():
     state.active_position = None
     logger.info(f"[MANUAL CLOSE] {side} closed @ {cur_p} | Net: {net:+.2f} USDT")
     
+    try:
+        await manager.broadcast(get_full_state_payload())
+    except Exception:
+        pass
+
     return JSONResponse({
         "status": "success",
         "message": f"Đã đóng vị thế thị trường thành công tại giá ${cur_p:,.2f}! PnL ròng: {net:+.2f} USDT.",
