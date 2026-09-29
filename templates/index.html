@@ -897,8 +897,11 @@
               Đang phân tích điều kiện thị trường BingX...
             </div>
           </div>
-          <div style="display: flex; align-items: center; gap: 12px; font-size: 11px; color: #8b949e;">
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 11px; color: #8b949e;">
             <span><i class="fas fa-shield-alt" style="color: #2962ff;"></i> Giới hạn Sniper: <b id="wait-reason-trades" style="color: #e6edf3;">0/4</b> Lệnh | <b id="wait-reason-losses" style="color: #e6edf3;">0/2</b> SL</span>
+            <button onclick="resetSniperLimits()" title="Reset về 0 Lệnh & SL, mở khóa bot ngay lập tức" style="background: rgba(246, 70, 93, 0.15); border: 1px solid rgba(246, 70, 93, 0.4); color: #f6465d; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all 0.2s ease;">
+              <i class="fas fa-rotate-left"></i> Reset Về 0
+            </button>
           </div>
         </div>
 
@@ -973,9 +976,14 @@
 
     <!-- CARD 2: LỊCH SỬ KHỚP LỆNH -->
     <div class="card">
-      <div class="card-header">
-        <span><i class="fas fa-list-check" style="color:#2962ff;"></i> NHẬT KÝ KHỚP LỆNH REALTIME (F8 SNIPER PRO MAX)</span>
-        <span style="font-size: 11px; color: var(--text-muted);">Tối đa 3 - 5 lệnh/ngày</span>
+      <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span><i class="fas fa-list-check" style="color:#2962ff;"></i> NHẬT KÝ KHỚP LỆNH REALTIME (F8 SNIPER PRO MAX)</span>
+          <span style="font-size: 11px; color: var(--text-muted);">(Tối đa 4 lệnh/ngày | 2 SL)</span>
+        </div>
+        <button onclick="resetSniperLimits()" title="Reset giới hạn và xóa nhật ký lệnh" style="background: rgba(246, 70, 93, 0.15); border: 1px solid rgba(246, 70, 93, 0.4); color: #f6465d; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all 0.2s ease;">
+          <i class="fas fa-rotate-left"></i> Reset Giới Hạn & Lệnh
+        </button>
       </div>
       <div class="card-body" style="padding: 0; max-height: 280px; overflow-y: auto;">
         <table class="trade-table">
@@ -2524,6 +2532,25 @@
         elem.requestFullscreen().catch(err => alert(err.message));
       } else {
         document.exitFullscreen();
+      }
+    }
+
+    async function resetSniperLimits() {
+      if (!confirm('Bạn có chắc chắn muốn RESET VỀ 0 toàn bộ Giới hạn Sniper (0/4 Lệnh, 0/2 SL), mở khóa bot và làm mới danh sách lệnh không?')) return;
+      try {
+        const resp = await fetch('/api/reset_limits', { method: 'POST' });
+        const res = await resp.json();
+        if (res.status === 'success') {
+          showToast(res.message, 'success');
+          const elTrades = document.getElementById('wait-reason-trades');
+          const elLosses = document.getElementById('wait-reason-losses');
+          if (elTrades) elTrades.innerText = '0/4';
+          if (elLosses) elLosses.innerText = '0/2';
+        } else {
+          showToast(res.message || 'Lỗi reset giới hạn', 'error');
+        }
+      } catch (err) {
+        showToast('Lỗi gửi yêu cầu reset: ' + err, 'error');
       }
     }
 

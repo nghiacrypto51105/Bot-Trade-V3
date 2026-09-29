@@ -1100,6 +1100,20 @@ def api_reset_account(req: Optional[ResetAccountRequest] = None):
     state.last_trade_candle_time = 0
     return {"status": "success", "message": f"Đã đặt lại tài khoản Demo về ${initial:,.2f}"}
 
+@app.post("/api/reset_limits")
+async def api_reset_limits():
+    state.quant_agent.daily_trades_count = 0
+    state.quant_agent.daily_losses_count = 0
+    state.quant_agent.day_locked = False
+    state.last_trade_candle_time = 0
+    state.trades = []
+    logger.info("[RESET] Đã reset về 0 Giới hạn Sniper và nhật ký lệnh!")
+    try:
+        await manager.broadcast(get_full_state_payload())
+    except Exception:
+        pass
+    return {"status": "success", "message": "Đã reset về 0 Giới hạn Sniper (0/4 Lệnh, 0/2 SL) & mở khóa bot thành công!"}
+
 class TestTradeRequest(BaseModel):
     side: str                          # "LONG" hoặc "SHORT"
     leverage: Optional[float] = 16.0   # Đòn bẩy tùy chọn (1x - 50x)
