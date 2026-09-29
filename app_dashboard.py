@@ -338,36 +338,71 @@ class BingXAPIClient:
             logger.error(f"[BINGX CLOSE ALL POSITIONS EXCEPTION] {e}")
             return False, {"error": str(e)}
 
+    def get_open_orders(self, symbol: str = "NCCOGOLD2USD-USDT") -> Tuple[bool, list, str]:
+        """
+        Lấy danh sách các lệnh chờ / lệnh TP/SL đang mở trên sàn BingX.
+        """
+        if not self.api_key or not self.api_secret:
+            return False, [], "Chưa có API Key"
+        try:
+            params = {"symbol": symbol}
+            q = self._sign(params)
+            url = f"{self.base_url}/openApi/swap/v2/trade/openOrders?{q}"
+            headers = {"X-BX-APIKEY": self.api_key}
+            r = requests.get(url, headers=headers, timeout=6)
+            if r.status_code == 200:
+                res = r.json()
+                if res.get("code") == 0:
+                    orders = res.get("data", {}).get("orders", [])
+                    return True, orders, "Thành công"
+                return False, [], res.get("msg", "Lỗi API")
+            return False, [], f"HTTP {r.status_code}"
+        except Exception as e:
+            return False, [], str(e)
+
     def cancel_all_open_orders(self, symbol: str = "NCCOGOLD2USD-USDT") -> Tuple[bool, dict]:
         """
-        Hủy tất cả các lệnh chờ / lệnh TP-SL cũ trên sàn BingX cho symbol.
+        Hủy tất cả các lệnh chờ / lệnh TP-SL cũ trên sàn BingX cho symbol (hủy từng ID triệt để).
         """
         if not self.api_key or not self.api_secret:
             return False, {"error": "Chưa có API Key"}
         try:
-            params = {"symbol": symbol}
-            q = self._sign(params)
-            url = f"{self.base_url}/openApi/swap/v2/trade/allOpenOrders?{q}"
-            headers = {"X-BX-APIKEY": self.api_key}
-            r = requests.delete(url, headers=headers, timeout=6)
-            res = r.json()
-            return (res.get("code") == 0), res
+            ok, orders, _ = self.get_open_orders(symbol)
+            if ok and orders:
+                for o in orders:
+                    oid = o.get("orderId")
+                    if oid:
+                        self.cancel_order(symbol, str(oid))
+            return True, {"cancelled_count": len(orders) if ok else 0}
         except Exception as e:
             return False, {"error": str(e)}
 
     def set_position_tp_sl(self, symbol: str, position_side: str, quantity: float, sl_price: float = 0.0, tp_price: float = 0.0) -> Tuple[bool, dict]:
         """
         Cài đặt trực tiếp lệnh Cắt Lỗ (Stop Loss) và Chốt Lời (Take Profit) lên sàn BingX.
-        Hiển thị tức thì trong cột 'C.Lãi/D.Lỗ' và tab 'Lệnh Mở' trên giao diện sàn BingX.
+        Khóa chống spam lệnh: Tuyệt đối không đặt trùng nếu lệnh TP/SL đã tồn tại trên sàn.
         """
         if not self.api_key or not self.api_secret:
             return False, {"error": "Chưa có API Key"}
+
+        # Kiểm tra các lệnh đang mở trên sàn để tránh spam/nhồi trùng lặp
+        ok_orders, open_orders, _ = self.get_open_orders(symbol)
+        has_sl = False
+        has_tp = False
+        if ok_orders and open_orders:
+            for o in open_orders:
+                if o.get("positionSide") == position_side:
+                    if o.get("type") == "STOP_MARKET":
+                        has_sl = True
+                    elif o.get("type") == "TAKE_PROFIT_MARKET":
+                        has_tp = True
+
         results = {}
         qty_str = f"{max(0.0005, quantity):.4f}"
         order_side = "SELL" if position_side == "LONG" else "BUY"
 
-        # 1. Đặt lệnh Stop Loss lên sàn BingX
-        if sl_price > 0:
+        # 1. Đặt lệnh Stop Loss lên sàn BingX (Chỉ đặt nếu chưa có)
+        if sl_price > 0 and not has_sl:
             try:
                 params_sl = {
                     "symbol": symbol,
@@ -392,8 +427,8 @@ class BingXAPIClient:
                 logger.error(f"[BINGX SL EXCEPTION] {e}")
                 results["sl_error"] = str(e)
 
-        # 2. Đặt lệnh Take Profit lên sàn BingX
-        if tp_price > 0:
+        # 2. Đặt lệnh Take Profit lên sàn BingX (Chỉ đặt nếu chưa có)
+        if tp_price > 0 and not has_tp:
             try:
                 params_tp = {
                     "symbol": symbol,
