@@ -47,10 +47,23 @@ class BingXAPIClient:
         self.api_key = api_key.strip()
         self.api_secret = api_secret.strip()
         self.base_url = "https://open-api.bingx.com"
+        self.time_offset = 0
+        self._sync_time()
+
+    def _sync_time(self):
+        try:
+            r = requests.get(f"{self.base_url}/openApi/swap/v2/server/time", timeout=3)
+            if r.status_code == 200:
+                s_time = r.json().get("data", {}).get("serverTime")
+                if s_time:
+                    self.time_offset = int(s_time) - int(time.time() * 1000)
+        except Exception:
+            pass
 
     def _sign(self, params: dict) -> str:
-        params["timestamp"] = str(int(time.time() * 1000))
-        params["recvWindow"] = "10000"
+        current_ts = int(time.time() * 1000) + self.time_offset
+        params["timestamp"] = str(current_ts)
+        params["recvWindow"] = "30000"
         sorted_items = sorted(params.items(), key=lambda d: d[0])
         query_str = "&".join([f"{k}={v}" for k, v in sorted_items])
         signature = hmac.new(self.api_secret.encode("utf-8"), query_str.encode("utf-8"), hashlib.sha256).hexdigest()
@@ -125,18 +138,30 @@ class BingXAPIClient:
         except Exception as e:
             return False, 0.0, 0.0, str(e)
 
-    def set_leverage(self, symbol: str = "NCCOGOLD2USD-USDT", leverage: int = 16):
+    def set_leverage(self, symbol: str = "NCCOGOLD2USD-USDT", leverage: int = 16) -> Tuple[bool, str]:
         if not self.api_key or not self.api_secret:
-            return
-        try:
-            for side in ["LONG", "SHORT"]:
+            return False, "Chưa cung cấp API Key BingX"
+        self._sync_time()
+        success = True
+        msg = f"Đã cài đặt đòn bẩy {leverage}x thành công"
+        for side in ["LONG", "SHORT"]:
+            try:
                 q = self._sign({"symbol": symbol, "side": side, "leverage": str(leverage)})
                 url = f"{self.base_url}/openApi/swap/v2/trade/leverage?{q}"
                 headers = {"X-BX-APIKEY": self.api_key}
-                requests.post(url, headers=headers, timeout=5)
+                r = requests.post(url, headers=headers, timeout=5)
+                res = r.json()
+                if res.get("code") != 0:
+                    success = False
+                    msg = res.get("msg", f"Lỗi đặt đòn bẩy {side}")
+                    logger.warning(f"[BINGX LEVERAGE ERROR] {side} {leverage}x: {msg}")
+            except Exception as e:
+                success = False
+                msg = str(e)
+                logger.warning(f"[BINGX LEVERAGE EXCEPTION] {e}")
+        if success:
             logger.info(f"[BINGX LEVERAGE] Đã cài đặt đòn bẩy {leverage}x cho {symbol}")
-        except Exception as e:
-            logger.warning(f"[BINGX LEVERAGE ERROR] {e}")
+        return success, msg
 
     def place_market_order(self, symbol: str, side: str, position_side: str, quantity: float) -> Tuple[bool, dict]:
         """
@@ -202,7 +227,9 @@ class TradingEngineState:
         self.death_reason = None
         
         self.leverage = 16.0
-        self.margin_pct = 0.50
+        self.risk_per_trade_pct = 0.015  # 1.5% max risk per trade
+        self.max_margin_pct = 0.25       # 25% max margin cap
+        self.margin_pct = 0.25
         self.fee_rate = 0.0005        # Phí Taker tiêu chuẩn BingX: 0.05%
         self.fee_rate_maker = 0.0002  # Phí Maker BingX (Chốt lời Limit TP1/TP2): 0.02%
         
@@ -285,6 +312,30 @@ def sync_live_balance() -> Tuple[bool, float, float, str]:
             return True, bal, eq, msg
         return False, state.balance, state.equity, msg
     return False, state.balance, state.equity, "Chưa cấu hình API Key"
+
+def compute_smart_order_sizing(balance: float, close_p: float, leverage: float, sl_pct: float, risk_pct: float = 0.015, max_margin_pct: float = 0.25) -> Tuple[float, float, float]:
+    """
+    Quản trị vốn thông minh thích ứng với đòn bẩy cao (lên tới 500x).
+    - Cố định rủi ro tối đa khi dính SL ở mức `risk_pct` (mặc định 1.5% tài khoản).
+    - Ở đòn bẩy lớn (50x - 500x), số tiền ký quỹ bỏ ra rất nhỏ, giữ > 95% vốn tự do (Free Margin) làm đệm chống cháy tuyệt đối.
+    - Đảm bảo tuân thủ khối lượng tối thiểu BingX (0.0005 oz Vàng).
+    """
+    min_qty = 0.0005
+    sl_distance = close_p * sl_pct
+    max_risk_usd = balance * risk_pct
+    ideal_size = max_risk_usd / sl_distance if sl_distance > 0 else min_qty
+    size = max(min_qty, round(ideal_size, 4))
+    
+    pos_val = size * close_p
+    required_margin = pos_val / max(1.0, leverage)
+    
+    cap_margin = balance * max_margin_pct
+    if required_margin > cap_margin:
+        required_margin = cap_margin
+        size = max(min_qty, round((required_margin * leverage) / close_p, 4))
+        
+    actual_risk = size * sl_distance
+    return size, required_margin, actual_risk
 
 class ConnectionManager:
     def __init__(self):
@@ -660,8 +711,14 @@ def check_live_entry_signal():
 
     # ĐIỀU KIỆN LONG: Xu hướng Tăng (Close > EMA) + Kéo ngược chạm dải dưới + RSI hồi quy
     if close_p > ema_1h and close_p <= lower_bb and rsi <= state.quant_agent.rsi_low:
-        margin = state.balance * state.margin_pct
-        size = (margin * state.leverage) / close_p
+        size, margin, est_risk = compute_smart_order_sizing(
+            balance=state.balance,
+            close_p=close_p,
+            leverage=state.leverage,
+            sl_pct=state.quant_agent.sl_pct,
+            risk_pct=state.risk_per_trade_pct,
+            max_margin_pct=state.max_margin_pct
+        )
 
         # Nếu đang ở chế độ LIVE TRADING: gửi lệnh thật lên sàn BingX
         if state.mode == "LIVE TRADING":
@@ -716,8 +773,14 @@ def check_live_entry_signal():
 
     # ĐIỀU KIỆN SHORT: Xu hướng Giảm (Close < EMA) + Hồi phục chạm dải trên + RSI hồi quy
     elif close_p < ema_1h and close_p >= upper_bb and rsi >= state.quant_agent.rsi_high:
-        margin = state.balance * state.margin_pct
-        size = (margin * state.leverage) / close_p
+        size, margin, est_risk = compute_smart_order_sizing(
+            balance=state.balance,
+            close_p=close_p,
+            leverage=state.leverage,
+            sl_pct=state.quant_agent.sl_pct,
+            risk_pct=state.risk_per_trade_pct,
+            max_margin_pct=state.max_margin_pct
+        )
 
         # Nếu đang ở chế độ LIVE TRADING: gửi lệnh thật lên sàn BingX
         if state.mode == "LIVE TRADING":
@@ -1014,6 +1077,16 @@ def get_full_state_payload() -> Dict[str, Any]:
     roi_pct = (pnl_net / init_bal) * 100
     wait_reason = compute_wait_reason()
     
+    cur_p = state.latest_price if state.latest_price > 0 else 4145.0
+    size_est, margin_est, risk_est = compute_smart_order_sizing(
+        balance=state.balance,
+        close_p=cur_p,
+        leverage=state.leverage,
+        sl_pct=state.quant_agent.sl_pct,
+        risk_pct=state.risk_per_trade_pct,
+        max_margin_pct=state.max_margin_pct
+    )
+    
     return {
         "symbol": state.symbol,
         "mode": state.mode,
@@ -1039,8 +1112,18 @@ def get_full_state_payload() -> Dict[str, Any]:
         "roi_pct": round(roi_pct, 2),
         "current_drawdown": round(state.current_drawdown, 2),
         "max_drawdown": round(state.max_drawdown, 2),
-        "leverage": state.leverage,
-        "margin_pct": state.margin_pct * 100,
+        "leverage": int(state.leverage),
+        "margin_pct": round(state.margin_pct * 100, 1),
+        "capital_mgmt": {
+            "leverage": int(state.leverage),
+            "risk_per_trade_pct": round(state.risk_per_trade_pct * 100, 1),
+            "est_margin": round(margin_est, 2),
+            "est_size": round(size_est, 4),
+            "est_max_loss": round(risk_est, 2),
+            "free_margin_buffer": round(max(0.0, state.balance - margin_est), 2),
+            "free_margin_ratio": round(((state.balance - margin_est) / max(0.01, state.balance)) * 100, 1),
+            "status_text": f"🛡️ BẢO VỆ CHỐNG CHÁY ({state.risk_per_trade_pct*100:.1f}% Risk/lệnh)"
+        },
         "active_position": state.active_position,
         "indicators": state.indicators,
         "trades": state.trades[:15],
@@ -1340,7 +1423,7 @@ async def api_set_mode(req: SetModeRequest):
         except Exception:
             pass
             
-        client.set_leverage(symbol="NCCOGOLD2USD-USDT", leverage=16)
+        client.set_leverage(symbol="NCCOGOLD2USD-USDT", leverage=int(state.leverage))
         
         state.bingx_client = client
         state.mode = "LIVE TRADING"
@@ -1445,6 +1528,68 @@ def api_save_keys(req: ApiKeyRequest):
         f.write(f"BINGX_API_SECRET={req.api_secret.strip()}\n")
     state.bingx_client = BingXAPIClient(req.api_key.strip(), req.api_secret.strip())
     return {"status": "success", "message": "Đã lưu BingX API Keys an toàn vào .env cục bộ"}
+
+class SetLeverageRequest(BaseModel):
+    leverage: int
+    risk_pct: Optional[float] = None
+
+@app.post("/api/set_leverage")
+async def api_set_leverage(req: SetLeverageRequest):
+    lev = int(req.leverage)
+    if lev < 1 or lev > 500:
+        return JSONResponse({
+            "status": "error",
+            "message": "Đòn bẩy không hợp lệ! Vui lòng chọn trong khoảng từ 1x đến 500x."
+        }, status_code=400)
+    
+    state.leverage = float(lev)
+    if req.risk_pct is not None and 0.005 <= req.risk_pct <= 0.10:
+        state.risk_per_trade_pct = float(req.risk_pct)
+        
+    msg_bingx = ""
+    if state.bingx_client and state.bingx_client.api_key:
+        ok, msg = state.bingx_client.set_leverage("NCCOGOLD2USD-USDT", lev)
+        if ok:
+            msg_bingx = f" và đồng bộ thành công lên sàn BingX ({lev}x)"
+        else:
+            msg_bingx = f" (cảnh báo sàn: {msg})"
+            
+    logger.info(f"[LEVERAGE CHANGED] Đòn bẩy mới: {lev}x | Risk/lệnh: {state.risk_per_trade_pct*100:.1f}%{msg_bingx}")
+    try:
+        await manager.broadcast(get_full_state_payload())
+    except Exception:
+        pass
+        
+    return JSONResponse({
+        "status": "success",
+        "leverage": lev,
+        "risk_pct": state.risk_per_trade_pct,
+        "message": f"Đã áp dụng đòn bẩy {lev}x{msg_bingx}!"
+    })
+
+@app.get("/api/leverage_info")
+def api_leverage_info():
+    cur_p = state.latest_price if state.latest_price > 0 else 4145.0
+    size_est, margin_est, risk_est = compute_smart_order_sizing(
+        balance=state.balance,
+        close_p=cur_p,
+        leverage=state.leverage,
+        sl_pct=state.quant_agent.sl_pct,
+        risk_pct=state.risk_per_trade_pct,
+        max_margin_pct=state.max_margin_pct
+    )
+    return JSONResponse({
+        "current_leverage": int(state.leverage),
+        "supported_presets": [10, 16, 25, 50, 100, 200, 500],
+        "max_leverage": 500,
+        "risk_per_trade_pct": round(state.risk_per_trade_pct * 100, 1),
+        "est_margin": round(margin_est, 2),
+        "est_size": round(size_est, 4),
+        "est_max_loss": round(risk_est, 2),
+        "free_margin_buffer": round(max(0.0, state.balance - margin_est), 2),
+        "free_margin_ratio": round(((state.balance - margin_est) / max(0.01, state.balance)) * 100, 1),
+        "symbol": "NCCOGOLD2USD-USDT"
+    })
 
 INTERVAL_MAP = {
     "Min1": "1m", "Min5": "5m", "Min15": "15m", "Min30": "30m",

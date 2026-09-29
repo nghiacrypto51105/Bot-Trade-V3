@@ -665,6 +665,9 @@
       <button class="btn btn-dark" onclick="openApiModal()" title="Cài đặt BingX API Keys">
         <i class="fas fa-key"></i> <span>API Key</span>
       </button>
+      <button class="btn btn-dark" id="btn-leverage-badge" onclick="openLeverageModal()" title="Tùy chọn đòn bẩy tới 500x & Quản trị vốn" style="border: 1px solid rgba(245, 158, 11, 0.4); color: #f59e0b;">
+        <i class="fas fa-bolt"></i> <span id="top-leverage-display">16x (Max 500x)</span>
+      </button>
       <button class="btn btn-primary" id="btn-toggle-run" onclick="toggleBotRun()">
         <i class="fas fa-pause"></i> <span>Tạm Dừng</span>
       </button>
@@ -876,6 +879,32 @@
         </div>
       </div>
     </section>
+
+    <!-- SMART CAPITAL MANAGEMENT & LEVERAGE BAR -->
+    <div style="margin-bottom: 8px; background: #0c1017; border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 6px; padding: 6px 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+      <div style="display: flex; align-items: center; gap: 10px; font-size: 11px; flex-wrap: wrap;">
+        <span style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); padding: 2px 7px; border-radius: 4px; font-weight: 800; display: inline-flex; align-items: center; gap: 5px;">
+          <i class="fas fa-shield-halved"></i> QUẢN TRỊ VỐN
+        </span>
+        <span style="color: var(--text-muted);">
+          Đòn bẩy: <b id="bar-leverage-val" style="color: #f59e0b; font-size: 11.5px;">16x</b> (Hỗ trợ tới 500x)
+        </span>
+        <span style="color: var(--text-muted);">
+          Ký quỹ/lệnh: <b id="bar-est-margin" style="color: #fff;">~$0.13 USDT</b>
+        </span>
+        <span style="color: var(--text-muted);">
+          Rủi ro tối đa SL: <b id="bar-est-risk" style="color: #f6465d;">-1.5% (-$0.45)</b>
+        </span>
+        <span style="color: var(--text-muted);">
+          Đệm vốn tự do: <b id="bar-free-margin" style="color: #0ecb81;">99.5% (Chống Cháy)</b>
+        </span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <button class="btn btn-dark" onclick="openLeverageModal()" style="padding: 2px 8px; font-size: 10.5px; border: 1px solid rgba(245, 158, 11, 0.4); color: #f59e0b;">
+          <i class="fas fa-sliders"></i> Tùy Chỉnh Đòn Bẩy (Tới 500x)
+        </button>
+      </div>
+    </div>
 
     <!-- SMART DYNAMIC POSITION BANNER -->
     <div id="dynamic-position-container">
@@ -1149,6 +1178,76 @@
       <div style="display:flex; justify-content:flex-end; margin-top:12px;">
         <button class="btn btn-dark" onclick="closeTestModal()">Đóng</button>
       </div>
+  <!-- MODAL: CÀI ĐẶT ĐÒN BẨY & QUẢN TRỊ VỐN (LEVERAGE UP TO 500X) -->
+  <div class="modal-backdrop" id="leverageModal">
+    <div class="modal-content" style="max-width: 470px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <i class="fas fa-bolt" style="color: #f59e0b; font-size: 14px;"></i>
+          <span style="font-weight: 800; font-size: 13px; color: #fff;">ĐÒN BẨY BINGX (1x - 500x) & QUẢN TRỊ VỐN</span>
+        </div>
+        <i class="fas fa-xmark" style="cursor: pointer; color: var(--text-muted); font-size: 16px;" onclick="closeLeverageModal()"></i>
+      </div>
+
+      <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 5px; padding: 7px 10px; margin-bottom: 10px; font-size: 11px; color: #f59e0b; line-height: 1.4;">
+        <i class="fas fa-shield-halved"></i> <b>Cơ Chế Quản Trị Rủi Ro Cố Định:</b> Khi tăng đòn bẩy lên cao (50x - 500x), bot sẽ <u>tự động giảm số tiền ký quỹ</u> để mức lỗ tối đa khi chạm SL <b>luôn cố định ở 1.5% tài khoản</b>, giữ > 95% vốn tự do để chống cháy tài khoản tuyệt đối!
+      </div>
+
+      <div style="margin-bottom: 10px;">
+        <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px; font-weight: 700;">
+          1. CHỌN MỨC ĐÒN BẨY NHANH:
+        </label>
+        <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-bottom: 8px;">
+          <button type="button" class="btn btn-dark lev-btn" onclick="selectPresetLev(16)" id="lev-btn-16" style="padding: 5px 0; font-size: 11px; text-align: center;">16x</button>
+          <button type="button" class="btn btn-dark lev-btn" onclick="selectPresetLev(25)" id="lev-btn-25" style="padding: 5px 0; font-size: 11px; text-align: center;">25x</button>
+          <button type="button" class="btn btn-dark lev-btn" onclick="selectPresetLev(50)" id="lev-btn-50" style="padding: 5px 0; font-size: 11px; text-align: center;">50x</button>
+          <button type="button" class="btn btn-dark lev-btn" onclick="selectPresetLev(100)" id="lev-btn-100" style="padding: 5px 0; font-size: 11px; text-align: center;">100x</button>
+          <button type="button" class="btn btn-dark lev-btn" onclick="selectPresetLev(200)" id="lev-btn-200" style="padding: 5px 0; font-size: 11px; text-align: center;">200x</button>
+          <button type="button" class="btn btn-dark lev-btn" onclick="selectPresetLev(500)" id="lev-btn-500" style="padding: 5px 0; font-size: 11px; text-align: center; color: #f59e0b; font-weight: 800;">500x</button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 11px; color: var(--text-muted);">Hoặc nhập đòn bẩy tự do:</span>
+          <input type="number" id="input-custom-leverage" min="1" max="500" value="16" oninput="onCustomLevInput()" style="width: 75px; background: #07090e; border: 1px solid var(--border-color); color: #fff; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-family: 'JetBrains Mono'; text-align: center;">
+          <span style="font-size: 11px; color: #f59e0b; font-weight: 700;">x (Tối đa 500x)</span>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 10px;">
+        <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px; font-weight: 700;">
+          2. MỨC RỦI RO CHẤP NHẬN / LỆNH (% RISK PER TRADE):
+        </label>
+        <select id="select-risk-pct" onchange="updateLevSimulation()" style="width: 100%; background: #07090e; border: 1px solid var(--border-color); color: #fff; padding: 6px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">
+          <option value="0.010">1.0% Vốn / Lệnh (Siêu An Toàn - Bảo Toàn Vốn Tuyệt Đối)</option>
+          <option value="0.015" selected>1.5% Vốn / Lệnh (Chuẩn Sniper Khuyên Dùng)</option>
+          <option value="0.020">2.0% Vốn / Lệnh (Cân Bằng Tăng Trưởng)</option>
+          <option value="0.030">3.0% Vốn / Lệnh (Tấn Công Nhanh)</option>
+        </select>
+      </div>
+
+      <!-- LIVE SIMULATION PREVIEW BOX -->
+      <div style="background: rgba(0,0,0,0.5); border: 1px solid rgba(245,158,11,0.25); border-radius: 6px; padding: 8px 10px; margin-bottom: 12px;">
+        <div style="font-size: 10px; color: #f59e0b; font-weight: 800; margin-bottom: 6px; text-transform: uppercase; display: flex; align-items: center; gap: 5px;">
+          <i class="fas fa-calculator"></i> BẢNG TÍNH AN TOÀN VỐN THỜI GIAN THỰC (LIVE SIMULATION)
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 10.5px;">
+          <div><span style="color: var(--text-muted);">Số dư ví:</span> <b id="sim-balance" style="color: #fff;">$30.17</b></div>
+          <div><span style="color: var(--text-muted);">Đòn bẩy chọn:</span> <b id="sim-leverage" style="color: #f59e0b;">16x</b></div>
+          <div><span style="color: var(--text-muted);">Ký quỹ bỏ ra:</span> <b id="sim-margin" style="color: #58a6ff;">$0.13 USDT</b></div>
+          <div><span style="color: var(--text-muted);">Khối lượng lệnh:</span> <b id="sim-size" style="color: #fff;">0.0005 oz</b></div>
+          <div><span style="color: var(--text-muted);">Lỗ tối đa khi SL (-0.25%):</span> <b id="sim-max-loss" style="color: #f6465d;">-$0.45 (1.5%)</b></div>
+          <div><span style="color: var(--text-muted);">Lãi mục tiêu TP1 (+0.55%):</span> <b id="sim-tp1" style="color: #0ecb81;">+$0.99 (+3.3%)</b></div>
+          <div style="grid-column: span 2;"><span style="color: var(--text-muted);">Đệm vốn tự do (Free Margin Buffer):</span> <b id="sim-free-buffer" style="color: #0ecb81;">99.5% (Tuyệt đối không cháy)</b></div>
+        </div>
+      </div>
+
+      <div id="modal-lev-alert" style="display: none; padding: 6px 10px; border-radius: 4px; margin-bottom: 10px; font-size: 11px; font-weight: 600;"></div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 6px;">
+        <button type="button" onclick="closeLeverageModal()" class="btn btn-dark" style="padding: 5px 12px;">Đóng</button>
+        <button type="button" onclick="applyLeverageSettings()" id="btn-save-leverage" class="btn" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; font-weight: 800; padding: 5px 16px;">
+          <i class="fas fa-check"></i> Áp Dụng Lên Sàn BingX
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1166,6 +1265,162 @@
     let defaultBaseCandles = 110; 
     let activeTradingMode = 'DEMO';
     let currentTab = 'chart';
+    let currentLeverage = 16;
+    let currentRiskPct = 0.015;
+    let currentBalanceForSim = 30.17;
+    let currentPriceForSim = 4145.0;
+
+    function openLeverageModal() {
+      const modal = document.getElementById('leverageModal');
+      if (modal) {
+        modal.style.display = 'flex';
+        updateLevButtons(currentLeverage);
+        updateLevSimulation();
+      }
+    }
+
+    function closeLeverageModal() {
+      const modal = document.getElementById('leverageModal');
+      if (modal) modal.style.display = 'none';
+      const alertBox = document.getElementById('modal-lev-alert');
+      if (alertBox) alertBox.style.display = 'none';
+    }
+
+    function selectPresetLev(val) {
+      currentLeverage = val;
+      const inp = document.getElementById('input-custom-leverage');
+      if (inp) inp.value = val;
+      updateLevButtons(val);
+      updateLevSimulation();
+    }
+
+    function onCustomLevInput() {
+      const inp = document.getElementById('input-custom-leverage');
+      let val = parseInt(inp ? inp.value : 16) || 16;
+      val = Math.max(1, Math.min(500, val));
+      currentLeverage = val;
+      updateLevButtons(val);
+      updateLevSimulation();
+    }
+
+    function updateLevButtons(val) {
+      document.querySelectorAll('.lev-btn').forEach(b => {
+        b.style.borderColor = 'var(--border-color)';
+        b.style.color = '#c9d1d9';
+        b.style.background = '#090c13';
+      });
+      const activeBtn = document.getElementById('lev-btn-' + val);
+      if (activeBtn) {
+        activeBtn.style.borderColor = '#f59e0b';
+        activeBtn.style.color = '#f59e0b';
+        activeBtn.style.background = 'rgba(245, 158, 11, 0.15)';
+      }
+    }
+
+    function updateLevSimulation() {
+      const selRisk = document.getElementById('select-risk-pct');
+      if (selRisk) currentRiskPct = parseFloat(selRisk.value) || 0.015;
+
+      const lev = currentLeverage || 16;
+      const bal = currentBalanceForSim || 30.17;
+      const price = currentPriceForSim || 4145.0;
+      const slPct = 0.0025; // 0.25%
+      const minQty = 0.0005;
+
+      // Smart Sizing
+      const slDist = price * slPct;
+      const maxRiskUsd = bal * currentRiskPct;
+      let size = maxRiskUsd / slDist;
+      size = Math.max(minQty, Math.round(size * 10000) / 10000);
+
+      let posVal = size * price;
+      let margin = posVal / lev;
+      const capMargin = bal * 0.25;
+      if (margin > capMargin) {
+        margin = capMargin;
+        size = Math.max(minQty, Math.round(((margin * lev) / price) * 10000) / 10000);
+      }
+      const actualLoss = size * slDist;
+      const freeMargin = Math.max(0, bal - margin);
+      const freeMarginPct = (freeMargin / bal) * 100;
+
+      const tp1Profit = size * (price * 0.0055);
+      const tp1Pct = (tp1Profit / bal) * 100;
+
+      // Update DOM
+      const elBal = document.getElementById('sim-balance');
+      if (elBal) elBal.innerText = '$' + bal.toFixed(2);
+
+      const elLev = document.getElementById('sim-leverage');
+      if (elLev) elLev.innerText = lev + 'x';
+
+      const elMargin = document.getElementById('sim-margin');
+      if (elMargin) elMargin.innerText = '$' + margin.toFixed(2) + ' USDT (' + ((margin/bal)*100).toFixed(1) + '%)';
+
+      const elSize = document.getElementById('sim-size');
+      if (elSize) elSize.innerText = size.toFixed(4) + ' oz';
+
+      const elMaxLoss = document.getElementById('sim-max-loss');
+      if (elMaxLoss) elMaxLoss.innerText = '-$' + actualLoss.toFixed(2) + ' USDT (' + ((actualLoss/bal)*100).toFixed(1) + '%)';
+
+      const elTp1 = document.getElementById('sim-tp1');
+      if (elTp1) elTp1.innerText = '+$' + tp1Profit.toFixed(2) + ' USDT (+' + tp1Pct.toFixed(1) + '%)';
+
+      const elFree = document.getElementById('sim-free-buffer');
+      if (elFree) elFree.innerText = freeMarginPct.toFixed(1) + '% (Tuyệt đối an toàn)';
+    }
+
+    async function applyLeverageSettings() {
+      const btn = document.getElementById('btn-save-leverage');
+      const alertBox = document.getElementById('modal-lev-alert');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang áp dụng...';
+      }
+      try {
+        const resp = await fetch('/api/set_leverage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            leverage: currentLeverage,
+            risk_pct: currentRiskPct
+          })
+        });
+        const res = await resp.json();
+        if (resp.ok && res.status === 'success') {
+          if (alertBox) {
+            alertBox.style.display = 'block';
+            alertBox.style.background = 'rgba(14,203,129,0.15)';
+            alertBox.style.color = '#0ecb81';
+            alertBox.style.border = '1px solid #0ecb81';
+            alertBox.innerText = res.message || 'Cài đặt đòn bẩy thành công!';
+          }
+          setTimeout(() => {
+            closeLeverageModal();
+          }, 1200);
+        } else {
+          if (alertBox) {
+            alertBox.style.display = 'block';
+            alertBox.style.background = 'rgba(246,70,93,0.15)';
+            alertBox.style.color = '#f6465d';
+            alertBox.style.border = '1px solid #f6465d';
+            alertBox.innerText = res.message || 'Lỗi áp dụng đòn bẩy';
+          }
+        }
+      } catch (e) {
+        if (alertBox) {
+          alertBox.style.display = 'block';
+          alertBox.style.background = 'rgba(246,70,93,0.15)';
+          alertBox.style.color = '#f6465d';
+          alertBox.innerText = 'Lỗi kết nối máy chủ: ' + e.message;
+        }
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-check"></i> Áp Dụng Lên Sàn BingX';
+        }
+      }
+    }
 
     // INIT WEBSOCKET
     let ws = null;
@@ -1454,6 +1709,30 @@
       if (document.getElementById('val-dd')) document.getElementById('val-dd').innerText = 'Sụt giảm: ' + dd.toFixed(2) + '%';
       if (document.getElementById('bar-dd')) document.getElementById('bar-dd').style.width = Math.min(100, (dd / 10) * 100) + '%';
       if (document.getElementById('val-max-dd')) document.getElementById('val-max-dd').innerText = (d.max_drawdown || 0).toFixed(2) + '%';
+
+      // 2.5 Capital Management & Leverage Update
+      if (d.capital_mgmt) {
+        const cm = d.capital_mgmt;
+        currentLeverage = cm.leverage || currentLeverage;
+        currentRiskPct = (cm.risk_per_trade_pct / 100) || currentRiskPct;
+        currentBalanceForSim = d.balance || currentBalanceForSim;
+        currentPriceForSim = p || currentPriceForSim;
+
+        const elTopLev = document.getElementById('top-leverage-display');
+        if (elTopLev) elTopLev.innerText = '⚡ ' + cm.leverage + 'x (Max 500x)';
+
+        const elBarLev = document.getElementById('bar-leverage-val');
+        if (elBarLev) elBarLev.innerText = cm.leverage + 'x';
+
+        const elBarMargin = document.getElementById('bar-est-margin');
+        if (elBarMargin) elBarMargin.innerText = '~$' + cm.est_margin.toFixed(2) + ' USDT';
+
+        const elBarRisk = document.getElementById('bar-est-risk');
+        if (elBarRisk) elBarRisk.innerText = '-' + cm.risk_per_trade_pct.toFixed(1) + '% (-$' + cm.est_max_loss.toFixed(2) + ')';
+
+        const elBarBuffer = document.getElementById('bar-free-margin');
+        if (elBarBuffer) elBarBuffer.innerText = cm.free_margin_ratio.toFixed(1) + '% (Chống Cháy)';
+      }
 
       // 3. Dynamic Position Banner Update
       activePosition = d.active_position;
