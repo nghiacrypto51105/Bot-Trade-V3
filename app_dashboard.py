@@ -927,9 +927,19 @@ def check_and_manage_live_position():
             state.active_position = None
             logger.info(f"[LIVE TP2 LONG] Hit @ {cur_p} | Net: +${net:.2f} (BingX Maker Fee)")
 
-        # 2. Chốt 50% ở TP1 (+0.55%) và Dời SL vào vùng LÃI DƯƠNG (+0.14%)
+        # 2. Chốt 75% ở TP1 (+0.55%) và Dời SL 25% còn lại vào vùng LÃI DƯƠNG (+0.14%)
         elif not tp1_hit and cur_p >= tp1:
-            close_size = size * 0.50
+            target_close = round(size * 0.75, 4)
+            remaining_size = round(size - target_close, 4)
+            
+            # Nếu phần còn lại < 0.0005 oz (dưới min contract của sàn), chốt 100% toàn bộ vị thế
+            if remaining_size < 0.0005:
+                close_size = size
+                is_full_close = True
+            else:
+                close_size = target_close
+                is_full_close = False
+
             pos["size"] -= close_size
             pos["tp1_hit"] = True
             
@@ -942,7 +952,8 @@ def check_and_manage_live_position():
             if state.mode == "LIVE TRADING" and state.bingx_client:
                 state.bingx_client.cancel_all_open_orders("NCCOGOLD2USD-USDT")
                 state.bingx_client.place_market_order("NCCOGOLD2USD-USDT", "SELL", "LONG", close_size)
-                state.bingx_client.set_position_tp_sl("NCCOGOLD2USD-USDT", "LONG", pos["size"], sl_price=new_sl, tp_price=tp2)
+                if not is_full_close and pos["size"] >= 0.0005:
+                    state.bingx_client.set_position_tp_sl("NCCOGOLD2USD-USDT", "LONG", pos["size"], sl_price=new_sl, tp_price=tp2)
                 sync_live_balance()
 
             pnl = (cur_p - entry) * close_size
@@ -950,17 +961,23 @@ def check_and_manage_live_position():
             net = pnl - fee
             state.balance += net
             
+            action_label = "CHỐT LỜI TP1 100% (+0.55%)" if is_full_close else "CHỐT LỜI TP1 75% (+0.55%)"
             state.trades.insert(0, {
                 "time": now_str,
-                "action": "CHỐT LỜI TP1 (+0.55%)" + (" [BINGX LIVE]" if state.mode == "LIVE TRADING" else ""),
+                "action": action_label + (" [BINGX LIVE]" if state.mode == "LIVE TRADING" else ""),
                 "price": cur_p,
                 "size": f"{close_size:.3f} oz",
                 "pnl": f"+${net:.2f}",
                 "balance": f"${state.balance:.2f}",
                 "type": "WIN"
             })
-            record_closed_trade_to_pnl(net, fee, "WIN", "CHỐT LỜI TP1 (+0.55%)", cur_p, f"{close_size:.3f} oz", state.balance)
-            logger.info(f"[LIVE TP1 LONG] Hit @ {cur_p} | Dời SL vào LÃI DƯƠNG: {new_sl} (+0.14%) & gắn lên BingX")
+            record_closed_trade_to_pnl(net, fee, "WIN", action_label, cur_p, f"{close_size:.3f} oz", state.balance)
+            
+            if is_full_close:
+                state.active_position = None
+                logger.info(f"[LIVE TP1 LONG FULL] Hit @ {cur_p} | Đã chốt 100% toàn bộ do size nhỏ")
+            else:
+                logger.info(f"[LIVE TP1 LONG 75%] Hit @ {cur_p} | Đã chốt {close_size:.3f} oz (75%) | Dời SL 25% còn lại ({pos['size']:.3f} oz) vào LÃI DƯƠNG: {new_sl} (+0.14%) & gắn lên BingX")
 
         # 3. Chạm Cắt lỗ / Khóa lãi dương
         elif cur_p <= sl:
@@ -1022,9 +1039,19 @@ def check_and_manage_live_position():
             state.active_position = None
             logger.info(f"[LIVE TP2 SHORT] Hit @ {cur_p} | Net: +${net:.2f} (BingX Maker Fee)")
 
-        # 2. Chốt 50% ở TP1 (+0.55%) và Dời SL vào vùng LÃI DƯƠNG (+0.14%)
+        # 2. Chốt 75% ở TP1 (+0.55%) và Dời SL 25% còn lại vào vùng LÃI DƯƠNG (+0.14%)
         elif not tp1_hit and cur_p <= tp1:
-            close_size = size * 0.50
+            target_close = round(size * 0.75, 4)
+            remaining_size = round(size - target_close, 4)
+            
+            # Nếu phần còn lại < 0.0005 oz (dưới min contract của sàn), chốt 100% toàn bộ vị thế
+            if remaining_size < 0.0005:
+                close_size = size
+                is_full_close = True
+            else:
+                close_size = target_close
+                is_full_close = False
+
             pos["size"] -= close_size
             pos["tp1_hit"] = True
             
@@ -1037,7 +1064,8 @@ def check_and_manage_live_position():
             if state.mode == "LIVE TRADING" and state.bingx_client:
                 state.bingx_client.cancel_all_open_orders("NCCOGOLD2USD-USDT")
                 state.bingx_client.place_market_order("NCCOGOLD2USD-USDT", "BUY", "SHORT", close_size)
-                state.bingx_client.set_position_tp_sl("NCCOGOLD2USD-USDT", "SHORT", pos["size"], sl_price=new_sl, tp_price=tp2)
+                if not is_full_close and pos["size"] >= 0.0005:
+                    state.bingx_client.set_position_tp_sl("NCCOGOLD2USD-USDT", "SHORT", pos["size"], sl_price=new_sl, tp_price=tp2)
                 sync_live_balance()
 
             pnl = (entry - cur_p) * close_size
@@ -1045,17 +1073,23 @@ def check_and_manage_live_position():
             net = pnl - fee
             state.balance += net
             
+            action_label = "CHỐT LỜI TP1 100% (+0.55%)" if is_full_close else "CHỐT LỜI TP1 75% (+0.55%)"
             state.trades.insert(0, {
                 "time": now_str,
-                "action": "CHỐT LỜI TP1 (+0.55%)" + (" [BINGX LIVE]" if state.mode == "LIVE TRADING" else ""),
+                "action": action_label + (" [BINGX LIVE]" if state.mode == "LIVE TRADING" else ""),
                 "price": cur_p,
                 "size": f"{close_size:.3f} oz",
                 "pnl": f"+${net:.2f}",
                 "balance": f"${state.balance:.2f}",
                 "type": "WIN"
             })
-            record_closed_trade_to_pnl(net, fee, "WIN", "CHỐT LỜI TP1 (+0.55%)", cur_p, f"{close_size:.3f} oz", state.balance)
-            logger.info(f"[LIVE TP1 SHORT] Hit @ {cur_p} | Dời SL vào LÃI DƯƠNG: {new_sl} (+0.14%) & gắn lên BingX")
+            record_closed_trade_to_pnl(net, fee, "WIN", action_label, cur_p, f"{close_size:.3f} oz", state.balance)
+            
+            if is_full_close:
+                state.active_position = None
+                logger.info(f"[LIVE TP1 SHORT FULL] Hit @ {cur_p} | Đã chốt 100% toàn bộ do size nhỏ")
+            else:
+                logger.info(f"[LIVE TP1 SHORT 75%] Hit @ {cur_p} | Đã chốt {close_size:.3f} oz (75%) | Dời SL 25% còn lại ({pos['size']:.3f} oz) vào LÃI DƯƠNG: {new_sl} (+0.14%) & gắn lên BingX")
 
         # 3. Chạm Cắt lỗ / Khóa lãi dương
         elif cur_p >= sl:

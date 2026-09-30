@@ -1350,9 +1350,9 @@
         <div style="background: #090c12; border: 1px solid var(--border-color); border-radius: 5px; padding: 10px;">
           <div style="color: #0ecb81; font-weight: 700; font-size: 11.5px; margin-bottom: 5px;">CHỐT LỜI PHÂN ĐOẠN</div>
           <div style="font-size: 11px; color: var(--text-muted); line-height: 1.45;">
-            • TP1: <b>+0.55%</b> (Chốt 50% khối lượng)<br>
+            • TP1: <b>+0.55%</b> (Chốt 75% khối lượng)<br>
             • Khóa lãi dương: <b>+0.14%</b> (Kéo SL qua Entry)<br>
-            • TP2: <b>+1.10%</b> (Ăn trọn sóng lớn)
+            • TP2: <b>+1.10%</b> (Thả 25% ăn trọn sóng lớn)
           </div>
         </div>
 
@@ -2124,7 +2124,7 @@
 
         if (entryEl) entryEl.innerText = '$' + (pos.entry_price || 0).toFixed(2);
         if (slEl) slEl.innerText = '$' + (pos.stop_loss || pos.sl || 0).toFixed(2);
-        if (tp1El) tp1El.innerHTML = '$' + (pos.tp1 || 0).toFixed(2) + (pos.tp1_hit ? ' <span style="color:#0ecb81; font-size:9.5px;">(✓ ĐÃ CHỐT 50%)</span>' : '');
+        if (tp1El) tp1El.innerHTML = '$' + (pos.tp1 || 0).toFixed(2) + (pos.tp1_hit ? ' <span style="color:#0ecb81; font-size:9.5px;">(✓ ĐÃ CHỐT 75%)</span>' : '');
         if (tp2El) tp2El.innerText = '$' + (pos.tp2 || 0).toFixed(2);
         
         if (lockEl) {

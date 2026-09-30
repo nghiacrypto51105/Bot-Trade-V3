@@ -140,10 +140,10 @@ class MockExecutionRiskCoreF7:
             self.position_size = 0.0
             return {"type": "FULL_TP", "net_pnl": total_pnl, "balance": self.balance}
 
-        # 1. CHỐT LỜI TẦNG 1 (TP1) - CHỐT 50% KHỐI LƯỢNG VÀ KHÓA BREAKEVEN
+        # 1. CHỐT LỜI TẦNG 1 (TP1) - CHỐT 75% KHỐI LƯỢNG VÀ KHÓA LÃI DƯƠNG
         elif "PARTIAL_TP1" in action and self.position_side:
             side = self.position_side
-            close_size = self.position_size * 0.50
+            close_size = self.position_size * 0.75
 
             if side == "LONG":
                 realized_pnl = (price - self.entry_price) * close_size
@@ -158,7 +158,7 @@ class MockExecutionRiskCoreF7:
 
             self.trade_history.append({
                 "timestamp": timestamp_str,
-                "action": f"TP1_LOCK_50%_{side}",
+                "action": f"TP1_LOCK_75%_{side}",
                 "result": "WIN",
                 "entry_price": self.entry_price,
                 "exit_price": price,
@@ -168,7 +168,7 @@ class MockExecutionRiskCoreF7:
 
             return {"type": "TP1", "net_pnl": net_pnl, "balance": self.balance}
 
-        # 2. CHỐT LỜI TẦNG 2 (TP2) - CHỐT NỐT 50% CÒN LẠI VỚI BIÊN ĐỘ LỚN
+        # 2. CHỐT LỜI TẦNG 2 (TP2) - CHỐT NỐT 25% CÒN LẠI VỚI BIÊN ĐỘ LỚN
         elif "TP2" in action and self.position_side:
             side = self.position_side
             if side == "LONG":
