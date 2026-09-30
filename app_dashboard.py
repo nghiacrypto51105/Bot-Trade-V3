@@ -202,8 +202,11 @@ class BingXAPIClient:
             r = requests.post(url, headers=headers, timeout=6)
             res = r.json()
             if res.get("code") == 0:
-                logger.info(f"[BINGX LIVE ORDER SUCCESS] {side} {position_side} {qty_str} | ID: {res.get('data', {}).get('orderId')}")
-                return True, res.get("data", {})
+                data = res.get("data", {})
+                order_info = data.get("order", data) if isinstance(data, dict) else {}
+                order_id = order_info.get("orderId", order_info.get("orderID", data.get("orderId")))
+                logger.info(f"[BINGX LIVE ORDER SUCCESS] {side} {position_side} {qty_str} | ID: {order_id}")
+                return True, {"orderId": order_id, **order_info}
             logger.error(f"[BINGX LIVE ORDER FAILED] {res}")
             return False, res
         except Exception as e:
@@ -238,8 +241,11 @@ class BingXAPIClient:
             r = requests.post(url, headers=headers, timeout=6)
             res = r.json()
             if res.get("code") == 0:
-                logger.info(f"[BINGX LIMIT ORDER PLACED] {side} {position_side} {qty_str} @ ${price_str} | ID: {res.get('data', {}).get('orderId')}")
-                return True, res.get("data", {})
+                data = res.get("data", {})
+                order_info = data.get("order", data) if isinstance(data, dict) else {}
+                order_id = order_info.get("orderId", order_info.get("orderID", data.get("orderId")))
+                logger.info(f"[BINGX LIMIT ORDER PLACED] {side} {position_side} {qty_str} @ ${price_str} | ID: {order_id}")
+                return True, {"orderId": order_id, **order_info}
             logger.error(f"[BINGX LIMIT ORDER FAILED] {res}")
             return False, res
         except Exception as e:
@@ -288,7 +294,9 @@ class BingXAPIClient:
             r = requests.get(url, headers=headers, timeout=6)
             res = r.json()
             if res.get("code") == 0:
-                return True, res.get("data", {})
+                data = res.get("data", {})
+                order_data = data.get("order", data)
+                return True, order_data
             return False, res
         except Exception as e:
             return False, {"error": str(e)}
@@ -843,6 +851,40 @@ def sync_live_positions_with_bingx():
                 state.active_position["size"] = pos_amt
                 state.active_position["margin"] = margin
                 state.active_position["leverage"] = leverage
+
+        # Đồng bộ và chống nhồi lệnh chờ Limit Maker từ sàn BingX
+        ok_orders, open_orders, _ = state.bingx_client.get_open_orders("NCCOGOLD2USD-USDT")
+        if ok_orders:
+            limit_orders = [o for o in open_orders if o.get("type") == "LIMIT"]
+            # Nếu có nhiều hơn 1 lệnh Limit chờ trên sàn -> Tự động hủy bớt chỉ giữ đúng 1 lệnh duy nhất
+            if len(limit_orders) > 1:
+                logger.warning(f"[ANTI-DUPLICATE] Phát hiện {len(limit_orders)} lệnh Limit trên BingX! Đang hủy các lệnh dư thừa...")
+                for dup_ord in limit_orders[1:]:
+                    dup_id = dup_ord.get("orderId")
+                    if dup_id:
+                        state.bingx_client.cancel_order("NCCOGOLD2USD-USDT", str(dup_id))
+                limit_orders = [limit_orders[0]]
+
+            if limit_orders and state.pending_limit_order is None and state.active_position is None:
+                first_lim = limit_orders[0]
+                lim_side = "LONG" if first_lim.get("side") == "BUY" else "SHORT"
+                lim_price = float(first_lim.get("price", state.latest_price))
+                lim_size = float(first_lim.get("origQty", 0.001))
+                state.pending_limit_order = {
+                    "order_id": first_lim.get("orderId"),
+                    "side": lim_side,
+                    "limit_price": lim_price,
+                    "size": lim_size,
+                    "margin": round((lim_price * lim_size) / state.leverage, 2),
+                    "strategy": "LIMIT MAKER",
+                    "placed_time": time.time(),
+                    "placed_time_str": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "candle_time": 0,
+                    "ttl_seconds": 900
+                }
+                logger.info(f"[LIVE SYNC] Đồng bộ lệnh chờ Limit từ BingX: {lim_side} {lim_size} oz @ ${lim_price}")
+            elif not limit_orders and state.pending_limit_order is not None and state.active_position is None:
+                state.pending_limit_order = None
     except Exception as e:
         logger.warning(f"[SYNC LIVE POS ERROR] {e}")
 
@@ -1083,11 +1125,21 @@ def check_and_manage_pending_limit_order():
 
     if is_expired or is_invalidated:
         cancel_reason = "HẾT HẠN TTL 15 PHÚT (LỖI THỜI)" if is_expired else "GÃY XU HƯỚNG EMA 300"
-        if state.mode == "LIVE TRADING" and state.bingx_client and order_id:
+        if state.mode == "LIVE TRADING" and state.bingx_client:
+            if order_id:
+                try:
+                    state.bingx_client.cancel_order("NCCOGOLD2USD-USDT", str(order_id))
+                except Exception as e:
+                    logger.warning(f"[CANCEL ORDER ERROR] {e}")
             try:
-                state.bingx_client.cancel_order("NCCOGOLD2USD-USDT", str(order_id))
+                ok, open_orders, _ = state.bingx_client.get_open_orders("NCCOGOLD2USD-USDT")
+                if ok and open_orders:
+                    for o in open_orders:
+                        if o.get("type") == "LIMIT" and o.get("orderId"):
+                            logger.info(f"[SWEEP CANCEL EXPIRED LIMIT] Hủy lệnh LIMIT tồn đọng trên BingX: {o.get('orderId')}")
+                            state.bingx_client.cancel_order("NCCOGOLD2USD-USDT", str(o.get("orderId")))
             except Exception as e:
-                logger.warning(f"[CANCEL ORDER ERROR] {e}")
+                logger.warning(f"[SWEEP CANCEL ERROR] {e}")
 
         logger.info(f"[CANCEL PENDING LIMIT] Đã hủy lệnh chờ {side} @ ${limit_p:,.2f} | Lý do: {cancel_reason}")
         state.trades.insert(0, {
@@ -1185,6 +1237,18 @@ def check_live_entry_signal():
     # 2. Kiểm tra các bộ lọc sinh mệnh và kỷ luật: KHÓA NHỒI LỆNH (Tuyệt đối không nhồi khi đã có lệnh active hoặc limit chờ)
     if state.active_position is not None or state.pending_limit_order is not None:
         return
+
+    # Double-check trực tiếp sàn BingX ở chế độ LIVE TRADING: Tuyệt đối không đặt thêm nếu sàn vẫn còn lệnh LIMIT chờ
+    if state.mode == "LIVE TRADING" and state.bingx_client:
+        try:
+            ok, open_orders, _ = state.bingx_client.get_open_orders("NCCOGOLD2USD-USDT")
+            if ok and open_orders:
+                has_live_limit = any(o.get("type") == "LIMIT" for o in open_orders)
+                if has_live_limit:
+                    return
+        except Exception as e:
+            logger.warning(f"[CHECK LIVE OPEN ORDERS ERROR] {e}")
+
     if state.quant_agent.day_locked or state.quant_agent.daily_trades_count >= state.quant_agent.max_daily_trades:
         return
     if len(state.candles) < 30:
@@ -1243,7 +1307,7 @@ def check_live_entry_signal():
             if not ok:
                 logger.error(f"[LIVE LIMIT ORDER FAILED] Không thể đặt lệnh BUY LIMIT BingX: {res}")
                 return
-            order_id = res.get("orderId")
+            order_id = res.get("orderId") or (res.get("order", {}).get("orderId") if isinstance(res.get("order"), dict) else None)
 
         state.pending_limit_order = {
             "order_id": order_id,
@@ -1293,7 +1357,7 @@ def check_live_entry_signal():
             if not ok:
                 logger.error(f"[LIVE LIMIT ORDER FAILED] Không thể đặt lệnh SELL LIMIT BingX: {res}")
                 return
-            order_id = res.get("orderId")
+            order_id = res.get("orderId") or (res.get("order", {}).get("orderId") if isinstance(res.get("order"), dict) else None)
 
         state.pending_limit_order = {
             "order_id": order_id,
@@ -1668,11 +1732,21 @@ async def api_cancel_pending_limit():
     side = order.get("side")
     limit_p = order.get("limit_price", 0.0)
     
-    if state.mode == "LIVE TRADING" and state.bingx_client and order_id:
+    if state.mode == "LIVE TRADING" and state.bingx_client:
+        if order_id:
+            try:
+                state.bingx_client.cancel_order("NCCOGOLD2USD-USDT", str(order_id))
+            except Exception as e:
+                logger.warning(f"[MANUAL CANCEL ORDER ERROR] {e}")
         try:
-            state.bingx_client.cancel_order("NCCOGOLD2USD-USDT", str(order_id))
+            ok, open_orders, _ = state.bingx_client.get_open_orders("NCCOGOLD2USD-USDT")
+            if ok and open_orders:
+                for o in open_orders:
+                    if o.get("type") == "LIMIT" and o.get("orderId"):
+                        logger.info(f"[MANUAL SWEEP CANCEL] Hủy lệnh LIMIT tồn đọng trên BingX: {o.get('orderId')}")
+                        state.bingx_client.cancel_order("NCCOGOLD2USD-USDT", str(o.get("orderId")))
         except Exception as e:
-            logger.warning(f"[MANUAL CANCEL ORDER ERROR] {e}")
+            logger.warning(f"[MANUAL SWEEP CANCEL ERROR] {e}")
 
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     state.trades.insert(0, {

@@ -1,1 +1,25 @@
-{}
+{
+  "2026-09-29": {
+    "date": "2026-09-29",
+    "trades_count": 1,
+    "wins": 0,
+    "losses": 1,
+    "gross_pnl": -0.4126,
+    "fees": 0.079,
+    "net_pnl": -0.4917,
+    "roi_pct": -2.55,
+    "start_balance": 19.2689,
+    "end_balance": 18.78,
+    "trades": [
+      {
+        "time": "23:45:21",
+        "action": "CẮT LỖ KỶ LUẬT (-0.25%)",
+        "price": 4149.54,
+        "size": "0.038 oz",
+        "pnl": "-0.49 USDT",
+        "fee": "$0.0790",
+        "type": "LOSS"
+      }
+    ]
+  }
+}
