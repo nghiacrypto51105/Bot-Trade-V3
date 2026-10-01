@@ -756,13 +756,14 @@ def load_initial_candles():
             if candles:
                 state.latest_price = candles[-1]["close"]
                 prices = [c["close"] for c in candles]
-                u, l, rsi, ema = state.quant_agent.calculate_indicators(prices)
+                u, l, rsi, ema, rsi_fast = state.quant_agent.calculate_indicators(prices)
                 state.indicators = {
                     "upper_bb": round(u, 2),
                     "lower_bb": round(l, 2),
                     "sma_bb": round((u + l) / 2, 2),
                     "ema_1h": round(ema, 2),
-                    "rsi": round(rsi, 1)
+                    "rsi": round(rsi, 1),
+                    "rsi_fast": round(rsi_fast, 1)
                 }
             logger.info(f"[INIT READY] Đã nạp {len(state.candles)} nến 15m BingX. Giới hạn Sniper hiện tại: {state.quant_agent.daily_trades_count}/{state.quant_agent.max_daily_trades} Lệnh | {state.quant_agent.daily_losses_count}/{state.quant_agent.max_daily_losses} SL")
     except Exception as e:
@@ -1289,13 +1290,14 @@ def check_live_entry_signal():
     # 1. Luôn tính toán cập nhật các chỉ báo kỹ thuật theo giá tick mới nhất
     if len(state.candles) >= 30:
         prices = [c["close"] for c in state.candles[:-1]] + [state.latest_price]
-        upper_bb, lower_bb, rsi, ema_1h = state.quant_agent.calculate_indicators(prices)
+        upper_bb, lower_bb, rsi, ema_1h, rsi_fast = state.quant_agent.calculate_indicators(prices)
         state.indicators = {
             "upper_bb": round(upper_bb, 2),
             "lower_bb": round(lower_bb, 2),
             "sma_bb": round((upper_bb + lower_bb) / 2, 2),
             "ema_1h": round(ema_1h, 2),
-            "rsi": round(rsi, 1)
+            "rsi": round(rsi, 1),
+            "rsi_fast": round(rsi_fast, 1)
         }
 
     # 2. Kiểm tra các bộ lọc sinh mệnh và kỷ luật: KHÓA NHỒI LỆNH (Tuyệt đối không nhồi khi đã có lệnh active hoặc limit chờ)
@@ -1319,16 +1321,26 @@ def check_live_entry_signal():
         return
 
     cur_candle = state.candles[-1]
+    prev_candle = state.candles[-2] if len(state.candles) >= 2 else cur_candle
     cur_time = cur_candle.get("time", 0)
 
     # KHÓA KỶ LUẬT: Tuyệt đối không mở quá 1 lệnh trên cùng 1 cây nến 15 phút!
     if state.last_trade_candle_time == cur_time:
         return
 
-    # Lọc bẫy sáng phiên Á (06:00 - 08:59 VN)
-    hour = datetime.now().hour
-    if state.quant_agent.filter_asia_morning and (6 <= hour <= 8):
+    now_vn = datetime.now()
+    hour = now_vn.hour
+    minute = now_vn.minute
+    time_float = hour + minute / 60.0
+
+    # 1. BỘ LỌC CỬA SỔ GIỜ VÀNG (Golden Liquidity Windows):
+    # - Loại bỏ 100% bẫy thanh khoản sáng phiên Á & giãn spread (04:00 - 08:59 VN)
+    if state.quant_agent.filter_asia_morning and (4.0 <= time_float < 9.0):
         return
+
+    is_london_golden = (13.5 <= time_float <= 18.5)  # 13:30 - 18:30 VN
+    is_ny_golden = (19.5 <= time_float <= 23.5)      # 19:30 - 23:30 VN
+    is_golden_session = is_london_golden or is_ny_golden
 
     close_p = state.latest_price
     ema_1h = state.indicators["ema_1h"]
@@ -1336,107 +1348,151 @@ def check_live_entry_signal():
     lower_bb = state.indicators["lower_bb"]
     sma_bb = state.indicators.get("sma_bb", (upper_bb + lower_bb) / 2.0)
     rsi = state.indicators["rsi"]
+    rsi_fast = state.indicators.get("rsi_fast", rsi)
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # 1. TÍN HIỆU LONG (Dual A+ Limit Maker):
-    # Nhánh 1: Bắt đáy chiết khấu sâu (Deep Dip): Giá gần BB Dưới & RSI <= 48 -> Đặt Limit tại BB Dưới
-    # Nhánh 2: Bắt nhịp hồi tiếp diễn sóng tăng (SMA 20 Pullback): Giá gần SMA 20 & RSI <= 54 -> Đặt Limit tại SMA 20
-    is_long_setup_sma = (close_p > ema_1h and close_p <= sma_bb * 1.006 and rsi <= 54.0)
+    # 2. BỘ LỌC KHỐI LƯỢNG DÒNG TIỀN (Volume Spread Analysis - VSA):
+    vols = [float(c.get("volume", c.get("amount", 0.0))) for c in state.candles[-20:] if float(c.get("volume", c.get("amount", 0.0))) > 0]
+    avg_vol = (sum(vols) / len(vols)) if len(vols) >= 5 else 0.0
+    prev_vol = float(prev_candle.get("volume", prev_candle.get("amount", 0.0)))
+    
+    # 3. BỘ LỌC NẾN RÚT RÂU / TỪ CHỐI GIÁ (Price Rejection Wick):
+    c_open = float(cur_candle.get("open", close_p))
+    c_high = float(cur_candle.get("high", close_p))
+    c_low = float(cur_candle.get("low", close_p))
+    c_range = max(0.01, c_high - c_low)
+
+    prev_open = float(prev_candle.get("open", close_p))
+    prev_high = float(prev_candle.get("high", close_p))
+    prev_low = float(prev_candle.get("low", close_p))
+    prev_range = max(0.01, prev_high - prev_low)
+
+    # Râu dưới (Lower Wick) cho lệnh BUY
+    cur_lower_wick_ratio = (min(c_open, close_p) - c_low) / c_range
+    prev_lower_wick_ratio = (min(prev_open, float(prev_candle.get("close", close_p))) - prev_low) / prev_range
+    has_buy_rejection = (cur_lower_wick_ratio >= 0.15 or prev_lower_wick_ratio >= 0.20 or is_golden_session)
+
+    # Râu trên (Upper Wick) cho lệnh SELL
+    cur_upper_wick_ratio = (c_high - max(c_open, close_p)) / c_range
+    prev_upper_wick_ratio = (prev_high - max(prev_open, float(prev_candle.get("close", close_p)))) / prev_range
+    has_sell_rejection = (cur_upper_wick_ratio >= 0.15 or prev_upper_wick_ratio >= 0.20 or is_golden_session)
+
+    # Chống bắt dao rơi nếu có nến xả / bơm đột biến ngược chiều (Anti-Flush > 2.5x avg vol)
+    is_anti_flush_buy = True
+    if avg_vol > 0 and prev_vol > 2.5 * avg_vol:
+        if (prev_open - float(prev_candle.get("close", close_p))) / prev_open > 0.005:
+            is_anti_flush_buy = False  # Chặn bắt dao rơi khi xả mạnh
+
+    is_anti_flush_sell = True
+    if avg_vol > 0 and prev_vol > 2.5 * avg_vol:
+        if (float(prev_candle.get("close", close_p)) - prev_open) / prev_open > 0.005:
+            is_anti_flush_sell = False  # Chặn bắt đỉnh khi bơm mạnh
+
+    # 4. ĐỒNG PHA ĐA KHUNG THỜI GIAN (M5 / M15 Momentum):
+    is_long_momentum = (rsi_fast <= 45.0 or rsi_fast >= rsi)
+    is_short_momentum = (rsi_fast >= 55.0 or rsi_fast <= rsi)
+
+    # ================== 1. TÍN HIỆU LONG ==================
+    is_long_setup_sma = (close_p > ema_1h and close_p <= sma_bb * 1.006 and rsi <= (54.0 if is_golden_session else 50.0))
     is_long_setup_deep = (close_p > ema_1h and close_p <= lower_bb * 1.004 and rsi <= 48.0)
 
     if (not state.active_position) and (not state.pending_limit_order) and (is_long_setup_sma or is_long_setup_deep):
-        strategy_tag = "DEEP DIP" if is_long_setup_deep else "SMA 20 PULLBACK"
-        limit_p = round(lower_bb if is_long_setup_deep else sma_bb, 2)
-        if limit_p > close_p:
-            limit_p = round(close_p, 2)
+        if is_anti_flush_buy and has_buy_rejection and is_long_momentum:
+            strategy_tag = "DEEP DIP" if is_long_setup_deep else "SMA 20 PULLBACK"
+            if is_golden_session:
+                strategy_tag += " [GOLDEN A++]"
+            limit_p = round(lower_bb if is_long_setup_deep else sma_bb, 2)
+            if limit_p > close_p:
+                limit_p = round(close_p, 2)
 
-        size, margin, est_risk = compute_smart_order_sizing(
-            balance=state.balance,
-            close_p=limit_p,
-            leverage=state.leverage,
-            sl_pct=state.quant_agent.sl_pct,
-            risk_pct=state.risk_per_trade_pct,
-            max_margin_pct=state.max_margin_pct
-        )
+            size, margin, est_risk = compute_smart_order_sizing(
+                balance=state.balance,
+                close_p=limit_p,
+                leverage=state.leverage,
+                sl_pct=state.quant_agent.sl_pct,
+                risk_pct=state.risk_per_trade_pct,
+                max_margin_pct=state.max_margin_pct
+            )
 
-        order_id = None
-        if state.mode == "LIVE TRADING":
-            if not state.bingx_client:
-                logger.error("[LIVE ERROR] Chưa có BingX Client để mở lệnh Live!")
-                return
-            if state.balance < 2.0:
-                logger.warning(f"[LIVE INSUFFICIENT BALANCE] Số dư ${state.balance:.2f} < 2 USDT tối thiểu!")
-                return
-            ok, res = state.bingx_client.place_limit_order("NCCOGOLD2USD-USDT", "BUY", "LONG", size, limit_p)
-            if not ok:
-                logger.error(f"[LIVE LIMIT ORDER FAILED] Không thể đặt lệnh BUY LIMIT BingX: {res}")
-                return
-            order_id = res.get("orderId") or (res.get("order", {}).get("orderId") if isinstance(res.get("order"), dict) else None)
+            order_id = None
+            if state.mode == "LIVE TRADING":
+                if not state.bingx_client:
+                    logger.error("[LIVE ERROR] Chưa có BingX Client để mở lệnh Live!")
+                    return
+                if state.balance < 2.0:
+                    logger.warning(f"[LIVE INSUFFICIENT BALANCE] Số dư ${state.balance:.2f} < 2 USDT tối thiểu!")
+                    return
+                ok, res = state.bingx_client.place_limit_order("NCCOGOLD2USD-USDT", "BUY", "LONG", size, limit_p)
+                if not ok:
+                    logger.error(f"[LIVE LIMIT ORDER FAILED] Không thể đặt lệnh BUY LIMIT BingX: {res}")
+                    return
+                order_id = res.get("orderId") or (res.get("order", {}).get("orderId") if isinstance(res.get("order"), dict) else None)
 
-        state.pending_limit_order = {
-            "order_id": order_id,
-            "side": "LONG",
-            "limit_price": limit_p,
-            "size": size,
-            "margin": margin,
-            "strategy": strategy_tag,
-            "placed_time": time.time(),
-            "placed_time_str": now_str,
-            "candle_time": cur_time,
-            "ttl_seconds": 900
-        }
-        state.last_trade_candle_time = cur_time
-        logger.info(f"[PLACED BUY LIMIT ({strategy_tag})] @ {limit_p:,.2f} | Size: {size:.3f} oz | TTL: 15 mins")
+            state.pending_limit_order = {
+                "order_id": order_id,
+                "side": "LONG",
+                "limit_price": limit_p,
+                "size": size,
+                "margin": margin,
+                "strategy": strategy_tag,
+                "placed_time": time.time(),
+                "placed_time_str": now_str,
+                "candle_time": cur_time,
+                "ttl_seconds": 900
+            }
+            state.last_trade_candle_time = cur_time
+            logger.info(f"[PLACED BUY LIMIT ({strategy_tag})] @ {limit_p:,.2f} | Size: {size:.3f} oz | TTL: 15 mins (A++ Confirmed)")
 
-    # 2. TÍN HIỆU SHORT (Dual A+ Limit Maker):
-    # Nhánh 1: Bắt đỉnh sóng hồi sâu (Deep Peak): Giá gần BB Trên & RSI >= 52 -> Đặt Limit tại BB Trên
-    # Nhánh 2: Bắt nhịp hồi tiếp diễn sóng giảm (SMA 20 Pullback): Giá gần SMA 20 & RSI >= 46 -> Đặt Limit tại SMA 20
-    is_short_setup_sma = (close_p < ema_1h and close_p >= sma_bb * 0.994 and rsi >= 46.0)
+    # ================== 2. TÍN HIỆU SHORT ==================
+    is_short_setup_sma = (close_p < ema_1h and close_p >= sma_bb * 0.994 and rsi >= (46.0 if is_golden_session else 50.0))
     is_short_setup_deep = (close_p < ema_1h and close_p >= upper_bb * 0.996 and rsi >= 52.0)
 
     if (not state.active_position) and (not state.pending_limit_order) and (is_short_setup_sma or is_short_setup_deep):
-        strategy_tag = "DEEP PEAK" if is_short_setup_deep else "SMA 20 PULLBACK"
-        limit_p = round(upper_bb if is_short_setup_deep else sma_bb, 2)
-        if limit_p < close_p:
-            limit_p = round(close_p, 2)
+        if is_anti_flush_sell and has_sell_rejection and is_short_momentum:
+            strategy_tag = "DEEP PEAK" if is_short_setup_deep else "SMA 20 PULLBACK"
+            if is_golden_session:
+                strategy_tag += " [GOLDEN A++]"
+            limit_p = round(upper_bb if is_short_setup_deep else sma_bb, 2)
+            if limit_p < close_p:
+                limit_p = round(close_p, 2)
 
-        size, margin, est_risk = compute_smart_order_sizing(
-            balance=state.balance,
-            close_p=limit_p,
-            leverage=state.leverage,
-            sl_pct=state.quant_agent.sl_pct,
-            risk_pct=state.risk_per_trade_pct,
-            max_margin_pct=state.max_margin_pct
-        )
+            size, margin, est_risk = compute_smart_order_sizing(
+                balance=state.balance,
+                close_p=limit_p,
+                leverage=state.leverage,
+                sl_pct=state.quant_agent.sl_pct,
+                risk_pct=state.risk_per_trade_pct,
+                max_margin_pct=state.max_margin_pct
+            )
 
-        order_id = None
-        if state.mode == "LIVE TRADING":
-            if not state.bingx_client:
-                logger.error("[LIVE ERROR] Chưa có BingX Client để mở lệnh Live!")
-                return
-            if state.balance < 2.0:
-                logger.warning(f"[LIVE INSUFFICIENT BALANCE] Số dư ${state.balance:.2f} < 2 USDT tối thiểu!")
-                return
-            ok, res = state.bingx_client.place_limit_order("NCCOGOLD2USD-USDT", "SELL", "SHORT", size, limit_p)
-            if not ok:
-                logger.error(f"[LIVE LIMIT ORDER FAILED] Không thể đặt lệnh SELL LIMIT BingX: {res}")
-                return
-            order_id = res.get("orderId") or (res.get("order", {}).get("orderId") if isinstance(res.get("order"), dict) else None)
+            order_id = None
+            if state.mode == "LIVE TRADING":
+                if not state.bingx_client:
+                    logger.error("[LIVE ERROR] Chưa có BingX Client để mở lệnh Live!")
+                    return
+                if state.balance < 2.0:
+                    logger.warning(f"[LIVE INSUFFICIENT BALANCE] Số dư ${state.balance:.2f} < 2 USDT tối thiểu!")
+                    return
+                ok, res = state.bingx_client.place_limit_order("NCCOGOLD2USD-USDT", "SELL", "SHORT", size, limit_p)
+                if not ok:
+                    logger.error(f"[LIVE LIMIT ORDER FAILED] Không thể đặt lệnh SELL LIMIT BingX: {res}")
+                    return
+                order_id = res.get("orderId") or (res.get("order", {}).get("orderId") if isinstance(res.get("order"), dict) else None)
 
-        state.pending_limit_order = {
-            "order_id": order_id,
-            "side": "SHORT",
-            "limit_price": limit_p,
-            "size": size,
-            "margin": margin,
-            "strategy": strategy_tag,
-            "placed_time": time.time(),
-            "placed_time_str": now_str,
-            "candle_time": cur_time,
-            "ttl_seconds": 900
-        }
-        state.last_trade_candle_time = cur_time
-        logger.info(f"[PLACED SELL LIMIT ({strategy_tag})] @ {limit_p:,.2f} | Size: {size:.3f} oz | TTL: 15 mins")
+            state.pending_limit_order = {
+                "order_id": order_id,
+                "side": "SHORT",
+                "limit_price": limit_p,
+                "size": size,
+                "margin": margin,
+                "strategy": strategy_tag,
+                "placed_time": time.time(),
+                "placed_time_str": now_str,
+                "candle_time": cur_time,
+                "ttl_seconds": 900
+            }
+            state.last_trade_candle_time = cur_time
+            logger.info(f"[PLACED SELL LIMIT ({strategy_tag})] @ {limit_p:,.2f} | Size: {size:.3f} oz | TTL: 15 mins (A++ Confirmed)")
 
 async def bingx_realtime_ws_listener():
     url = "wss://open-api-swap.bingx.com/swap-market"

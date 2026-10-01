@@ -131,20 +131,9 @@ class QuantPricingAgent:
         upper_bb = sma + (self.bb_std * std)
         lower_bb = sma - (self.bb_std * std)
 
-        # 2. RSI (14)
-        if len(prices) > self.rsi_period:
-            deltas = [prices[i] - prices[i - 1] for i in range(1, len(prices))]
-            gains = [max(d, 0.0) for d in deltas]
-            losses = [max(-d, 0.0) for d in deltas]
-            avg_g = sum(gains[:self.rsi_period]) / self.rsi_period
-            avg_l = sum(losses[:self.rsi_period]) / self.rsi_period
-            for g, l in zip(gains[self.rsi_period:], losses[self.rsi_period:]):
-                avg_g = (avg_g * (self.rsi_period - 1) + g) / self.rsi_period
-                avg_l = (avg_l * (self.rsi_period - 1) + l) / self.rsi_period
-            rs = avg_g / avg_l if avg_l > 0 else 1.0
-            rsi = 100.0 - (100.0 / (1.0 + rs))
-        else:
-            rsi = 50.0
+        # 2. RSI (14) & Fast RSI (7)
+        rsi = self._calculate_rsi(prices, self.rsi_period)
+        rsi_fast = self._calculate_rsi(prices, 7)
 
         # 3. EMA 1H (Thuyền trưởng xu hướng)
         k = 2.0 / (self.ema_1h_period + 1)
@@ -152,7 +141,22 @@ class QuantPricingAgent:
         for p in prices[1:]:
             ema_1h = (p * k) + (ema_1h * (1.0 - k))
 
-        return upper_bb, lower_bb, rsi, ema_1h
+        return upper_bb, lower_bb, rsi, ema_1h, rsi_fast
+
+    def _calculate_rsi(self, prices: List[float], period: int = 14) -> float:
+        """Tính toán RSI tiêu chuẩn theo chu kỳ tùy biến."""
+        if len(prices) <= period:
+            return 50.0
+        deltas = [prices[i] - prices[i - 1] for i in range(1, len(prices))]
+        gains = [max(d, 0.0) for d in deltas]
+        losses = [max(-d, 0.0) for d in deltas]
+        avg_g = sum(gains[:period]) / period
+        avg_l = sum(losses[:period]) / period
+        for g, l in zip(gains[period:], losses[period:]):
+            avg_g = (avg_g * (period - 1) + g) / period
+            avg_l = (avg_l * (period - 1) + l) / period
+        rs = avg_g / avg_l if avg_l > 0 else 1.0
+        return 100.0 - (100.0 / (1.0 + rs))
 
     def process_candle(self, candle: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
@@ -323,7 +327,7 @@ class QuantPricingAgent:
                 if volume < (0.85 * avg_vol):
                     return None
 
-            upper_bb, lower_bb, rsi, ema_1h = self.calculate_indicators(prices)
+            upper_bb, lower_bb, rsi, ema_1h, rsi_fast = self.calculate_indicators(prices)
             sma_bb = (upper_bb + lower_bb) / 2.0
 
             # 1. ĐIỀU KIỆN LONG (Dual A+ Sniper):
