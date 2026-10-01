@@ -573,8 +573,9 @@ class TradingEngineState:
             rsi_high=55.0,
             ema_1h_period=300,
             sl_pct=0.0025,
-            tp1_pct=0.0055,
+            tp1_pct=0.0048,
             tp2_pct=0.0110,
+            be_trigger_pct=0.0038,
             lock_gain_ratio=0.25,
             max_daily_trades=8,
             max_daily_losses=2,
@@ -927,7 +928,7 @@ def check_and_manage_live_position():
             state.active_position = None
             logger.info(f"[LIVE TP2 LONG] Hit @ {cur_p} | Net: +${net:.2f} (BingX Maker Fee)")
 
-        # 2. Chốt 75% ở TP1 (+0.55%) và Dời SL 25% còn lại vào vùng LÃI DƯƠNG (+0.14%)
+        # 2. Chốt 75% ở TP1 (+0.48%) và Dời SL 25% còn lại vào vùng LÃI DƯƠNG (+0.12%)
         elif not tp1_hit and cur_p >= tp1:
             target_close = round(size * 0.75, 4)
             remaining_size = round(size - target_close, 4)
@@ -943,7 +944,7 @@ def check_and_manage_live_position():
             pos["size"] -= close_size
             pos["tp1_hit"] = True
             
-            # Khóa lãi dương: entry + 25% khoảng cách TP1
+            # Khóa lãi dương: entry + 25% khoảng cách TP1 (+0.12% lãi)
             lock_dist = (tp1 - entry) * 0.25
             new_sl = round(entry + lock_dist, 2)
             pos["sl"] = new_sl
@@ -961,7 +962,7 @@ def check_and_manage_live_position():
             net = pnl - fee
             state.balance += net
             
-            action_label = "CHỐT LỜI TP1 100% (+0.55%)" if is_full_close else "CHỐT LỜI TP1 75% (+0.55%)"
+            action_label = "CHỐT LỜI TP1 100% (+0.48%)" if is_full_close else "CHỐT LỜI TP1 75% (+0.48%)"
             state.trades.insert(0, {
                 "time": now_str,
                 "action": action_label + (" [BINGX LIVE]" if state.mode == "LIVE TRADING" else ""),
@@ -977,9 +978,20 @@ def check_and_manage_live_position():
                 state.active_position = None
                 logger.info(f"[LIVE TP1 LONG FULL] Hit @ {cur_p} | Đã chốt 100% toàn bộ do size nhỏ")
             else:
-                logger.info(f"[LIVE TP1 LONG 75%] Hit @ {cur_p} | Đã chốt {close_size:.3f} oz (75%) | Dời SL 25% còn lại ({pos['size']:.3f} oz) vào LÃI DƯƠNG: {new_sl} (+0.14%) & gắn lên BingX")
+                logger.info(f"[LIVE TP1 LONG 75%] Hit @ {cur_p} | Đã chốt {close_size:.3f} oz (75%) | Dời SL 25% còn lại ({pos['size']:.3f} oz) vào LÃI DƯƠNG: {new_sl} (+0.12%) & gắn lên BingX")
 
-        # 3. Chạm Cắt lỗ / Khóa lãi dương
+        # 3. KÍCH HOẠT EARLY BREAKEVEN: Khi lãi đạt >= +0.38% (gần chạm TP1) -> Dời SL về Entry hòa vốn bảo hiểm
+        elif not tp1_hit and not pos.get("be_hit", False) and cur_p >= round(entry * (1.0 + state.quant_agent.be_trigger_pct), 2):
+            pos["be_hit"] = True
+            be_sl = round(entry * 1.0003, 2)  # Entry + 0.03% để trả phí giao dịch
+            if be_sl > pos["sl"]:
+                pos["sl"] = be_sl
+                pos["stop_loss"] = be_sl
+                if state.mode == "LIVE TRADING" and state.bingx_client:
+                    state.bingx_client.set_position_tp_sl("NCCOGOLD2USD-USDT", "LONG", pos["size"], sl_price=be_sl, tp_price=tp1)
+                logger.info(f"[LIVE EARLY BREAKEVEN LONG] Giá đạt ${cur_p:.2f} (+0.38% - gần chạm TP1) -> Đã dời SL về HÒA VỐN BẢO HIỂM: ${be_sl:.2f}!")
+
+        # 4. Chạm Cắt lỗ / Khóa lãi dương / Hòa vốn
         elif cur_p <= sl:
             if state.mode == "LIVE TRADING" and state.bingx_client:
                 state.bingx_client.cancel_all_open_orders("NCCOGOLD2USD-USDT")
@@ -992,7 +1004,10 @@ def check_and_manage_live_position():
             
             if tp1_hit:
                 act_type = "PROFIT_LOCK"
-                act_text = "KHÓA LÃI DƯƠNG (+0.14%)"
+                act_text = "KHÓA LÃI DƯƠNG (+0.12%)"
+            elif pos.get("be_hit", False):
+                act_type = "BREAKEVEN"
+                act_text = "HÒA VỐN BẢO HIỂM (EARLY BE)"
             else:
                 act_type = "LOSS"
                 act_text = "CẮT LỖ KỶ LUẬT (-0.25%)"
@@ -1039,7 +1054,7 @@ def check_and_manage_live_position():
             state.active_position = None
             logger.info(f"[LIVE TP2 SHORT] Hit @ {cur_p} | Net: +${net:.2f} (BingX Maker Fee)")
 
-        # 2. Chốt 75% ở TP1 (+0.55%) và Dời SL 25% còn lại vào vùng LÃI DƯƠNG (+0.14%)
+        # 2. Chốt 75% ở TP1 (+0.48%) và Dời SL 25% còn lại vào vùng LÃI DƯƠNG (+0.12%)
         elif not tp1_hit and cur_p <= tp1:
             target_close = round(size * 0.75, 4)
             remaining_size = round(size - target_close, 4)
@@ -1055,7 +1070,7 @@ def check_and_manage_live_position():
             pos["size"] -= close_size
             pos["tp1_hit"] = True
             
-            # Khóa lãi dương: entry - 25% khoảng cách TP1
+            # Khóa lãi dương: entry - 25% khoảng cách TP1 (+0.12% lãi)
             lock_dist = (entry - tp1) * 0.25
             new_sl = round(entry - lock_dist, 2)
             pos["sl"] = new_sl
@@ -1073,7 +1088,7 @@ def check_and_manage_live_position():
             net = pnl - fee
             state.balance += net
             
-            action_label = "CHỐT LỜI TP1 100% (+0.55%)" if is_full_close else "CHỐT LỜI TP1 75% (+0.55%)"
+            action_label = "CHỐT LỜI TP1 100% (+0.48%)" if is_full_close else "CHỐT LỜI TP1 75% (+0.48%)"
             state.trades.insert(0, {
                 "time": now_str,
                 "action": action_label + (" [BINGX LIVE]" if state.mode == "LIVE TRADING" else ""),
@@ -1089,9 +1104,20 @@ def check_and_manage_live_position():
                 state.active_position = None
                 logger.info(f"[LIVE TP1 SHORT FULL] Hit @ {cur_p} | Đã chốt 100% toàn bộ do size nhỏ")
             else:
-                logger.info(f"[LIVE TP1 SHORT 75%] Hit @ {cur_p} | Đã chốt {close_size:.3f} oz (75%) | Dời SL 25% còn lại ({pos['size']:.3f} oz) vào LÃI DƯƠNG: {new_sl} (+0.14%) & gắn lên BingX")
+                logger.info(f"[LIVE TP1 SHORT 75%] Hit @ {cur_p} | Đã chốt {close_size:.3f} oz (75%) | Dời SL 25% còn lại ({pos['size']:.3f} oz) vào LÃI DƯƠNG: {new_sl} (+0.12%) & gắn lên BingX")
 
-        # 3. Chạm Cắt lỗ / Khóa lãi dương
+        # 3. KÍCH HOẠT EARLY BREAKEVEN: Khi lãi đạt >= +0.38% (gần chạm TP1) -> Dời SL về Entry hòa vốn bảo hiểm
+        elif not tp1_hit and not pos.get("be_hit", False) and cur_p <= round(entry * (1.0 - state.quant_agent.be_trigger_pct), 2):
+            pos["be_hit"] = True
+            be_sl = round(entry * 0.9997, 2)  # Entry - 0.03% để trả phí giao dịch
+            if be_sl < pos["sl"]:
+                pos["sl"] = be_sl
+                pos["stop_loss"] = be_sl
+                if state.mode == "LIVE TRADING" and state.bingx_client:
+                    state.bingx_client.set_position_tp_sl("NCCOGOLD2USD-USDT", "SHORT", pos["size"], sl_price=be_sl, tp_price=tp1)
+                logger.info(f"[LIVE EARLY BREAKEVEN SHORT] Giá đạt ${cur_p:.2f} (+0.38% - gần chạm TP1) -> Đã dời SL về HÒA VỐN BẢO HIỂM: ${be_sl:.2f}!")
+
+        # 4. Chạm Cắt lỗ / Khóa lãi dương / Hòa vốn
         elif cur_p >= sl:
             if state.mode == "LIVE TRADING" and state.bingx_client:
                 state.bingx_client.cancel_all_open_orders("NCCOGOLD2USD-USDT")
@@ -1104,7 +1130,10 @@ def check_and_manage_live_position():
             
             if tp1_hit:
                 act_type = "PROFIT_LOCK"
-                act_text = "KHÓA LÃI DƯƠNG (+0.14%)"
+                act_text = "KHÓA LÃI DƯƠNG (+0.12%)"
+            elif pos.get("be_hit", False):
+                act_type = "BREAKEVEN"
+                act_text = "HÒA VỐN BẢO HIỂM (EARLY BE)"
             else:
                 act_type = "LOSS"
                 act_text = "CẮT LỖ KỶ LUẬT (-0.25%)"
@@ -1223,6 +1252,7 @@ def check_and_manage_pending_limit_order():
             "tp1": tp1,
             "tp2": tp2,
             "tp1_hit": False,
+            "be_hit": False,
             "open_time": now_str,
             "strategy": strategy,
             "order_type": "LIMIT_MAKER",

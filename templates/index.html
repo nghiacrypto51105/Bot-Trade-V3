@@ -1348,10 +1348,11 @@
         </div>
 
         <div style="background: #090c12; border: 1px solid var(--border-color); border-radius: 5px; padding: 10px;">
-          <div style="color: #0ecb81; font-weight: 700; font-size: 11.5px; margin-bottom: 5px;">CHỐT LỜI PHÂN ĐOẠN</div>
+          <div style="color: #0ecb81; font-weight: 700; font-size: 11.5px; margin-bottom: 5px;">CHỐT LỜI & BẢO VỆ ĐA TẦNG</div>
           <div style="font-size: 11px; color: var(--text-muted); line-height: 1.45;">
-            • TP1: <b>+0.55%</b> (Chốt 75% khối lượng)<br>
-            • Khóa lãi dương: <b>+0.14%</b> (Kéo SL qua Entry)<br>
+            • Early Breakeven: <b>+0.38%</b> (Kéo SL về Hòa Vốn)<br>
+            • TP1: <b>+0.48%</b> (Chốt 75% khối lượng)<br>
+            • Khóa lãi dương: <b>+0.12%</b> (Kéo SL qua Entry)<br>
             • TP2: <b>+1.10%</b> (Thả 25% ăn trọn sóng lớn)
           </div>
         </div>
@@ -2129,9 +2130,11 @@
         
         if (lockEl) {
           if (pos.tp1_hit) {
-            lockEl.innerHTML = '<span style="color:#0ecb81;"><i class="fas fa-check"></i> ĐÃ DỜI SL VÀO +0.14% LÃI</span>';
+            lockEl.innerHTML = '<span style="color:#0ecb81;"><i class="fas fa-check"></i> ĐÃ DỜI SL VÀO +0.12% LÃI</span>';
+          } else if (pos.be_hit) {
+            lockEl.innerHTML = '<span style="color:#f0ad4e;"><i class="fas fa-shield-alt"></i> ĐÃ DỜI SL VỀ HÒA VỐN (0 RỦI RO)</span>';
           } else {
-            lockEl.innerText = 'CHƯA KÍCH HOẠT (Chờ TP1)';
+            lockEl.innerText = 'CHƯA KÍCH HOẠT (Chờ +0.38%)';
             lockEl.style.color = 'var(--text-muted)';
           }
         }

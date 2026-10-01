@@ -52,9 +52,10 @@ class QuantPricingAgent:
         rsi_high: float = 55.0,
         ema_1h_period: int = 300,
         sl_pct: float = 0.0025,          # Cắt lỗ chặt 0.25% (Sniper Pro Max)
-        tp1_pct: float = 0.0055,         # Chốt lời Tầng 1: 0.55%
+        tp1_pct: float = 0.0048,         # Chốt lời Tầng 1: 0.48% (~$20 giá vàng)
         tp2_pct: float = 0.0110,         # Chốt lời Tầng 2: 1.10% (Ăn trọn sóng lớn)
-        lock_gain_ratio: float = 0.25,    # Khóa 25% biên độ TP1 thành SL dương (+0.14% lãi)
+        be_trigger_pct: float = 0.0038,  # Early Breakeven: Khi lãi đạt +0.38% -> Dời SL về Entry hòa vốn
+        lock_gain_ratio: float = 0.25,    # Khóa 25% biên độ TP1 thành SL dương (+0.12% lãi)
         max_daily_trades: int = 8,         # Tối đa 8 lệnh A+ mỗi ngày (Sniper Nâng Cao)
         max_daily_losses: int = 2,         # Cầu dao ngắt lỗ: tối đa 2 SL/ngày
         filter_asia_morning: bool = True,  # Triệt tiêu bẫy thanh khoản sáng phiên Á (06:00 - 08:59)
@@ -72,6 +73,7 @@ class QuantPricingAgent:
         self.sl_pct = sl_pct
         self.tp1_pct = tp1_pct
         self.tp2_pct = tp2_pct
+        self.be_trigger_pct = be_trigger_pct
         self.lock_gain_ratio = lock_gain_ratio
         self.max_daily_trades = max_daily_trades
         self.max_daily_losses = max_daily_losses
