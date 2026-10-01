@@ -983,13 +983,13 @@ def check_and_manage_live_position():
         # 3. KÍCH HOẠT EARLY BREAKEVEN: Khi lãi đạt >= +0.38% (gần chạm TP1) -> Dời SL về Entry hòa vốn bảo hiểm
         elif not tp1_hit and not pos.get("be_hit", False) and cur_p >= round(entry * (1.0 + state.quant_agent.be_trigger_pct), 2):
             pos["be_hit"] = True
-            be_sl = round(entry * 1.0003, 2)  # Entry + 0.03% để trả phí giao dịch
+            be_sl = round(entry * 1.0005, 2)  # Entry + 0.05% để bù đủ 2 lần phí giao dịch (Mở Maker 0.02% + Đóng Taker 0.05%)
             if be_sl > pos["sl"]:
                 pos["sl"] = be_sl
                 pos["stop_loss"] = be_sl
                 if state.mode == "LIVE TRADING" and state.bingx_client:
                     state.bingx_client.set_position_tp_sl("NCCOGOLD2USD-USDT", "LONG", pos["size"], sl_price=be_sl, tp_price=tp1)
-                logger.info(f"[LIVE EARLY BREAKEVEN LONG] Giá đạt ${cur_p:.2f} (+0.38% - gần chạm TP1) -> Đã dời SL về HÒA VỐN BẢO HIỂM: ${be_sl:.2f}!")
+                logger.info(f"[LIVE EARLY BREAKEVEN LONG] Giá đạt ${cur_p:.2f} (+0.38% - gần chạm TP1) -> Đã dời SL về HÒA VỐN BẢO HIỂM (+0.05% phí): ${be_sl:.2f}!")
 
         # 4. Chạm Cắt lỗ / Khóa lãi dương / Hòa vốn
         elif cur_p <= sl:
@@ -1109,13 +1109,13 @@ def check_and_manage_live_position():
         # 3. KÍCH HOẠT EARLY BREAKEVEN: Khi lãi đạt >= +0.38% (gần chạm TP1) -> Dời SL về Entry hòa vốn bảo hiểm
         elif not tp1_hit and not pos.get("be_hit", False) and cur_p <= round(entry * (1.0 - state.quant_agent.be_trigger_pct), 2):
             pos["be_hit"] = True
-            be_sl = round(entry * 0.9997, 2)  # Entry - 0.03% để trả phí giao dịch
+            be_sl = round(entry * 0.9995, 2)  # Entry - 0.05% để bù đủ 2 lần phí giao dịch (Mở Maker 0.02% + Đóng Taker 0.05%)
             if be_sl < pos["sl"]:
                 pos["sl"] = be_sl
                 pos["stop_loss"] = be_sl
                 if state.mode == "LIVE TRADING" and state.bingx_client:
                     state.bingx_client.set_position_tp_sl("NCCOGOLD2USD-USDT", "SHORT", pos["size"], sl_price=be_sl, tp_price=tp1)
-                logger.info(f"[LIVE EARLY BREAKEVEN SHORT] Giá đạt ${cur_p:.2f} (+0.38% - gần chạm TP1) -> Đã dời SL về HÒA VỐN BẢO HIỂM: ${be_sl:.2f}!")
+                logger.info(f"[LIVE EARLY BREAKEVEN SHORT] Giá đạt ${cur_p:.2f} (+0.38% - gần chạm TP1) -> Đã dời SL về HÒA VỐN BẢO HIỂM (+0.05% phí): ${be_sl:.2f}!")
 
         # 4. Chạm Cắt lỗ / Khóa lãi dương / Hòa vốn
         elif cur_p >= sl:
