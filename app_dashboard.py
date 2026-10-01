@@ -651,6 +651,37 @@ def compute_smart_order_sizing(balance: float, close_p: float, leverage: float, 
     actual_risk = size * sl_distance
     return size, required_margin, actual_risk
 
+def compute_front_run_tp_sl(side: str, entry_p: float, sl_pct: float, tp1_pct: float, tp2_pct: float, upper_bb: float = 0.0, lower_bb: float = 0.0) -> Tuple[float, float, float]:
+    """
+    Tính toán SL, TP1, TP2 theo quy tắc Pro Trader:
+    1. R:R luôn dưới 1:3 (TP1 = 0.48%, SL = 0.25%).
+    2. Dynamic Front-Running S/R Buffer: Đặt TP1 trước vùng cản Kháng cự (Upper BB) / Hỗ trợ (Lower BB) ít nhất $2.0.
+    """
+    sl = round(entry_p * (1.0 - sl_pct) if side == "LONG" else entry_p * (1.0 + sl_pct), 2)
+    ideal_tp1 = round(entry_p * (1.0 + tp1_pct) if side == "LONG" else entry_p * (1.0 - tp1_pct), 2)
+    tp2 = round(entry_p * (1.0 + tp2_pct) if side == "LONG" else entry_p * (1.0 - tp2_pct), 2)
+
+    if side == "LONG":
+        if upper_bb > entry_p:
+            res_buffer = round(upper_bb - 2.0, 2)
+            if res_buffer > entry_p * 1.0020 and res_buffer < ideal_tp1:
+                tp1 = res_buffer
+            else:
+                tp1 = ideal_tp1
+        else:
+            tp1 = ideal_tp1
+    else:  # SHORT
+        if lower_bb > 0 and lower_bb < entry_p:
+            sup_buffer = round(lower_bb + 2.0, 2)
+            if sup_buffer < entry_p * 0.9980 and sup_buffer > ideal_tp1:
+                tp1 = sup_buffer
+            else:
+                tp1 = ideal_tp1
+        else:
+            tp1 = ideal_tp1
+
+    return sl, tp1, tp2
+
 class ConnectionManager:
     def __init__(self):
         self.active_connections: List[WebSocket] = []
@@ -823,9 +854,9 @@ def sync_live_positions_with_bingx():
             leverage = int(p.get("leverage", state.leverage))
             
             if state.active_position is None:
-                sl_calc = round(avg_price * 0.9975 if pos_side == "LONG" else avg_price * 1.0025, 2)
-                tp1_calc = round(avg_price * 1.0055 if pos_side == "LONG" else avg_price * 0.9945, 2)
-                tp2_calc = round(avg_price * 1.0110 if pos_side == "LONG" else avg_price * 0.9890, 2)
+                upper_bb = state.indicators.get("upper_bb", 0.0)
+                lower_bb = state.indicators.get("lower_bb", 0.0)
+                sl_calc, tp1_calc, tp2_calc = compute_front_run_tp_sl(pos_side, avg_price, state.quant_agent.sl_pct, state.quant_agent.tp1_pct, state.quant_agent.tp2_pct, upper_bb, lower_bb)
                 state.active_position = {
                     "side": pos_side,
                     "entry_price": avg_price,
@@ -1239,9 +1270,9 @@ def check_and_manage_pending_limit_order():
         fee = limit_p * size * state.fee_rate_maker
         state.balance -= fee
         
-        sl = round(limit_p * (1.0 - state.quant_agent.sl_pct if side == "LONG" else 1.0 + state.quant_agent.sl_pct), 2)
-        tp1 = round(limit_p * (1.0 + state.quant_agent.tp1_pct if side == "LONG" else 1.0 - state.quant_agent.tp1_pct), 2)
-        tp2 = round(limit_p * (1.0 + state.quant_agent.tp2_pct if side == "LONG" else 1.0 - state.quant_agent.tp2_pct), 2)
+        upper_bb = state.indicators.get("upper_bb", 0.0)
+        lower_bb = state.indicators.get("lower_bb", 0.0)
+        sl, tp1, tp2 = compute_front_run_tp_sl(side, limit_p, state.quant_agent.sl_pct, state.quant_agent.tp1_pct, state.quant_agent.tp2_pct, upper_bb, lower_bb)
         
         state.active_position = {
             "side": side,
