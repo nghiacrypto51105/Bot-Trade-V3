@@ -533,9 +533,9 @@ class TradingEngineState:
         self.death_reason = None
         
         self.leverage = 16.0
-        self.risk_per_trade_pct = 0.015  # 1.5% max risk per trade
-        self.max_margin_pct = 0.25       # 25% max margin cap
-        self.margin_pct = 0.25
+        self.risk_per_trade_pct = 0.025  # 2.5% max risk per trade (Optimal Pro Growth)
+        self.max_margin_pct = 0.40       # 40% max margin cap
+        self.margin_pct = 0.40
         self.fee_rate = 0.0005        # Phí Taker tiêu chuẩn BingX: 0.05%
         self.fee_rate_maker = 0.0002  # Phí Maker BingX (Chốt lời Limit TP1/TP2): 0.02%
         
@@ -627,11 +627,11 @@ def sync_live_balance() -> Tuple[bool, float, float, str]:
         return False, state.balance, state.equity, msg
     return False, state.balance, state.equity, "Chưa cấu hình API Key"
 
-def compute_smart_order_sizing(balance: float, close_p: float, leverage: float, sl_pct: float, risk_pct: float = 0.015, max_margin_pct: float = 0.25) -> Tuple[float, float, float]:
+def compute_smart_order_sizing(balance: float, close_p: float, leverage: float, sl_pct: float, risk_pct: float = 0.025, max_margin_pct: float = 0.40) -> Tuple[float, float, float]:
     """
     Quản trị vốn thông minh thích ứng với đòn bẩy cao (lên tới 500x).
-    - Cố định rủi ro tối đa khi dính SL ở mức `risk_pct` (mặc định 1.5% tài khoản).
-    - Ở đòn bẩy lớn (50x - 500x), số tiền ký quỹ bỏ ra rất nhỏ, giữ > 95% vốn tự do (Free Margin) làm đệm chống cháy tuyệt đối.
+    - Cố định rủi ro tối đa khi dính SL ở mức `risk_pct` (mặc định 2.5% tài khoản).
+    - Phân bổ Ký quỹ linh hoạt tối đa 40% vốn, giữ >= 60% vốn tự do làm đệm chống cháy tuyệt đối.
     - Đảm bảo tuân thủ khối lượng tối thiểu BingX (0.0005 oz Vàng).
     """
     min_qty = 0.0005
